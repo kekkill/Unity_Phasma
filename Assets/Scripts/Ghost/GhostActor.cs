@@ -200,7 +200,8 @@ public class GhostActor : MonoBehaviour
         currentState =
             GhostState.Roaming;
 
-        if (!navigation.TryRoomDestination(ghostRoom, moveSpeed))
+        if (!navigation.TryRoomDestination(ghostRoom, moveSpeed,
+            !ghostRoom.ContainsPoint(transform.position)))
         {
             EnterIdle();
             return;

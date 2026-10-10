@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(GhostNavigation))]
+[RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch))]
 public class GhostHuntController : MonoBehaviour
 {
     private enum HuntMode
@@ -22,8 +22,8 @@ public class GhostHuntController : MonoBehaviour
     private GhostActionRestrictions actionRestrictions;
 
     private GhostNavigation navigation;
-    private bool hasSearchDestination;
-    private float nextSearchRetryTime;
+    private GhostRoomSearch roomSearch;
+    private bool wasHearingTarget;
     private float nextHuntCheckTime;
     private float huntEndTime;
     private float searchEndTime;
@@ -34,6 +34,7 @@ public class GhostHuntController : MonoBehaviour
     private void Awake()
     {
         navigation = GetComponent<GhostNavigation>();
+        roomSearch = GetComponent<GhostRoomSearch>();
         ghostController =
             GetComponent<GhostController>();
 
@@ -177,14 +178,15 @@ public class GhostHuntController : MonoBehaviour
             return true;
         }
 
-        // Потерял и зрение, и слух.
-        if (currentMode == HuntMode.Chase)
+        // Resume room search at the last observed position after hearing/vision is lost.
+        if (currentMode == HuntMode.Chase || wasHearingTarget)
         {
             EnterSearch(
                 ghostPerception.LastKnownPosition
             );
         }
 
+        wasHearingTarget = false;
         UpdateSearch();
 
         return
@@ -203,6 +205,8 @@ public class GhostHuntController : MonoBehaviour
 
     private void EnterChase()
     {
+        wasHearingTarget = false;
+        roomSearch.Stop();
         currentMode =
             HuntMode.Chase;
 
@@ -234,6 +238,7 @@ public class GhostHuntController : MonoBehaviour
 
     private void UpdateHeardTarget()
     {
+        wasHearingTarget = true;
         if (currentMode != HuntMode.Search)
         {
             currentMode =
@@ -259,7 +264,7 @@ public class GhostHuntController : MonoBehaviour
             Time.time +
             ghostController.Profile.SearchDuration;
 
-        hasSearchDestination = navigation.MoveTo(
+        navigation.MoveTo(
             searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
     }
 
@@ -282,9 +287,8 @@ public class GhostHuntController : MonoBehaviour
             Time.time +
             ghostController.Profile.SearchDuration;
 
-        hasSearchDestination = navigation.MoveTo(
-            searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
-        nextSearchRetryTime = Time.time;
+        roomSearch.Begin(searchCenter, ghostPerception.LastKnownRoom,
+            ghostController.Profile.HuntMoveSpeed);
 
         Debug.Log(
             "Ghost Hunt -> Search"
@@ -300,24 +304,13 @@ public class GhostHuntController : MonoBehaviour
             return;
         }
 
-        if (Time.time < nextSearchRetryTime) return;
-        if (!hasSearchDestination || navigation.HasArrived || navigation.HasFailedPath)
-            ChooseNextSearchPoint();
-    }
-
-    private void ChooseNextSearchPoint()
-    {
-        hasSearchDestination = navigation.TrySearchPoint(
-            searchCenter, ghostController.Profile.SearchRadius, out searchTargetPosition) &&
-            navigation.MoveTo(searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
-        // If carving temporarily removes a route, retry without spinning every frame.
-        nextSearchRetryTime = Time.time + 0.5f;
+        roomSearch.Tick(ghostController.Profile.HuntMoveSpeed);
     }
 
     private void FinishHunt()
     {
-        navigation.Stop();
-        hasSearchDestination = false;
+        roomSearch.Stop();
+        wasHearingTarget = false;
         isHunting =
             false;
 

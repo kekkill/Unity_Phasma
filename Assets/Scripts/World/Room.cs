@@ -5,6 +5,14 @@ public class Room : MonoBehaviour
 {
     [SerializeField] private string roomName = "Room";
 
+    [Header("Connections")]
+    [SerializeField] private Room[] connectedRooms = new Room[0];
+    [SerializeField] private bool canBeGhostRoom = true;
+    public Room[] ConnectedRooms => connectedRooms;
+    public bool CanBeGhostRoom => canBeGhostRoom;
+    public Vector3 FloorCenter => transform.TransformPoint(
+        roomCollider.center - Vector3.up * roomCollider.size.y * 0.5f);
+
     [Header("Temperature")]
     [SerializeField] private float normalTemperature = 20f;
     [SerializeField] private float ghostTemperature = 5f;

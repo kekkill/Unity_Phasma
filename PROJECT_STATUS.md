@@ -26,7 +26,16 @@ Cloud checks passed: C# syntax parsing for all 40 source files, unique asset GUI
 Unity Editor is unavailable in the current cloud machine. Unity import, compilation, pathfinding and gameplay remain unverified. See Docs/NAVIGATION_CHECK.md for the local validation procedure.
 
 ## Known remaining limitations
-No networking, attack/death, journal or mission completion. One held item. Generic UV and EMF generation needs event-specific rules. Child triggers can remain active on held items. Hearing has no sound occlusion. Search is still radius-based, not room-graph-based. EditorBuildSettings still selects SampleScene; open Prototype explicitly for gameplay checks.
+No networking, attack/death, journal or mission completion. One held item. Generic UV and EMF generation needs event-specific rules. Child triggers can remain active on held items. Hearing has no sound occlusion. The old radius-search helper remains available; the latest hunt search now uses room connections. EditorBuildSettings now selects RoomSearchPrototype; open that scene for current checks.
 
 ## Local test report and navigation fix
 The user reported automatic Error Pause and a stationary ghost. Console points to NullReferenceException inside NavMeshAgent.CalculatePath. Move NavMeshPath construction from the field initializer to Awake, and recreate it if absent before CalculatePath. The fix is awaiting local Unity validation; the stack screenshot does not establish why the path reference was absent. During HuntActive, constant anger/hunt chance is intentional.
+
+## Three-zone layout and room search (latest increment)
+New scene: Assets/Scenes/RoomSearchPrototype.unity, selected as the enabled build scene. Two 6 × 6 m rooms and a 4 × 6 m corridor, perimeter walls and two 2 m openings. Bedroom ↔ Corridor ↔ Kitchen, reciprocal Inspector links. Corridor cannot be the home ghost room. Original Prototype layout remains available.
+
+GhostRoomSearch chooses local goals and adjacent rooms based on the last observed room recorded by GhostPerception. Hidden player position is not consulted during search. Roaming paths are constrained to the home room; return after hunts and search transitions can cross room boundaries through the physical openings.
+
+The user reports the previous CalculatePath fix appears to work. Current room-search batch has NOT been run in Unity. A Play Mode validation menu is supplied for six complete room-center paths, reciprocal room links, containment and partition blocking. Static geometry clearance checks passed for open connections and a blocked bedroom opening. See Docs/ROOM_SEARCH_CHECK.md.
+
+Limits still include unimplemented door-opening-for-navigation, attack/death, multiplayer, voice/noise occlusion and mission loop.

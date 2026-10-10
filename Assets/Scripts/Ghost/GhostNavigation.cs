@@ -66,14 +66,33 @@ public class GhostNavigation : MonoBehaviour
         return true;
     }
 
-    public bool TryRoomDestination(Room room, float speed)
+    private bool PathStaysInRoom(Room room)
     {
+        // Rooms are convex boxes: if all corners are inside, every path segment is inside.
+        foreach (Vector3 corner in candidatePath.corners)
+            if (!room.ContainsPoint(corner)) return false;
+        return true;
+    }
+
+    public bool TryRoomPoint(Room room, bool allowTransition, out Vector3 point)
+    {
+        point = default;
+        if (room == null) return false;
         for (int i = 0; i < pointAttempts; i++)
         {
-            if (TryReachablePoint(room.GetRandomFloorPoint(), out Vector3 point) &&
-                room.ContainsPoint(point) && MoveTo(point, speed)) return true;
+            if (TryReachablePoint(room.GetRandomFloorPoint(), out point) &&
+                room.ContainsPoint(point) && (allowTransition || PathStaysInRoom(room))) return true;
         }
         return false;
+    }
+
+    public bool TryRoomDestination(Room room, float speed, bool allowTransition = false)
+    {
+        if (!TryRoomPoint(room, allowTransition, out Vector3 point) || !MoveTo(point, speed))
+            return false;
+        // A confined roam must not automatically reroute through another room.
+        agent.autoRepath = allowTransition;
+        return true;
     }
 
     public bool TrySearchPoint(Vector3 center, float radius, out Vector3 point)
@@ -95,6 +114,7 @@ public class GhostNavigation : MonoBehaviour
             Stop();
             return false;
         }
+        agent.autoRepath = true;
         agent.speed = Mathf.Max(0f, speed);
         agent.isStopped = false;
         // Reuse the path already calculated instead of restarting it every frame.

@@ -17,6 +17,7 @@ public class GhostPerception : MonoBehaviour
 
     private GhostController ghostController;
 
+    public Room LastKnownRoom { get; private set; }
     private Vector3 lastKnownPosition;
     private float lastDetectionTime = float.NegativeInfinity;
 
@@ -82,6 +83,8 @@ public class GhostPerception : MonoBehaviour
     {
         if (HasDetectedTarget)
         {
+            // Remember only observed information, never query the hidden player during search.
+            LastKnownRoom = ghostController.FindRoomAt(target.transform.position);
             lastKnownPosition =
                 target.transform.position;
 

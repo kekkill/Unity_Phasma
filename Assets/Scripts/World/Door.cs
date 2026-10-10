@@ -5,6 +5,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractable
     [SerializeField] private float openAngle = 90f;
     [SerializeField] private float rotationSpeed = 180f;
 
+    [SerializeField] private bool initiallyOpen;
     private bool isOpen;
 
     public string InteractionPrompt =>
@@ -32,8 +33,9 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractable
                 0f
             );
 
-        targetRotation =
-            closedRotation;
+        isOpen = initiallyOpen;
+        targetRotation = isOpen ? openRotation : closedRotation;
+        transform.localRotation = targetRotation;
     }
 
     private void Update()

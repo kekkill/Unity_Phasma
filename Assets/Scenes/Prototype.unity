@@ -1048,6 +1048,7 @@ GameObject:
   - component: {fileID: 513613260}
   - component: {fileID: 513613261}
   - component: {fileID: 513613262}
+  - component: {fileID: 513613263}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -4165,6 +4166,22 @@ MonoBehaviour:
   - {fileID: 2127530393}
   movingObstacles:
   - {fileID: 1556033313}
+--- !u!114 &513613263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f70f38f7ed4eeaa0a46d4d63a4f340, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostRoomSearch
+  pointsPerRoom: 2
+  secondsPerRoom: 3
+  searchRoom: {fileID: 0}
+  transitioning: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

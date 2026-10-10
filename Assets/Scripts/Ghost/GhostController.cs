@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GhostController : MonoBehaviour
@@ -23,6 +24,14 @@ public class GhostController : MonoBehaviour
 
     public GhostProfile Profile =>
         ghostProfile;
+
+    public Room FindRoomAt(Vector3 position)
+    {
+        if (rooms == null) return null;
+        foreach (Room room in rooms)
+            if (room != null && room.ContainsPoint(position)) return room;
+        return null;
+    }
 
     private void Start()
     {
@@ -68,17 +77,19 @@ public class GhostController : MonoBehaviour
             return;
         }
 
-        int randomIndex =
-            Random.Range(
-                0,
-                rooms.Length
-            );
-
-        ghostRoom =
-            rooms[randomIndex];
+        var eligibleRooms = new List<Room>();
+        foreach (Room room in rooms)
+            if (room != null && room.CanBeGhostRoom) eligibleRooms.Add(room);
+        if (eligibleRooms.Count == 0)
+        {
+            Debug.LogError("GhostController: no room allows ghost spawning.", this);
+            return;
+        }
+        ghostRoom = eligibleRooms[Random.Range(0, eligibleRooms.Count)];
 
         foreach (Room room in rooms)
         {
+            if (room == null) continue;
             bool isSelectedRoom =
                 room == ghostRoom;
 
