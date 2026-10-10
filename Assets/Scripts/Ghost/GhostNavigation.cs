@@ -8,7 +8,7 @@ public class GhostNavigation : MonoBehaviour
     [SerializeField, Min(0.05f)] private float sampleRadius = 1f;
     [SerializeField, Min(1)] private int pointAttempts = 16;
     private NavMeshAgent agent;
-    private readonly NavMeshPath candidatePath = new NavMeshPath();
+    private NavMeshPath candidatePath;
     private bool hasDestination;
 
     public bool IsReady => agent != null && agent.enabled && agent.isOnNavMesh;
@@ -20,6 +20,7 @@ public class GhostNavigation : MonoBehaviour
 
     private void Awake()
     {
+        candidatePath = new NavMeshPath();
         agent = GetComponent<NavMeshAgent>();
         if (agent == null) agent = gameObject.AddComponent<NavMeshAgent>();
         agent.enabled = false;
@@ -57,6 +58,8 @@ public class GhostNavigation : MonoBehaviour
         point = default;
         if (!IsReady || !NavMesh.SamplePosition(position, out NavMeshHit hit,
             sampleRadius, agent.areaMask)) return false;
+        // Nonserialized runtime references can be lost after a script/domain reload.
+        if (candidatePath == null) candidatePath = new NavMeshPath();
         if (!agent.CalculatePath(hit.position, candidatePath) ||
             candidatePath.status != NavMeshPathStatus.PathComplete) return false;
         point = hit.position;

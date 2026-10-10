@@ -25,3 +25,6 @@
 
 ## Откат
 Закройте Unity и переключитесь на main в GitHub Desktop. Исходный коммит 9bbd013 сохранён в main. Не используйте Discard для незакоммиченной собственной работы.
+
+## Исправление CalculatePath
+При NullReferenceException в NavMeshAgent.CalculatePath обновите GhostNavigation.cs из ветки feature/ghost-navigation. Остановите Play перед заменой; дождитесь компиляции и запустите заново. Если ошибка повторится, выберите её и скопируйте весь стек из нижней панели Console (включая строки GhostNavigation.cs и GhostHuntController.cs).

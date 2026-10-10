@@ -27,3 +27,6 @@ Unity Editor is unavailable in the current cloud machine. Unity import, compilat
 
 ## Known remaining limitations
 No networking, attack/death, journal or mission completion. One held item. Generic UV and EMF generation needs event-specific rules. Child triggers can remain active on held items. Hearing has no sound occlusion. Search is still radius-based, not room-graph-based. EditorBuildSettings still selects SampleScene; open Prototype explicitly for gameplay checks.
+
+## Local test report and navigation fix
+The user reported automatic Error Pause and a stationary ghost. Console points to NullReferenceException inside NavMeshAgent.CalculatePath. Move NavMeshPath construction from the field initializer to Awake, and recreate it if absent before CalculatePath. The fix is awaiting local Unity validation; the stack screenshot does not establish why the path reference was absent. During HuntActive, constant anger/hunt chance is intentional.
