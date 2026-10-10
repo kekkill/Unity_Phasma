@@ -10,6 +10,8 @@ public class GhostRoomSearch : MonoBehaviour
     [SerializeField] private Room searchRoom;
     [SerializeField] private bool transitioning;
     private Room previousRoom;
+    private Room blockedRoom;
+    private float blockedUntil;
     private GhostNavigation navigation;
     private GhostController controller;
     private bool hasGoal;
@@ -28,6 +30,7 @@ public class GhostRoomSearch : MonoBehaviour
     public void Begin(Vector3 lastKnownPosition, Room lastKnownRoom, float speed)
     {
         previousRoom = null;
+        blockedRoom = null;
         searchRoom = lastKnownRoom != null ? lastKnownRoom : controller.FindRoomAt(lastKnownPosition);
         if (searchRoom == null) searchRoom = controller.FindRoomAt(transform.position);
         transitioning = searchRoom != null && !searchRoom.ContainsPoint(transform.position);
@@ -48,9 +51,24 @@ public class GhostRoomSearch : MonoBehaviour
                 roomDeadline = Time.time + secondsPerRoom;
                 pointsVisited = 0;
             }
-            else if (!hasGoal || navigation.HasFailedPath || navigation.HasArrived)
+            else if (!hasGoal || navigation.HasFailedPath || navigation.HasStalled || navigation.HasArrived)
             {
-                hasGoal = navigation.TryRoomDestination(searchRoom, speed, true);
+                // A door can invalidate a transition after it has already started.
+                // Stop targeting the unreachable room and search where the ghost actually is.
+                Room current = controller.FindRoomAt(transform.position);
+                if (current != null)
+                {
+                    blockedRoom = searchRoom;
+                    blockedUntil = Time.time + secondsPerRoom;
+                    searchRoom = current;
+                    previousRoom = null;
+                    transitioning = false;
+                    pointsVisited = 0;
+                    roomDeadline = Time.time + secondsPerRoom;
+                    hasGoal = navigation.TryRoomDestination(searchRoom, speed);
+                    Debug.Log("Ghost search: passage blocked, searching " + searchRoom.RoomName, this);
+                }
+                else hasGoal = navigation.TryRoomDestination(searchRoom, speed, true);
                 nextRetry = Time.time + 0.5f;
             }
             return;
@@ -67,7 +85,7 @@ public class GhostRoomSearch : MonoBehaviour
             pointsVisited = 0;
             roomDeadline = Time.time + secondsPerRoom;
         }
-        if (!hasGoal || navigation.HasArrived || navigation.HasFailedPath)
+        if (!hasGoal || navigation.HasArrived || navigation.HasFailedPath || navigation.HasStalled)
         {
             hasGoal = navigation.TryRoomDestination(searchRoom, speed);
             nextRetry = Time.time + 0.5f;
@@ -78,7 +96,8 @@ public class GhostRoomSearch : MonoBehaviour
     {
         candidates.Clear();
         foreach (Room room in searchRoom.ConnectedRooms)
-            if (room != null && room != searchRoom && !candidates.Contains(room)) candidates.Add(room);
+            if (room != null && room != searchRoom &&
+                !(room == blockedRoom && Time.time < blockedUntil) && !candidates.Contains(room)) candidates.Add(room);
         // Prefer a new neighbor; allow returning when this is a dead end.
         if (candidates.Count > 1) candidates.Remove(previousRoom);
         while (candidates.Count > 0)
@@ -99,7 +118,8 @@ public class GhostRoomSearch : MonoBehaviour
         {
             foreach (Room room in searchRoom.ConnectedRooms)
             {
-                if (room != previousRoom || !navigation.TryRoomDestination(room, speed, true)) continue;
+                if (room != previousRoom || (room == blockedRoom && Time.time < blockedUntil) ||
+                    !navigation.TryRoomDestination(room, speed, true)) continue;
                 Room old = searchRoom;
                 searchRoom = room;
                 previousRoom = old;

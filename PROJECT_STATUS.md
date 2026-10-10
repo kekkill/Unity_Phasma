@@ -42,3 +42,8 @@ Limits still include unimplemented door-opening-for-navigation, attack/death, mu
 
 ## Roaming regression report
 The user reports hunting movement works but ordinary roaming does not; screenshot shows Idle with no active hunt. Arrival previously trusted remainingDistance, which can be stale just after SetPath. Arrival now requires physical horizontal proximity to the stored destination; missing-path failure has a short two-frame grace. This is a diagnosis to validate, not a confirmed runtime fix. Runtime Last Move Result and Requested Destination are exposed. Phasma/Validate Roaming (Play Mode) tests actual confined navigation/arrival using temporary agents without modifying the real actor. Neither this test nor the fix has been run in the cloud.
+
+## Blocked-door search recovery
+User confirms ordinary movement now works, but reports search stalls after closing the door. Code review found that a failed transition retried the unreachable destination room without returning to local search. Search now falls back to the physically occupied room, postpones that blocked neighbor, and handles an accepted path that stops making progress. Visible/heard but unreachable targets also fall back to accessible-room search without resetting it every frame. Door-opening AI is still not implemented. This recovery has not been run in Unity; local validation is required.
+
+After a hunt, if the home room is unreachable, GhostActor can roam its current room and retry returning on later decisions; the favorite/home room and its temperature are not reassigned.

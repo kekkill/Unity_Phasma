@@ -200,8 +200,16 @@ public class GhostActor : MonoBehaviour
         currentState =
             GhostState.Roaming;
 
-        if (!navigation.TryRoomDestination(ghostRoom, moveSpeed,
-            !ghostRoom.ContainsPoint(transform.position)))
+        bool outsideHome = !ghostRoom.ContainsPoint(transform.position);
+        bool assigned = navigation.TryRoomDestination(ghostRoom, moveSpeed, outsideHome);
+        if (!assigned && outsideHome)
+        {
+            // A closed door must not freeze normal behavior after the hunt either.
+            Room currentRoom = ghostController.FindRoomAt(transform.position);
+            assigned = navigation.TryRoomDestination(currentRoom, moveSpeed);
+            if (assigned) Debug.Log("Ghost: home room unreachable, roaming current room", this);
+        }
+        if (!assigned)
         {
             EnterIdle();
             return;

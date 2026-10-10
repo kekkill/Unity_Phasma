@@ -14,6 +14,10 @@ public class GhostNavigation : MonoBehaviour
     [SerializeField] private Vector3 requestedDestination;
     [SerializeField] private string lastMoveResult = "Not initialized";
     private int pathAssignedFrame;
+    private Vector3 lastProgressPosition;
+    private float lastProgressTime;
+    public bool HasStalled => IsReady && hasDestination && !HasArrived &&
+        !agent.pathPending && Time.time - lastProgressTime > 2f;
 
     public Vector3 RequestedDestination => requestedDestination;
     public string LastMoveResult => lastMoveResult;
@@ -35,6 +39,18 @@ public class GhostNavigation : MonoBehaviour
     public bool HasFailedPath => !IsReady || (hasDestination &&
         Time.frameCount > pathAssignedFrame + 2 && !agent.pathPending &&
         ((!agent.hasPath && !HasArrived) || agent.pathStatus != NavMeshPathStatus.PathComplete));
+
+    private void Update()
+    {
+        if (!IsReady || !hasDestination) return;
+        Vector3 progress = transform.position - lastProgressPosition;
+        progress.y = 0f;
+        if (progress.sqrMagnitude > 0.0025f)
+        {
+            lastProgressPosition = transform.position;
+            lastProgressTime = Time.time;
+        }
+    }
 
     private void Awake()
     {
@@ -146,6 +162,8 @@ public class GhostNavigation : MonoBehaviour
         {
             requestedDestination = point;
             pathAssignedFrame = Time.frameCount;
+            lastProgressPosition = transform.position;
+            lastProgressTime = Time.time;
             lastMoveResult = "Path accepted";
         }
         else

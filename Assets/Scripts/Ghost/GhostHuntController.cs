@@ -24,6 +24,7 @@ public class GhostHuntController : MonoBehaviour
     private GhostNavigation navigation;
     private GhostRoomSearch roomSearch;
     private bool wasHearingTarget;
+    private bool searchingBlockedTarget;
     private float nextHuntCheckTime;
     private float huntEndTime;
     private float searchEndTime;
@@ -158,12 +159,14 @@ public class GhostHuntController : MonoBehaviour
         // можно преследовать его точную текущую позицию.
         if (ghostPerception.CanSeeTarget)
         {
-            if (currentMode != HuntMode.Chase)
+            Vector3 observedPosition = ghostPerception.Target.transform.position;
+            if (navigation.TryReachablePoint(observedPosition, out _))
             {
-                EnterChase();
+                if (currentMode != HuntMode.Chase) EnterChase();
+                searchingBlockedTarget = false;
+                UpdateChase();
             }
-
-            UpdateChase();
+            else UpdateBlockedTargetSearch();
 
             return true;
         }
@@ -205,6 +208,7 @@ public class GhostHuntController : MonoBehaviour
 
     private void EnterChase()
     {
+        searchingBlockedTarget = false;
         wasHearingTarget = false;
         roomSearch.Stop();
         currentMode =
@@ -264,13 +268,31 @@ public class GhostHuntController : MonoBehaviour
             Time.time +
             ghostController.Profile.SearchDuration;
 
-        navigation.MoveTo(
-            searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
+        if (navigation.TryReachablePoint(searchTargetPosition, out _))
+        {
+            searchingBlockedTarget = false;
+            navigation.MoveTo(searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
+        }
+        else UpdateBlockedTargetSearch();
+    }
+
+    private void UpdateBlockedTargetSearch()
+    {
+        if (!searchingBlockedTarget)
+        {
+            searchingBlockedTarget = true;
+            currentMode = HuntMode.Search;
+            roomSearch.Begin(transform.position,
+                ghostController.FindRoomAt(transform.position), ghostController.Profile.HuntMoveSpeed);
+            Debug.Log("Ghost Hunt: target unreachable, searching accessible rooms", this);
+        }
+        roomSearch.Tick(ghostController.Profile.HuntMoveSpeed);
     }
 
     private void EnterSearch(
         Vector3 lostPosition)
     {
+        searchingBlockedTarget = false;
         currentMode =
             HuntMode.Search;
 
@@ -310,6 +332,7 @@ public class GhostHuntController : MonoBehaviour
     private void FinishHunt()
     {
         roomSearch.Stop();
+        searchingBlockedTarget = false;
         wasHearingTarget = false;
         isHunting =
             false;
