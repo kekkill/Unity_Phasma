@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(GhostNavigation))]
 public class GhostActor : MonoBehaviour
 {
     private enum GhostState
@@ -33,9 +34,9 @@ public class GhostActor : MonoBehaviour
     private GhostActionRestrictions actionRestrictions;
     private GhostHuntController huntController;
 
+    private GhostNavigation navigation;
     private Room ghostRoom;
 
-    private Vector3 targetPosition;
     private float stateEndTime;
 
     public bool IsHunting =>
@@ -44,6 +45,7 @@ public class GhostActor : MonoBehaviour
 
     private void Awake()
     {
+        navigation = GetComponent<GhostNavigation>();
         ghostController =
             GetComponent<GhostController>();
 
@@ -68,14 +70,11 @@ public class GhostActor : MonoBehaviour
             return;
         }
 
-        Vector3 startPosition =
-            ghostRoom.GetRandomPoint();
-
-        startPosition.y =
-            transform.position.y;
-
-        transform.position =
-            startPosition;
+        if (!navigation.Initialize(ghostRoom))
+        {
+            enabled = false;
+            return;
+        }
 
         if (huntController != null)
         {
@@ -169,6 +168,7 @@ public class GhostActor : MonoBehaviour
 
     private void EnterIdle()
     {
+        navigation.Stop();
         currentState =
             GhostState.Idle;
 
@@ -200,11 +200,11 @@ public class GhostActor : MonoBehaviour
         currentState =
             GhostState.Roaming;
 
-        targetPosition =
-            ghostRoom.GetRandomPoint();
-
-        targetPosition.y =
-            transform.position.y;
+        if (!navigation.TryRoomDestination(ghostRoom, moveSpeed))
+        {
+            EnterIdle();
+            return;
+        }
 
         Debug.Log(
             "Ghost -> Roaming"
@@ -213,21 +213,12 @@ public class GhostActor : MonoBehaviour
 
     private void UpdateRoaming()
     {
-        MoveTowards(
-            targetPosition,
-            moveSpeed
-        );
-
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                targetPosition
-            );
-
-        if (distance < 0.05f)
+        if (navigation.HasFailedPath)
         {
-            DecideNextAction();
+            EnterIdle();
+            return;
         }
+        if (navigation.HasArrived) DecideNextAction();
     }
 
     private void DecideNextAction()
@@ -265,6 +256,7 @@ public class GhostActor : MonoBehaviour
 
     private void EnterInteraction()
     {
+        navigation.Stop();
         currentState =
             GhostState.Interaction;
 
@@ -286,45 +278,6 @@ public class GhostActor : MonoBehaviour
         {
             EnterIdle();
         }
-    }
-
-    private void MoveTowards(
-        Vector3 position,
-        float speed)
-    {
-        TurnTowards(
-            position
-        );
-
-        transform.position =
-            Vector3.MoveTowards(
-                transform.position,
-                position,
-                speed * Time.deltaTime
-            );
-    }
-
-    private void TurnTowards(
-        Vector3 position)
-    {
-        Vector3 direction =
-            position -
-            transform.position;
-
-        direction.y =
-            0f;
-
-        if (direction.sqrMagnitude <=
-            0.001f)
-        {
-            return;
-        }
-
-        transform.rotation =
-            Quaternion.LookRotation(
-                direction.normalized,
-                Vector3.up
-            );
     }
 
     private bool IsActionBlocked(

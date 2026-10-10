@@ -1047,6 +1047,7 @@ GameObject:
   - component: {fileID: 513613259}
   - component: {fileID: 513613260}
   - component: {fileID: 513613261}
+  - component: {fileID: 513613262}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -2996,6 +2997,7 @@ GameObject:
   - component: {fileID: 1971981890}
   - component: {fileID: 1971981889}
   - component: {fileID: 1971981888}
+  - component: {fileID: 1971981892}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -4132,6 +4134,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 90419491563546542b57a34d31fca381, type: 3}
+--- !u!114 &513613262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8bde314013ad4143842c6c5d070d5ec8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostNavigation
+  sampleRadius: 1
+  pointAttempts: 16
+--- !u!114 &1971981892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971981887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f2bd99c097477ca867e5b88a9502a1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuntimeNavigationWorld
+  geometry:
+  - {fileID: 1971981888}
+  - {fileID: 2127530393}
+  movingObstacles:
+  - {fileID: 1556033313}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

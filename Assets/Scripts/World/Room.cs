@@ -61,6 +61,23 @@ public class Room : MonoBehaviour
                 ? freezingTemperature
                 : ghostTemperature;
     }
+    public Vector3 GetRandomFloorPoint()
+    {
+        Vector3 point = new Vector3(
+            Random.Range(-0.5f, 0.5f) * roomCollider.size.x,
+            -roomCollider.size.y * 0.5f,
+            Random.Range(-0.5f, 0.5f) * roomCollider.size.z);
+        return transform.TransformPoint(point + roomCollider.center);
+    }
+
+    public bool ContainsPoint(Vector3 worldPoint)
+    {
+        Vector3 local = transform.InverseTransformPoint(worldPoint) - roomCollider.center;
+        Vector3 half = roomCollider.size * 0.5f;
+        // Navigation is on the floor, so room membership is checked horizontally.
+        return Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.z) <= half.z;
+    }
+
     public Vector3 GetRandomPoint()
     {
         Vector3 localPoint = new Vector3(

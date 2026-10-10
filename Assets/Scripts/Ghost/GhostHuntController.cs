@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(GhostNavigation))]
 public class GhostHuntController : MonoBehaviour
 {
     private enum HuntMode
@@ -20,6 +21,9 @@ public class GhostHuntController : MonoBehaviour
     private GhostAggression ghostAggression;
     private GhostActionRestrictions actionRestrictions;
 
+    private GhostNavigation navigation;
+    private bool hasSearchDestination;
+    private float nextSearchRetryTime;
     private float nextHuntCheckTime;
     private float huntEndTime;
     private float searchEndTime;
@@ -29,6 +33,7 @@ public class GhostHuntController : MonoBehaviour
 
     private void Awake()
     {
+        navigation = GetComponent<GhostNavigation>();
         ghostController =
             GetComponent<GhostController>();
 
@@ -49,6 +54,8 @@ public class GhostHuntController : MonoBehaviour
 
     public bool ShouldStartHunt()
     {
+        if (!navigation.IsReady) return false;
+
         if (isHunting)
         {
             return false;
@@ -91,6 +98,7 @@ public class GhostHuntController : MonoBehaviour
 
     public bool BeginHunt()
     {
+        if (!navigation.IsReady) return false;
         if (ghostController == null ||
             ghostController.Profile == null ||
             ghostPerception == null ||
@@ -221,10 +229,7 @@ public class GhostHuntController : MonoBehaviour
         chasePosition.y =
             transform.position.y;
 
-        MoveTowards(
-            chasePosition,
-            ghostController.Profile.HuntMoveSpeed
-        );
+        navigation.MoveTo(chasePosition, ghostController.Profile.HuntMoveSpeed);
     }
 
     private void UpdateHeardTarget()
@@ -254,10 +259,8 @@ public class GhostHuntController : MonoBehaviour
             Time.time +
             ghostController.Profile.SearchDuration;
 
-        MoveTowards(
-            searchTargetPosition,
-            ghostController.Profile.HuntMoveSpeed
-        );
+        hasSearchDestination = navigation.MoveTo(
+            searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
     }
 
     private void EnterSearch(
@@ -279,6 +282,10 @@ public class GhostHuntController : MonoBehaviour
             Time.time +
             ghostController.Profile.SearchDuration;
 
+        hasSearchDestination = navigation.MoveTo(
+            searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
+        nextSearchRetryTime = Time.time;
+
         Debug.Log(
             "Ghost Hunt -> Search"
         );
@@ -293,44 +300,24 @@ public class GhostHuntController : MonoBehaviour
             return;
         }
 
-        MoveTowards(
-            searchTargetPosition,
-            ghostController.Profile.HuntMoveSpeed
-        );
-
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                searchTargetPosition
-            );
-
-        if (distance <= 0.1f)
-        {
+        if (Time.time < nextSearchRetryTime) return;
+        if (!hasSearchDestination || navigation.HasArrived || navigation.HasFailedPath)
             ChooseNextSearchPoint();
-        }
     }
 
     private void ChooseNextSearchPoint()
     {
-        Vector2 randomCircle =
-            Random.insideUnitCircle *
-            ghostController.Profile.SearchRadius;
-
-        searchTargetPosition =
-            searchCenter +
-            new Vector3(
-                randomCircle.x,
-                0f,
-                randomCircle.y
-            );
-
-        Debug.Log(
-            "Ghost chose another search point."
-        );
+        hasSearchDestination = navigation.TrySearchPoint(
+            searchCenter, ghostController.Profile.SearchRadius, out searchTargetPosition) &&
+            navigation.MoveTo(searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
+        // If carving temporarily removes a route, retry without spinning every frame.
+        nextSearchRetryTime = Time.time + 0.5f;
     }
 
     private void FinishHunt()
     {
+        navigation.Stop();
+        hasSearchDestination = false;
         isHunting =
             false;
 
@@ -388,41 +375,4 @@ public class GhostHuntController : MonoBehaviour
             );
     }
 
-    private void MoveTowards(
-        Vector3 position,
-        float speed)
-    {
-        TurnTowards(
-            position
-        );
-
-        transform.position =
-            Vector3.MoveTowards(
-                transform.position,
-                position,
-                speed * Time.deltaTime
-            );
-    }
-
-    private void TurnTowards(
-        Vector3 position)
-    {
-        Vector3 direction =
-            position -
-            transform.position;
-
-        direction.y =
-            0f;
-
-        if (direction.sqrMagnitude <= 0.001f)
-        {
-            return;
-        }
-
-        transform.rotation =
-            Quaternion.LookRotation(
-                direction.normalized,
-                Vector3.up
-            );
-    }
 }
