@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch))]
+[RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch), typeof(GhostAttack))]
 public class GhostHuntController : MonoBehaviour
 {
     private enum HuntMode
@@ -21,6 +21,7 @@ public class GhostHuntController : MonoBehaviour
     private GhostAggression ghostAggression;
     private GhostActionRestrictions actionRestrictions;
 
+    private GhostAttack attack;
     private GhostNavigation navigation;
     private GhostRoomSearch roomSearch;
     private bool wasHearingTarget;
@@ -34,6 +35,7 @@ public class GhostHuntController : MonoBehaviour
 
     private void Awake()
     {
+        attack = GetComponent<GhostAttack>();
         navigation = GetComponent<GhostNavigation>();
         roomSearch = GetComponent<GhostRoomSearch>();
         ghostController =
@@ -146,6 +148,18 @@ public class GhostHuntController : MonoBehaviour
         if (!isHunting)
         {
             return false;
+        }
+
+        if (attack.TryAttack(ghostPerception.Target))
+        {
+            ghostPerception.RefreshTarget();
+            // Ending the round may already have stopped this hunt via GameSession.
+            if (!isHunting) return false;
+            if (ghostPerception.Target == null)
+            {
+                FinishHunt();
+                return false;
+            }
         }
 
         if (Time.time >= huntEndTime)

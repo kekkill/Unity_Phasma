@@ -5,6 +5,7 @@ public class PlayerInputReader : MonoBehaviour
 {
     [SerializeField] private InputActionAsset inputActions;
 
+    private InputActionAsset runtimeActions;
     private InputActionMap playerActionMap;
 
     private InputAction moveAction;
@@ -37,8 +38,10 @@ public class PlayerInputReader : MonoBehaviour
 
     private void Awake()
     {
-        playerActionMap =
-            inputActions.FindActionMap("Player", true);
+        // Each participant owns its action maps. Disabling a dead player's input
+        // must not disable maps used by another participant.
+        runtimeActions = Instantiate(inputActions);
+        playerActionMap = runtimeActions.FindActionMap("Player", true);
 
         moveAction =
             playerActionMap.FindAction("Move", true);
@@ -70,5 +73,9 @@ public class PlayerInputReader : MonoBehaviour
     private void OnDisable()
     {
         playerActionMap?.Disable();
+    }
+    private void OnDestroy()
+    {
+        if (runtimeActions != null) Destroy(runtimeActions);
     }
 }

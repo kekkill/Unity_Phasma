@@ -50,3 +50,10 @@ After a hunt, if the home room is unreachable, GhostActor can roam its current r
 
 ## User validation update
 User reports blocked-door recovery now works. Unity 6000.6.3f1 emitted CS0618 for FindObjectsSortMode and the sorted FindObjectsByType overload in the two Editor validation tools. They now use FindObjectsByType<Room>() as recommended by that compiler. This API update awaits local compilation; no warnings were suppressed.
+
+## Life state and all-dead round completion (latest batch)
+Branch feature/player-death-round includes the preceding layout fixes. PlayerLifeState owns an idempotent Alive→Dead transition. GameSession registers participants, exposes living targets, and ends once after the final participant dies; empty rosters do not lose. PlayerDeathPresentation disables local controls/collider/UI and player renderers/audio while dropping held equipment. GhostPerception ignores deceased participants, removes their memory and selects detectable survivors. GhostAttack only runs from the hunt update, checks range, solid line of sight and Attack restrictions. RoundEndScreen provides scene restart. Both gameplay scenes are wired.
+
+DeathRoundValidation provides a Play Mode test with isolated temporary participants, obstacles and a ghost perception fixture. No actual multiplayer or voice transport was added. All-dead checks and presence are currently local; future authority, replication and voice filtering remain required. Current batch is awaiting Unity compilation and gameplay checks. See Docs/DEATH_ROUND_CHECK.md.
+
+PlayerInputReader now instantiates an action asset per participant, preventing death/disable from disabling another player's shared action map. Local-owner activation will still be required when networking is introduced.

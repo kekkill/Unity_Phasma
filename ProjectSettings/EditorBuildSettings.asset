@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/RoomSearchPrototype.unity
     guid: e73198fd45a94dbd85170f2b41f758a5
+  - enabled: 1
+    path: Assets/Scenes/Prototype.unity
+    guid: ffd42e097da6ff04daac5f4ff320bd9e
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05

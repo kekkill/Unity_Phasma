@@ -5,6 +5,8 @@ public class GhostPerception : MonoBehaviour
     [SerializeField]
     private GhostPerceptionTarget target;
 
+    [SerializeField] private GameSession session;
+
     [Header("Vision")]
     [SerializeField] private float eyeHeight = 1.5f;
 
@@ -51,9 +53,10 @@ public class GhostPerception : MonoBehaviour
 
     private void Update()
     {
+        RefreshTarget();
         if (ghostController == null ||
             ghostController.Profile == null ||
-            target == null)
+            target == null || !target.IsAlive)
         {
             canSeeTarget = false;
             canHearTarget = false;
@@ -63,10 +66,10 @@ public class GhostPerception : MonoBehaviour
         }
 
         canSeeTarget =
-            CheckVision();
+            CheckVision(target);
 
         canHearTarget =
-            CheckHearing();
+            CheckHearing(target);
 
         UpdateTargetMemory();
 
@@ -77,6 +80,45 @@ public class GhostPerception : MonoBehaviour
 
         previousCanHearTarget =
             canHearTarget;
+    }
+
+    public void RefreshTarget()
+    {
+        GhostPerceptionTarget selected = target != null && target.IsAlive ? target : null;
+        if (session != null && ghostController != null && ghostController.Profile != null)
+        {
+            selected = null;
+            GhostPerceptionTarget visible = null;
+            GhostPerceptionTarget audible = null;
+            float visibleDistance = float.PositiveInfinity;
+            float audibleDistance = float.PositiveInfinity;
+            foreach (GhostPerceptionTarget candidate in session.LivingTargets())
+            {
+                if (candidate == target) selected = candidate;
+                float distance = (candidate.transform.position - transform.position).sqrMagnitude;
+                if (CheckVision(candidate) && distance < visibleDistance)
+                { visible = candidate; visibleDistance = distance; }
+                else if (CheckHearing(candidate) && distance < audibleDistance)
+                { audible = candidate; audibleDistance = distance; }
+            }
+            if (visible != null || audible != null) selected = visible != null ? visible : audible;
+        }
+        if (selected == target && selected != null) return;
+        target = selected;
+        canSeeTarget = false;
+        canHearTarget = false;
+        hasKnownTargetPosition = false;
+        LastKnownRoom = null;
+        lastDetectionTime = float.NegativeInfinity;
+        lastKnownPosition = default;
+        previousCanSeeTarget = false;
+        previousCanHearTarget = false;
+        if (target != null && ghostController != null && ghostController.Profile != null)
+        {
+            canSeeTarget = CheckVision(target);
+            canHearTarget = CheckHearing(target);
+            UpdateTargetMemory();
+        }
     }
 
     private void UpdateTargetMemory()
@@ -112,14 +154,14 @@ public class GhostPerception : MonoBehaviour
         }
     }
 
-    private bool CheckVision()
+    private bool CheckVision(GhostPerceptionTarget candidate)
     {
         Vector3 origin =
             transform.position +
             Vector3.up * eyeHeight;
 
         Vector3 targetPosition =
-            target.VisionPosition;
+            candidate.VisionPosition;
 
         Vector3 directionToTarget =
             targetPosition - origin;
@@ -171,13 +213,13 @@ public class GhostPerception : MonoBehaviour
                 .GetComponentInParent<GhostPerceptionTarget>();
 
         return
-            hitTarget == target;
+            hitTarget == candidate;
     }
 
-    private bool CheckHearing()
+    private bool CheckHearing(GhostPerceptionTarget candidate)
     {
         float noiseLevel =
-            target.NoiseLevel;
+            candidate.NoiseLevel;
 
         if (noiseLevel <= 0f)
         {
@@ -191,7 +233,7 @@ public class GhostPerception : MonoBehaviour
         float distance =
             Vector3.Distance(
                 transform.position,
-                target.transform.position
+                candidate.transform.position
             );
 
         return
