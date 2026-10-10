@@ -47,3 +47,6 @@ The user reports hunting movement works but ordinary roaming does not; screensho
 User confirms ordinary movement now works, but reports search stalls after closing the door. Code review found that a failed transition retried the unreachable destination room without returning to local search. Search now falls back to the physically occupied room, postpones that blocked neighbor, and handles an accepted path that stops making progress. Visible/heard but unreachable targets also fall back to accessible-room search without resetting it every frame. Door-opening AI is still not implemented. This recovery has not been run in Unity; local validation is required.
 
 After a hunt, if the home room is unreachable, GhostActor can roam its current room and retry returning on later decisions; the favorite/home room and its temperature are not reassigned.
+
+## User validation update
+User reports blocked-door recovery now works. Unity 6000.6.3f1 emitted CS0618 for FindObjectsSortMode and the sorted FindObjectsByType overload in the two Editor validation tools. They now use FindObjectsByType<Room>() as recommended by that compiler. This API update awaits local compilation; no warnings were suppressed.

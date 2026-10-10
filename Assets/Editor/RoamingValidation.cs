@@ -20,7 +20,7 @@ public static class RoamingValidation
         GameObject probe = null;
         try
         {
-            Room[] rooms = UnityEngine.Object.FindObjectsByType<Room>(FindObjectsSortMode.None);
+            Room[] rooms = UnityEngine.Object.FindObjectsByType<Room>();
             int tested = 0;
             foreach (Room room in rooms)
             {

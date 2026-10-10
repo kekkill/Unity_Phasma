@@ -11,7 +11,7 @@ public static class RoomLayoutValidation
     {
         if (!EditorApplication.isPlaying)
             throw new InvalidOperationException("Open RoomSearchPrototype and enter Play Mode first.");
-        Room[] rooms = UnityEngine.Object.FindObjectsByType<Room>(FindObjectsSortMode.None);
+        Room[] rooms = UnityEngine.Object.FindObjectsByType<Room>();
         if (rooms.Length != 3) throw new InvalidOperationException("Expected exactly three room zones.");
         int paths = 0;
         foreach (Room room in rooms)
