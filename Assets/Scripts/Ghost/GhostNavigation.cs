@@ -9,14 +9,32 @@ public class GhostNavigation : MonoBehaviour
     [SerializeField, Min(1)] private int pointAttempts = 16;
     private NavMeshAgent agent;
     private NavMeshPath candidatePath;
-    private bool hasDestination;
+    [Header("Runtime diagnostics")]
+    [SerializeField] private bool hasDestination;
+    [SerializeField] private Vector3 requestedDestination;
+    [SerializeField] private string lastMoveResult = "Not initialized";
+    private int pathAssignedFrame;
 
+    public Vector3 RequestedDestination => requestedDestination;
+    public string LastMoveResult => lastMoveResult;
     public bool IsReady => agent != null && agent.enabled && agent.isOnNavMesh;
-    public bool HasArrived => IsReady && hasDestination && !agent.pathPending &&
-        agent.pathStatus == NavMeshPathStatus.PathComplete &&
-        agent.remainingDistance <= agent.stoppingDistance + 0.05f;
-    public bool HasFailedPath => !IsReady || (hasDestination && !agent.pathPending &&
-        (!agent.hasPath && !HasArrived || agent.pathStatus != NavMeshPathStatus.PathComplete));
+    public bool HasArrived
+    {
+        get
+        {
+            if (!IsReady || !hasDestination || agent.pathPending ||
+                agent.pathStatus != NavMeshPathStatus.PathComplete) return false;
+            // remainingDistance may still be zero immediately after SetPath.
+            // Arrival requires the ghost to physically reach the requested point.
+            Vector3 delta = transform.position - requestedDestination;
+            delta.y = 0f;
+            float tolerance = agent.stoppingDistance + 0.05f;
+            return delta.sqrMagnitude <= tolerance * tolerance;
+        }
+    }
+    public bool HasFailedPath => !IsReady || (hasDestination &&
+        Time.frameCount > pathAssignedFrame + 2 && !agent.pathPending &&
+        ((!agent.hasPath && !HasArrived) || agent.pathStatus != NavMeshPathStatus.PathComplete));
 
     private void Awake()
     {
@@ -88,8 +106,12 @@ public class GhostNavigation : MonoBehaviour
 
     public bool TryRoomDestination(Room room, float speed, bool allowTransition = false)
     {
-        if (!TryRoomPoint(room, allowTransition, out Vector3 point) || !MoveTo(point, speed))
+        if (!TryRoomPoint(room, allowTransition, out Vector3 point))
+        {
+            lastMoveResult = "No reachable confined room point: " + (room != null ? room.RoomName : "missing room");
             return false;
+        }
+        if (!MoveTo(point, speed)) return false;
         // A confined roam must not automatically reroute through another room.
         agent.autoRepath = allowTransition;
         return true;
@@ -112,6 +134,7 @@ public class GhostNavigation : MonoBehaviour
         if (!TryReachablePoint(destination, out Vector3 point))
         {
             Stop();
+            lastMoveResult = "Destination cannot be reached";
             return false;
         }
         agent.autoRepath = true;
@@ -119,7 +142,17 @@ public class GhostNavigation : MonoBehaviour
         agent.isStopped = false;
         // Reuse the path already calculated instead of restarting it every frame.
         hasDestination = agent.SetPath(candidatePath);
-        if (!hasDestination) Stop();
+        if (hasDestination)
+        {
+            requestedDestination = point;
+            pathAssignedFrame = Time.frameCount;
+            lastMoveResult = "Path accepted";
+        }
+        else
+        {
+            Stop();
+            lastMoveResult = "Agent rejected path";
+        }
         return hasDestination;
     }
 

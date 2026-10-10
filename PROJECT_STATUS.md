@@ -39,3 +39,6 @@ GhostRoomSearch chooses local goals and adjacent rooms based on the last observe
 The user reports the previous CalculatePath fix appears to work. Current room-search batch has NOT been run in Unity. A Play Mode validation menu is supplied for six complete room-center paths, reciprocal room links, containment and partition blocking. Static geometry clearance checks passed for open connections and a blocked bedroom opening. See Docs/ROOM_SEARCH_CHECK.md.
 
 Limits still include unimplemented door-opening-for-navigation, attack/death, multiplayer, voice/noise occlusion and mission loop.
+
+## Roaming regression report
+The user reports hunting movement works but ordinary roaming does not; screenshot shows Idle with no active hunt. Arrival previously trusted remainingDistance, which can be stale just after SetPath. Arrival now requires physical horizontal proximity to the stored destination; missing-path failure has a short two-frame grace. This is a diagnosis to validate, not a confirmed runtime fix. Runtime Last Move Result and Requested Destination are exposed. Phasma/Validate Roaming (Play Mode) tests actual confined navigation/arrival using temporary agents without modifying the real actor. Neither this test nor the fix has been run in the cloud.
