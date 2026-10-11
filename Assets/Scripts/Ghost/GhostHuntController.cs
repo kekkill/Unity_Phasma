@@ -26,6 +26,7 @@ public class GhostHuntController : MonoBehaviour
     private GhostRoomSearch roomSearch;
     private bool wasHearingTarget;
     private bool searchingBlockedTarget;
+    [SerializeField] private float repelledUntil;
     private float nextHuntCheckTime;
     private float huntEndTime;
     private float searchEndTime;
@@ -58,7 +59,7 @@ public class GhostHuntController : MonoBehaviour
 
     public bool ShouldStartHunt()
     {
-        if (!navigation.IsReady) return false;
+        if (!navigation.IsReady || Time.time < repelledUntil) return false;
 
         if (isHunting)
         {
@@ -102,7 +103,7 @@ public class GhostHuntController : MonoBehaviour
 
     public bool BeginHunt()
     {
-        if (!navigation.IsReady) return false;
+        if (!navigation.IsReady || Time.time < repelledUntil) return false;
         if (ghostController == null ||
             ghostController.Profile == null ||
             ghostPerception == null ||
@@ -150,7 +151,15 @@ public class GhostHuntController : MonoBehaviour
             return false;
         }
 
-        if (attack.TryAttack(ghostPerception.Target))
+        bool killedPlayer = attack.TryAttack(ghostPerception.Target);
+        if (attack.WasRepelled)
+        {
+            repelledUntil = Time.time + ghostController.Profile.CrossRepelDuration;
+            FinishHunt();
+            Debug.Log("Ghost repelled by cross", this);
+            return false;
+        }
+        if (killedPlayer)
         {
             ghostPerception.RefreshTarget();
             // Ending the round may already have stopped this hunt via GameSession.

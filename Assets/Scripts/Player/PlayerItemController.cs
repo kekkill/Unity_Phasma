@@ -6,9 +6,11 @@ public class PlayerItemController : MonoBehaviour
 {
     private PlayerInputReader inputReader;
     private PlayerItemHolder itemHolder;
+    private PlayerItemPlacement placement;
 
     private void Awake()
     {
+        placement = GetComponent<PlayerItemPlacement>();
         inputReader =
             GetComponent<PlayerInputReader>();
 
@@ -18,7 +20,8 @@ public class PlayerItemController : MonoBehaviour
 
     private void Update()
     {
-        if (inputReader.UsePressedThisFrame)
+        if (inputReader.UsePressedThisFrame &&
+            (placement == null || (!placement.IsPlacing && !placement.ConsumedUseThisFrame)))
         {
             itemHolder.UseCurrentItem(gameObject);
         }

@@ -11,13 +11,47 @@ public class RuntimeNavigationWorld : MonoBehaviour
     private NavMeshData data;
     private NavMeshDataInstance instance;
     private readonly List<NavMeshObstacle> ownedObstacles = new();
+    private List<NavMeshBuildSource> staticSources;
+    private Bounds buildBounds;
+    private NavMeshBuildSettings buildSettings;
+    private AsyncOperation saltUpdate;
+    private bool saltDirty;
+
+    private void OnEnable() { SaltPile.Changed += MarkSaltDirty; MarkSaltDirty(); }
+    private void OnDisable() { SaltPile.Changed -= MarkSaltDirty; }
+    private void MarkSaltDirty() { saltDirty = true; }
+    private void Update()
+    {
+        if (data == null || !saltDirty || (saltUpdate != null && !saltUpdate.isDone)) return;
+        saltDirty = false;
+        saltUpdate = NavMeshBuilder.UpdateNavMeshDataAsync(data, buildSettings, BuildSources(), buildBounds);
+    }
+    private List<NavMeshBuildSource> BuildSources()
+    {
+        var sources = new List<NavMeshBuildSource>(staticSources);
+        int area = NavMesh.GetAreaFromName("Salt");
+        if (area < 0) return sources;
+        foreach (SaltPile pile in SaltPile.Active)
+        {
+            if (pile == null || !pile.IsIntact || !buildBounds.Contains(pile.transform.position)) continue;
+            sources.Add(new NavMeshBuildSource
+            {
+                shape = NavMeshBuildSourceShape.ModifierBox,
+                area = area,
+                size = new Vector3(pile.Radius * 2f, 1f, pile.Radius * 2f),
+                transform = Matrix4x4.TRS(pile.transform.position + Vector3.up * 0.2f,
+                    Quaternion.identity, Vector3.one)
+            });
+        }
+        return sources;
+    }
 
     private void Awake()
     {
         var sources = new List<NavMeshBuildSource>();
         Bounds bounds = default;
         bool hasBounds = false;
-        foreach (Collider collider in geometry)
+        foreach (Collider collider in geometry ?? new Collider[0])
         {
             if (collider == null || !collider.enabled || collider.isTrigger) continue;
             NavMeshBuildSource source = new NavMeshBuildSource { area = 0 };
@@ -49,14 +83,17 @@ public class RuntimeNavigationWorld : MonoBehaviour
         settings.agentHeight = 1.8f;
         settings.overrideVoxelSize = true;
         settings.voxelSize = 0.1f;
-        data = NavMeshBuilder.BuildNavMeshData(settings, sources, bounds, Vector3.zero, Quaternion.identity);
+        staticSources = sources;
+        buildBounds = bounds;
+        buildSettings = settings;
+        data = NavMeshBuilder.BuildNavMeshData(settings, BuildSources(), bounds, Vector3.zero, Quaternion.identity);
         if (data == null)
         {
             Debug.LogError("RuntimeNavigationWorld: NavMesh build failed.", this);
             return;
         }
         instance = NavMesh.AddNavMeshData(data);
-        foreach (BoxCollider box in movingObstacles)
+        foreach (BoxCollider box in movingObstacles ?? new BoxCollider[0])
         {
             if (box == null || box.GetComponent<NavMeshObstacle>() != null) continue;
             NavMeshObstacle obstacle = box.gameObject.AddComponent<NavMeshObstacle>();
@@ -71,6 +108,7 @@ public class RuntimeNavigationWorld : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (data != null && saltUpdate != null && !saltUpdate.isDone) NavMeshBuilder.Cancel(data);
         if (instance.valid) instance.Remove();
         if (data != null) Destroy(data);
         foreach (NavMeshObstacle obstacle in ownedObstacles)

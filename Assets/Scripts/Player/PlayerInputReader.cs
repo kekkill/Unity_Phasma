@@ -15,6 +15,8 @@ public class PlayerInputReader : MonoBehaviour
     private InputAction dropAction;
     private InputAction crouchAction;
     private InputAction sprintAction;
+    private InputAction placeAction;
+    public bool PlacePressedThisFrame => placeAction != null && placeAction.WasPressedThisFrame();
     public Vector2 MoveInput =>
         moveAction.ReadValue<Vector2>();
 
@@ -42,6 +44,8 @@ public class PlayerInputReader : MonoBehaviour
         // must not disable maps used by another participant.
         runtimeActions = Instantiate(inputActions);
         playerActionMap = runtimeActions.FindActionMap("Player", true);
+
+        placeAction = playerActionMap.FindAction("Place", false);
 
         moveAction =
             playerActionMap.FindAction("Move", true);

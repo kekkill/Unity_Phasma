@@ -521,7 +521,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &331973596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1050,6 +1050,8 @@ GameObject:
   - component: {fileID: 513613262}
   - component: {fileID: 513613263}
   - component: {fileID: 513613264}
+  - component: {fileID: 513613265}
+  - component: {fileID: 513613266}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -1572,6 +1574,7 @@ GameObject:
   - component: {fileID: 1277915021}
   - component: {fileID: 1277915023}
   - component: {fileID: 1277915024}
+  - component: {fileID: 1277915025}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4221,6 +4224,7 @@ MonoBehaviour:
   - {fileID: 1277915019}
   - {fileID: 1277915020}
   - {fileID: 1277915021}
+  - {fileID: 1277915025}
   collisionsToDisable:
   - {fileID: 1277915011}
   livingOnlyUI:
@@ -4298,6 +4302,91 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55e502be10124edfb7c34d351fee8829, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RoundEndScreen
+--- !u!114 &513613265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67e299e27fa649988823567ab6277bc9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostDebugVisual
+  visible: 1
+--- !u!114 &513613266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4df20febac264fe993a251f4b72bd9e4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostSaltReaction
+--- !u!114 &1277915025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34b1788145554b6c9db0a861fd8d9251, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItemPlacement
+  playerCamera: {fileID: 330585545}
+  maxDistance: 3
+--- !u!1 &50020000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 50020001}
+  - component: {fileID: 50020002}
+  m_Layer: 0
+  m_Name: DefensiveItems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &50020001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50020000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &50020002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50020000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b4e1a7437d846099ca02cd0dcbf4de7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DefensiveItemSetup
+  crossPosition: {x: -2, y: 0.05, z: 1.6}
+  saltPosition: {x: -1.2, y: 0.05, z: 1.6}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4325,3 +4414,4 @@ SceneRoots:
   - {fileID: 2107965716}
   - {fileID: 331973601}
   - {fileID: 50010001}
+  - {fileID: 50020001}

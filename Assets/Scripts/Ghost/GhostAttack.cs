@@ -7,10 +7,12 @@ public class GhostAttack : MonoBehaviour
     [SerializeField, Min(0.1f)] private float attackRange = 1.2f;
     [SerializeField] private float attackOriginHeight = 0.9f;
     private GhostActionRestrictions restrictions;
+    public bool WasRepelled { get; private set; }
     private void Awake() { restrictions = GetComponent<GhostActionRestrictions>(); }
 
     public bool TryAttack(GhostPerceptionTarget target)
     {
+        WasRepelled = false;
         if (target == null || !target.IsAlive || target.LifeState == null ||
             restrictions.IsActionBlocked(GhostActionType.Attack)) return false;
         if (Vector3.Distance(transform.position, target.transform.position) > attackRange) return false;
@@ -24,6 +26,14 @@ public class GhostAttack : MonoBehaviour
             if (hit.collider.GetComponentInParent<PickupItem>() != null) continue;
             // The first solid object must be this player; a wall/door blocks the attack.
             if (hit.collider.GetComponentInParent<GhostPerceptionTarget>() != target) return false;
+            GhostController controller = GetComponent<GhostController>();
+            GhostAggression aggression = GetComponent<GhostAggression>();
+            if (controller != null && CrossItem.ProtectPlayer(target, controller.Profile,
+                aggression != null ? aggression.CurrentAnger : 0f))
+            {
+                WasRepelled = true;
+                return false;
+            }
             return target.LifeState.TryDie();
         }
         return false;

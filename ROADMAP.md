@@ -1,11 +1,9 @@
 # Roadmap
 
-1. Verify the player-death/round batch in Unity using Docs/DEATH_ROUND_CHECK.md.
-2. After verification, agree the next medium-sized feature with the user.
-3. Attack, death and local all-dead completion are implemented; verify before expanding.
-4. Add repel/cross mechanics and explicit held/placed item states.
-5. Improve ghost profiles, evidence conditions and instrument presentation.
-6. Add journal and a complete single-player mission loop.
-7. Later, design and implement multiplayer authority and synchronization.
+1. Verify feature/defensive-items in Unity using Docs/DEFENSIVE_ITEMS_CHECK.md: compilation, item placement, held/placed cross, break/immune type, three salt rules, dynamic pathfinding and death/restart regression.
+2. Fix any observed regressions, record user validation, then agree the next medium-sized batch.
+3. Refine ghost profile/evidence conditions and instrument presentation; replace temporary visuals when agreed.
+4. Add journal and a complete single-player mission loop.
+5. Later, choose multiplayer transport and implement server authority, ownership, state replication, dead-player visibility/voice routing and connection handling.
 
-Navigation and room-search/layout increments are implemented; the latter awaits Unity validation. Remaining features are plans.
+Navigation, three-zone room search and death/round completion are implemented; user has confirmed movement, blocked-door recovery and death/round validation/restart. Defensive-item work is implemented but awaits local Unity validation. Multiplayer is a future task, not part of this batch.

@@ -10,11 +10,12 @@ public class PlayerItemHolder : MonoBehaviour
 
     private PickupItem currentItem;
 
+    public PickupItem CurrentItem => currentItem;
     public bool HasItem => currentItem != null;
 
     public bool TryPickup(PickupItem item)
     {
-        if (HasItem)
+        if (HasItem || item == null || !item.isActiveAndEnabled || item.State == PickupItemState.Held)
             return false;
 
         currentItem = item;
@@ -40,6 +41,15 @@ public class PlayerItemHolder : MonoBehaviour
                 return;
             }
         }
+    }
+
+    public bool PlaceCurrentItem(Vector3 position, Quaternion rotation)
+    {
+        if (currentItem == null) return false;
+        PickupItem item = currentItem;
+        currentItem = null;
+        item.Place(position, rotation);
+        return true;
     }
 
     public void DropCurrentItem()

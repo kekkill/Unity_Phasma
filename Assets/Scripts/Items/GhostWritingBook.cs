@@ -27,6 +27,8 @@ public class GhostWritingBook : MonoBehaviour, IGhostInteractable
     public void GhostInteract(
         GhostInteractionContext context)
     {
+        PickupItem pickup = GetComponent<PickupItem>();
+        if (pickup != null && pickup.State != PickupItemState.Placed) return;
         if (hasWriting)
         {
             return;

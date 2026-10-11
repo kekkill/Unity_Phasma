@@ -19,6 +19,12 @@ public class MotionSensorItem : MonoBehaviour
 
     private void Update()
     {
+        if (!IsPlaced)
+        {
+            isTriggered = false;
+            SetIndicator(false);
+            return;
+        }
         if (!isTriggered)
         {
             return;
@@ -32,10 +38,13 @@ public class MotionSensorItem : MonoBehaviour
         }
     }
 
+    public bool IsPlaced => GetComponent<PickupItem>() == null ||
+        GetComponent<PickupItem>().State == PickupItemState.Placed;
+
     public void DetectGhost(
         GhostActor ghostActor)
     {
-        if (ghostActor == null)
+        if (!IsPlaced || ghostActor == null)
         {
             return;
         }

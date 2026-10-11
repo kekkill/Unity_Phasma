@@ -1,16 +1,28 @@
+using System;
 using UnityEngine;
+
+public enum PickupItemState { Dropped, Held, Placed }
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 public class PickupItem : MonoBehaviour, IInteractable
 {
+    [SerializeField] private PickupItemState state;
+    public PickupItemState State => state;
+    public event Action<PickupItemState> StateChanged;
+    private Collider[] colliders;
+    private bool[] originalEnabled;
     private Rigidbody itemRigidbody;
     private Collider itemCollider;
 
-    public string InteractionPrompt => "[E] Поднять";
+    public string InteractionPrompt => GetComponent<CrossItem>() != null && GetComponent<CrossItem>().IsBroken
+        ? "[E] Поднять сломанный крест" : "[E] Поднять";
 
     private void Awake()
     {
+        colliders = GetComponentsInChildren<Collider>(true);
+        originalEnabled = new bool[colliders.Length];
+        for (int i = 0; i < colliders.Length; i++) originalEnabled[i] = colliders[i].enabled;
         itemRigidbody =
             GetComponent<Rigidbody>();
 
@@ -32,7 +44,8 @@ public class PickupItem : MonoBehaviour, IInteractable
     public void AttachTo(Transform holdPoint)
     {
         itemRigidbody.isKinematic = true;
-        itemCollider.enabled = false;
+        SetColliders(false);
+        SetState(PickupItemState.Held);
 
         transform.SetParent(holdPoint);
 
@@ -49,7 +62,8 @@ public class PickupItem : MonoBehaviour, IInteractable
 
         transform.position = dropPosition;
 
-        itemCollider.enabled = true;
+        SetColliders(true);
+        SetState(PickupItemState.Dropped);
 
         itemRigidbody.isKinematic = false;
         itemRigidbody.useGravity = true;
@@ -58,5 +72,48 @@ public class PickupItem : MonoBehaviour, IInteractable
             throwDirection.normalized * throwForce,
             ForceMode.Impulse
         );
+    }
+    private void SetState(PickupItemState value)
+    {
+        state = value;
+        StateChanged?.Invoke(state);
+    }
+    private void SetColliders(bool active)
+    {
+        for (int i = 0; i < colliders.Length; i++)
+            if (colliders[i] != null) colliders[i].enabled = active && originalEnabled[i];
+    }
+    // Collider.bounds is empty while held (disabled). Use the local shape instead.
+    private Bounds PlacementBounds
+    {
+        get
+        {
+            Bounds local;
+            if (itemCollider is BoxCollider box) local = new Bounds(box.center, box.size);
+            else if (itemCollider is SphereCollider sphere)
+                local = new Bounds(sphere.center, Vector3.one * sphere.radius * 2f);
+            else if (itemCollider is CapsuleCollider capsule)
+            {
+                Vector3 size = Vector3.one * capsule.radius * 2f;
+                size[capsule.direction] = Mathf.Max(capsule.height, capsule.radius * 2f);
+                local = new Bounds(capsule.center, size);
+            }
+            else if (itemCollider is MeshCollider mesh && mesh.sharedMesh != null) local = mesh.sharedMesh.bounds;
+            else local = new Bounds(Vector3.zero, Vector3.one * 0.2f);
+            Vector3 scale = transform.lossyScale;
+            Vector3 absolute = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+            return new Bounds(Vector3.Scale(local.center, scale), Vector3.Scale(local.size, absolute));
+        }
+    }
+    public float PlacementLift => Mathf.Max(0f, PlacementBounds.extents.y - PlacementBounds.center.y) + 0.02f;
+    public Vector3 PlacementHalfSize => PlacementBounds.extents;
+    public Vector3 PlacementCenter => PlacementBounds.center;
+    public void Place(Vector3 position, Quaternion rotation)
+    {
+        transform.SetParent(null);
+        transform.SetPositionAndRotation(position, rotation);
+        itemRigidbody.isKinematic = true;
+        SetColliders(true);
+        SetState(PickupItemState.Placed);
     }
 }

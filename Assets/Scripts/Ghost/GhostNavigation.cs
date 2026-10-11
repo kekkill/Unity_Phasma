@@ -7,6 +7,9 @@ public class GhostNavigation : MonoBehaviour
 {
     [SerializeField, Min(0.05f)] private float sampleRadius = 1f;
     [SerializeField, Min(1)] private int pointAttempts = 16;
+    private GhostController controller;
+    private GhostHuntController hunt;
+    private int baseAreaMask;
     private NavMeshAgent agent;
     private NavMeshPath candidatePath;
     [Header("Runtime diagnostics")]
@@ -42,6 +45,7 @@ public class GhostNavigation : MonoBehaviour
 
     private void Update()
     {
+        UpdateSaltMask();
         if (!IsReady || !hasDestination) return;
         Vector3 progress = transform.position - lastProgressPosition;
         progress.y = 0f;
@@ -54,9 +58,12 @@ public class GhostNavigation : MonoBehaviour
 
     private void Awake()
     {
+        controller = GetComponent<GhostController>();
+        hunt = GetComponent<GhostHuntController>();
         candidatePath = new NavMeshPath();
         agent = GetComponent<NavMeshAgent>();
         if (agent == null) agent = gameObject.AddComponent<NavMeshAgent>();
+        baseAreaMask = agent.areaMask;
         agent.enabled = false;
         agent.radius = 0.35f;
         agent.height = 1.8f;
@@ -68,6 +75,7 @@ public class GhostNavigation : MonoBehaviour
 
     public bool Initialize(Room room)
     {
+        UpdateSaltMask();
         // Room points have arbitrary height. Project them to nearby walkable ground.
         for (int i = 0; i < pointAttempts; i++)
         {
@@ -89,6 +97,7 @@ public class GhostNavigation : MonoBehaviour
 
     public bool TryReachablePoint(Vector3 position, out Vector3 point)
     {
+        UpdateSaltMask();
         point = default;
         if (!IsReady || !NavMesh.SamplePosition(position, out NavMeshHit hit,
             sampleRadius, agent.areaMask)) return false;
@@ -172,6 +181,21 @@ public class GhostNavigation : MonoBehaviour
             lastMoveResult = "Agent rejected path";
         }
         return hasDestination;
+    }
+
+    private void UpdateSaltMask()
+    {
+        if (agent == null) return;
+        int area = NavMesh.GetAreaFromName("Salt");
+        bool avoid = controller != null && controller.Profile != null &&
+            controller.Profile.SaltResponse == GhostSaltResponse.AvoidUntilHunt &&
+            (hunt == null || !hunt.IsHunting);
+        // A pile poured directly underneath the ghost must allow it to leave.
+        if (avoid)
+            foreach (SaltPile pile in SaltPile.Active)
+                if (pile != null && pile.IsIntact && pile.Contains(transform.position)) { avoid = false; break; }
+        int mask = avoid && area >= 0 ? baseAreaMask & ~(1 << area) : baseAreaMask;
+        if (agent.areaMask != mask) agent.areaMask = mask;
     }
 
     public void Stop()

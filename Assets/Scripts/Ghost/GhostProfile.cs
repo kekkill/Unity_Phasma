@@ -1,5 +1,7 @@
 using UnityEngine;
 
+public enum GhostSaltResponse { AvoidUntilHunt, LeaveFootprints, Ignore }
+
 [CreateAssetMenu(
     fileName = "GhostProfile",
     menuName = "Ghost/Ghost Profile"
@@ -7,6 +9,18 @@ using UnityEngine;
 public class GhostProfile : ScriptableObject
 {
     [SerializeField] private string ghostName = "Ghost";
+
+    [Header("Defensive items")]
+    [SerializeField] private bool ignoresCross;
+    [SerializeField, Range(0f, 1f)] private float crossBreakChance = 0.15f;
+    [SerializeField, Range(0f, 1f)] private float angerCrossBreakContribution = 0.5f;
+    [SerializeField, Min(1f)] private float crossRepelDuration = 6f;
+    [SerializeField] private GhostSaltResponse saltResponse;
+    public bool IgnoresCross => ignoresCross;
+    public float CrossRepelDuration => crossRepelDuration;
+    public GhostSaltResponse SaltResponse => saltResponse;
+    public float GetCrossBreakChance(float anger) => Mathf.Clamp01(crossBreakChance +
+        Mathf.Clamp01(anger / 100f) * angerCrossBreakContribution);
 
     [Header("Evidence")]
     [SerializeField] private bool hasFreezingEvidence;

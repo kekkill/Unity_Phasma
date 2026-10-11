@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: TestGhostProfile
   m_EditorClassIdentifier: Assembly-CSharp::GhostProfile
   ghostName: Ghost
+  ignoresCross: 0
+  crossBreakChance: 0.15
+  angerCrossBreakContribution: 0.5
+  crossRepelDuration: 6
+  saltResponse: 0
   hasFreezingEvidence: 1
   hasEmfEvidence: 1
   hasUltravioletEvidence: 1
