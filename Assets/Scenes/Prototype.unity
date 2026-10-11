@@ -1575,6 +1575,9 @@ GameObject:
   - component: {fileID: 1277915023}
   - component: {fileID: 1277915024}
   - component: {fileID: 1277915025}
+  - component: {fileID: 1277915026}
+  - component: {fileID: 1277915027}
+  - component: {fileID: 1277915028}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4225,6 +4228,7 @@ MonoBehaviour:
   - {fileID: 1277915020}
   - {fileID: 1277915021}
   - {fileID: 1277915025}
+  - {fileID: 1277915027}
   collisionsToDisable:
   - {fileID: 1277915011}
   livingOnlyUI:
@@ -4387,6 +4391,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DefensiveItemSetup
   crossPosition: {x: -2, y: 0.05, z: 1.6}
   saltPosition: {x: -1.2, y: 0.05, z: 1.6}
+--- !u!114 &1277915026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 955c4484db7744438ef91b66d1cec114, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::JournalState
+  catalog: {fileID: 11400000, guid: 1227eee9cb3b4063bd20e14f1677e85f, type: 2}
+  freezing: 0
+  emf: 0
+  ultraviolet: 0
+  writing: 0
+  saltObservation: 0
+  crossObservation: 0
+  selectedGhostId:
+--- !u!114 &1277915027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b34f1c91c14d4f32b81ba16cfd1c652a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerJournalController
+--- !u!114 &1277915028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfac176190b499faceb2c2aaa30f14e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::JournalScreen
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,27 +18,30 @@ public class PlayerInputReader : MonoBehaviour
     private InputAction crouchAction;
     private InputAction sprintAction;
     private InputAction placeAction;
-    public bool PlacePressedThisFrame => placeAction != null && placeAction.WasPressedThisFrame();
-    public Vector2 MoveInput =>
-        moveAction.ReadValue<Vector2>();
-
-    public Vector2 LookInput =>
-        lookAction.ReadValue<Vector2>();
-
-    public bool InteractPressedThisFrame =>
-        interactAction.WasPressedThisFrame();
-
-    public bool UsePressedThisFrame =>
-        useAction.WasPressedThisFrame();
-
-    public bool DropPressedThisFrame =>
-        dropAction.WasPressedThisFrame();
-
-    public bool CrouchIsPressed =>
-        crouchAction.IsPressed();
-
-    public bool SprintIsPressed =>
-        sprintAction.IsPressed();
+    private InputAction journalAction;
+    private InputAction closeJournalAction;
+    private readonly HashSet<object> gameplayBlockers = new HashSet<object>();
+    private int resumeAfterFrame = -1;
+    public bool HasGameplayBlockers => gameplayBlockers.Count > 0;
+    public bool GameplayBlocked => HasGameplayBlockers || Time.frameCount <= resumeAfterFrame;
+    public void SetGameplayBlocked(object owner, bool blocked)
+    {
+        if (owner == null) throw new ArgumentNullException(nameof(owner));
+        if (blocked) gameplayBlockers.Add(owner);
+        else if (gameplayBlockers.Remove(owner) && gameplayBlockers.Count == 0)
+            resumeAfterFrame = Time.frameCount; // Closing a UI cannot also use/place an item in this frame.
+    }
+    // Menu actions stay available while gameplay actions are blocked.
+    public bool JournalPressedThisFrame => journalAction != null && journalAction.WasPressedThisFrame();
+    public bool CloseJournalPressedThisFrame => closeJournalAction != null && closeJournalAction.WasPressedThisFrame();
+    public bool PlacePressedThisFrame => !GameplayBlocked && placeAction != null && placeAction.WasPressedThisFrame();
+    public Vector2 MoveInput => !GameplayBlocked && moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+    public Vector2 LookInput => !GameplayBlocked && lookAction != null ? lookAction.ReadValue<Vector2>() : Vector2.zero;
+    public bool InteractPressedThisFrame => !GameplayBlocked && interactAction != null && interactAction.WasPressedThisFrame();
+    public bool UsePressedThisFrame => !GameplayBlocked && useAction != null && useAction.WasPressedThisFrame();
+    public bool DropPressedThisFrame => !GameplayBlocked && dropAction != null && dropAction.WasPressedThisFrame();
+    public bool CrouchIsPressed => !GameplayBlocked && crouchAction != null && crouchAction.IsPressed();
+    public bool SprintIsPressed => !GameplayBlocked && sprintAction != null && sprintAction.IsPressed();
 
     private void Awake()
     {
@@ -46,6 +51,8 @@ public class PlayerInputReader : MonoBehaviour
         playerActionMap = runtimeActions.FindActionMap("Player", true);
 
         placeAction = playerActionMap.FindAction("Place", false);
+        journalAction = playerActionMap.FindAction("Journal", false);
+        closeJournalAction = playerActionMap.FindAction("CloseJournal", false);
 
         moveAction =
             playerActionMap.FindAction("Move", true);

@@ -25,7 +25,7 @@ public class PlayerItemPlacement : MonoBehaviour
     }
     public void Begin()
     {
-        if (holder.CurrentItem == null) return;
+        if (input.GameplayBlocked || holder.CurrentItem == null) return;
         Cancel();
         selected = holder.CurrentItem;
         preview = RuntimeVisuals.Primitive(PrimitiveType.Cube, null, Vector3.zero,
@@ -41,6 +41,7 @@ public class PlayerItemPlacement : MonoBehaviour
     private void OnDisable() { Cancel(); }
     private void Update()
     {
+        if (input.GameplayBlocked) { if (IsPlacing) Cancel(); return; }
         if (input.PlacePressedThisFrame)
         {
             if (IsPlacing) Cancel(); else Begin();
@@ -84,6 +85,7 @@ public class PlayerItemPlacement : MonoBehaviour
     }
     private void OnGUI()
     {
+        if (input.GameplayBlocked) return;
         SaltContainer salt = holder != null && holder.CurrentItem != null ? holder.CurrentItem.GetComponent<SaltContainer>() : null;
         if (salt != null) GUI.Label(new Rect(20f, Screen.height - 90f, 650f, 25f), "Соль: " + salt.Portions + " порций. F или R — выбрать место");
         if (IsPlacing) GUI.Label(new Rect(20f, Screen.height - 65f, 650f, 45f),

@@ -43,6 +43,7 @@ public class PlayerCrouch : MonoBehaviour
 
     private void Update()
     {
+        if (inputReader.GameplayBlocked) return; // Preserve the current posture while writing notes.
         bool wantsToCrouch =
             inputReader.CrouchIsPressed;
 

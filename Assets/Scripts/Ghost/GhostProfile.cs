@@ -69,6 +69,18 @@ public class GhostProfile : ScriptableObject
 
     [SerializeField] private float postHuntRecoveryDuration = 8f;
 
+    public bool HasEvidence(EvidenceType type)
+    {
+        switch (type)
+        {
+            case EvidenceType.Freezing: return hasFreezingEvidence;
+            case EvidenceType.Emf: return hasEmfEvidence;
+            case EvidenceType.Ultraviolet: return hasUltravioletEvidence;
+            case EvidenceType.Writing: return hasWritingEvidence;
+            default: return false;
+        }
+    }
+
     public string GhostName =>
         ghostName;
 

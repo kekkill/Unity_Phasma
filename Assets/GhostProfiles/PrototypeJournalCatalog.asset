@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd934673dcc54a8eb7ba1c72cc8bb9ed, type: 3}
+  m_Name: PrototypeJournalCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::JournalCatalog
+  entries:
+  - id: basic
+    displayName: Обычный призрак
+    description: Обходит целую соль вне охоты. Исправный крест отпугивает его.
+    profile: {fileID: 11400000, guid: 20db6a9436e24ace837f8fa8bb206bc3, type: 2}
+  - id: footprints
+    displayName: Следопыт
+    description: Проходит по соли и оставляет следы. Исправный крест отпугивает его.
+    profile: {fileID: 11400000, guid: d13da2178d904d96a3cbbb4c64c6667c, type: 2}
+  - id: cross-immune
+    displayName: Неуязвимый к кресту
+    description: Игнорирует исправный крест и соль, не оставляет соляных следов.
+    profile: {fileID: 11400000, guid: 21d3e4813dee46218dd413d11d7869b2, type: 2}

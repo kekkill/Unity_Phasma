@@ -29,6 +29,12 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Update()
     {
+        if (inputReader.GameplayBlocked)
+        {
+            currentInteractable = null;
+            SetInteractionUI(false);
+            return;
+        }
         FindInteractable();
 
         if (currentInteractable != null &&
