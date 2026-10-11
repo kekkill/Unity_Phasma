@@ -21,7 +21,14 @@ MonoBehaviour:
   hasFreezingEvidence: 1
   hasEmfEvidence: 1
   hasUltravioletEvidence: 1
-  hasWritingEvidence: 1
+  hasWritingEvidence: 0
+  emfLevel3Anger: 25
+  emfLevel4Anger: 50
+  emfLevel5Anger: 75
+  angryIdleMultiplier: 0.4
+  huntInteractionInterval: 0.65
+  normalThrowImpulse: 2
+  huntThrowImpulse: 5
   visionRange: 10
   visionAngle: 90
   hearingRange: 10

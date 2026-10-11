@@ -4,6 +4,7 @@ using UnityEngine;
 public enum GhostSelectionMode { Manual, RandomFromCatalog }
 
 [DefaultExecutionOrder(-100)]
+[RequireComponent(typeof(GhostActivityEmitter))]
 public class GhostController : MonoBehaviour
 {
     [SerializeField] private Room[] rooms;
@@ -33,7 +34,7 @@ public class GhostController : MonoBehaviour
         return true;
     }
 
-    [Header("EMF Evidence")]
+    [Header("EMF Activity")]
     [SerializeField] private GhostActivityEvent activityPrefab;
     [SerializeField] private float activityLifetime = 8f;
 
@@ -129,94 +130,19 @@ public class GhostController : MonoBehaviour
         );
     }
 
-    public void CreateInteractionEvidenceAt(
-        Vector3 position)
+    public bool IsHunting => GetComponent<GhostHuntController>() != null && GetComponent<GhostHuntController>().IsHunting;
+    public float CurrentAnger => GetComponent<GhostAggression>() != null ? GetComponent<GhostAggression>().CurrentAnger : Profile != null ? Profile.InitialAnger : 0f;
+    public GhostActivityEvent ActivityPrefab => activityPrefab;
+    public float ActivityLifetime => Mathf.Max(0.1f, activityLifetime);
+    public UltravioletTrace UltravioletTracePrefab => ultravioletTracePrefab;
+    public float UltravioletTraceLifetime => Mathf.Max(0.1f, ultravioletTraceLifetime);
+
+    // Preserve existing entry points and Inspector references; emission belongs to its own component.
+    public void CreateInteractionEvidenceAt(Vector3 position)
     {
-        TryCreateEmfActivityAt(
-            position
-        );
-
-        TryCreateUltravioletTraceAt(
-            position
-        );
+        TryCreateEmfActivityAt(position);
+        TryCreateUltravioletTraceAt(position);
     }
-
-    public void TryCreateEmfActivityAt(
-        Vector3 position)
-    {
-        if (!Profile.HasEmfEvidence)
-        {
-            Debug.Log(
-                "Ghost interaction left no EMF evidence."
-            );
-
-            return;
-        }
-
-        if (activityPrefab == null)
-        {
-            Debug.LogError(
-                "GhostController: Activity Prefab is not assigned."
-            );
-
-            return;
-        }
-
-        GhostActivityEvent newActivity =
-            Instantiate(
-                activityPrefab,
-                position,
-                Quaternion.identity
-            );
-
-        int level =
-            Random.Range(2, 5);
-
-        newActivity.Initialize(
-            level,
-            activityLifetime
-        );
-
-        Debug.Log(
-            "Ghost left EMF evidence. Level: " +
-            level
-        );
-    }
-
-    public void TryCreateUltravioletTraceAt(
-        Vector3 position)
-    {
-        if (!Profile.HasUltravioletEvidence)
-        {
-            Debug.Log(
-                "Ghost interaction left no ultraviolet evidence."
-            );
-
-            return;
-        }
-
-        if (ultravioletTracePrefab == null)
-        {
-            Debug.LogError(
-                "GhostController: Ultraviolet Trace Prefab is not assigned."
-            );
-
-            return;
-        }
-
-        UltravioletTrace newTrace =
-            Instantiate(
-                ultravioletTracePrefab,
-                position,
-                Quaternion.identity
-            );
-
-        newTrace.Initialize(
-            ultravioletTraceLifetime
-        );
-
-        Debug.Log(
-            "Ghost left ultraviolet evidence."
-        );
-    }
+    public void TryCreateEmfActivityAt(Vector3 position) => GetComponent<GhostActivityEmitter>().EmitEmfAt(position);
+    public void TryCreateUltravioletTraceAt(Vector3 position) => GetComponent<GhostActivityEmitter>().EmitUltravioletAt(position);
 }

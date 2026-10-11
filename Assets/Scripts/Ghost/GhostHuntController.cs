@@ -1,6 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch), typeof(GhostAttack))]
+[RequireComponent(typeof(GhostWorldInteraction))]
 public class GhostHuntController : MonoBehaviour
 {
     private enum HuntMode
@@ -125,6 +126,8 @@ public class GhostHuntController : MonoBehaviour
             ghostController.Profile.MaxHuntDuration;
 
         ghostAggression.BeginHunt();
+        GetComponent<GhostWorldInteraction>().ResetHuntTimer();
+        GetComponent<GhostActivityEmitter>()?.RefreshHuntSignal();
 
         if (ghostPerception.CanSeeTarget)
         {
@@ -177,6 +180,8 @@ public class GhostHuntController : MonoBehaviour
 
             return false;
         }
+
+        GetComponent<GhostWorldInteraction>().TickHunt();
 
         // Видит игрока:
         // можно преследовать его точную текущую позицию.
@@ -359,6 +364,7 @@ public class GhostHuntController : MonoBehaviour
         wasHearingTarget = false;
         isHunting =
             false;
+        GetComponent<GhostActivityEmitter>()?.StopHuntSignal();
 
         ghostAggression
             .EndHuntAndStartRecovery();

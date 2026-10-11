@@ -266,6 +266,7 @@ GameObject:
   - component: {fileID: 277929990}
   - component: {fileID: 277929989}
   - component: {fileID: 277929993}
+  - component: {fileID: 50040000}
   m_Layer: 0
   m_Name: EMFReader
   m_TagString: Untagged
@@ -515,6 +516,7 @@ GameObject:
   - component: {fileID: 331973598}
   - component: {fileID: 331973597}
   - component: {fileID: 331973596}
+  - component: {fileID: 50040001}
   m_Layer: 0
   m_Name: ProtectionWard
   m_TagString: Untagged
@@ -1054,6 +1056,8 @@ GameObject:
   - component: {fileID: 513613266}
   - component: {fileID: 513613267}
   - component: {fileID: 513613268}
+  - component: {fileID: 513613269}
+  - component: {fileID: 513613270}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -1587,6 +1591,7 @@ GameObject:
   - component: {fileID: 1277915029}
   - component: {fileID: 1277915030}
   - component: {fileID: 1277915031}
+  - component: {fileID: 1277915032}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2742,6 +2747,7 @@ GameObject:
   - component: {fileID: 1944482479}
   - component: {fileID: 1944482478}
   - component: {fileID: 1944482477}
+  - component: {fileID: 50040002}
   m_Layer: 0
   m_Name: GhostWritingBook
   m_TagString: Untagged
@@ -2910,6 +2916,7 @@ GameObject:
   - component: {fileID: 1964078699}
   - component: {fileID: 1964078698}
   - component: {fileID: 1964078697}
+  - component: {fileID: 50040003}
   m_Layer: 0
   m_Name: UVFlashlight
   m_TagString: Untagged
@@ -3140,6 +3147,7 @@ GameObject:
   - component: {fileID: 1988192539}
   - component: {fileID: 1988192538}
   - component: {fileID: 1988192544}
+  - component: {fileID: 50040004}
   m_Layer: 0
   m_Name: FlashLight
   m_TagString: Untagged
@@ -3358,6 +3366,7 @@ GameObject:
   - component: {fileID: 2097593003}
   - component: {fileID: 2097593002}
   - component: {fileID: 2097593008}
+  - component: {fileID: 50040005}
   m_Layer: 0
   m_Name: Thermometer
   m_TagString: Untagged
@@ -3524,6 +3533,7 @@ GameObject:
   - component: {fileID: 2107965712}
   - component: {fileID: 2107965711}
   - component: {fileID: 2107965710}
+  - component: {fileID: 50040006}
   m_Layer: 0
   m_Name: MotionSensor
   m_TagString: Untagged
@@ -6198,3 +6208,125 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f10511fe9242b2a8c09fd51b1f3fc5, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryScreen
+--- !u!114 &513613269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7cefabeee27488f873b2f89d44a622c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostActivityEmitter
+--- !u!114 &513613270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 321ff33adda9446cbd7b01b80801ca97, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostWorldInteraction
+  huntInteractionRadius: 2.5
+  targetCooldown: 1.5
+--- !u!114 &1277915032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b3c24534d5646f682ba513ca87731f2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentReadout
+--- !u!114 &50040000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277929988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331973595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944482476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964078696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1988192537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2097593001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem
+--- !u!114 &50040006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107965709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97f1e155cb542df82dcc9e1eb304134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostThrowableItem

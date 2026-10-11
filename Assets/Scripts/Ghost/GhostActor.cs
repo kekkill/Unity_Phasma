@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(GhostNavigation))]
+[RequireComponent(typeof(GhostNavigation), typeof(GhostWorldInteraction))]
 public class GhostActor : MonoBehaviour
 {
     private enum GhostState
@@ -179,7 +178,7 @@ public class GhostActor : MonoBehaviour
             );
 
         stateEndTime =
-            Time.time + idleTime;
+            Time.time + idleTime * GhostActivityRules.IdleMultiplier(ghostController.Profile, ghostController.CurrentAnger);
 
         Debug.Log(
             "Ghost -> Idle"
@@ -236,7 +235,7 @@ public class GhostActor : MonoBehaviour
             Random.value;
 
         if (randomValue <=
-            interactionChance)
+            GhostActivityRules.InteractionChance(interactionChance, ghostController.CurrentAnger))
         {
             TryEnterInteraction();
         }
@@ -304,104 +303,7 @@ public class GhostActor : MonoBehaviour
                 );
     }
 
-    private void TryInteractWithNearbyObject()
-    {
-        Collider[] hits =
-            Physics.OverlapSphere(
-                transform.position,
-                interactionRadius,
-                ~0,
-                QueryTriggerInteraction.Ignore
-            );
-
-        List<IGhostInteractable> possibleTargets =
-            new List<IGhostInteractable>();
-
-        foreach (Collider hit in hits)
-        {
-            MonoBehaviour[] behaviours =
-                hit.GetComponentsInParent
-                    <MonoBehaviour>();
-
-            foreach (
-                MonoBehaviour behaviour
-                in behaviours)
-            {
-                if (behaviour is not
-                    IGhostInteractable
-                    ghostInteractable)
-                {
-                    continue;
-                }
-
-                if (!possibleTargets.Contains(
-                    ghostInteractable))
-                {
-                    possibleTargets.Add(
-                        ghostInteractable
-                    );
-                }
-            }
-        }
-
-        if (possibleTargets.Count == 0)
-        {
-            Debug.Log(
-                "Ghost found no nearby object to interact with."
-            );
-
-            return;
-        }
-
-        int randomIndex =
-            Random.Range(
-                0,
-                possibleTargets.Count
-            );
-
-        IGhostInteractable target =
-            possibleTargets[randomIndex];
-
-        GhostInteractionContext context =
-            new GhostInteractionContext(
-                this,
-                ghostController,
-                ghostController != null
-                    ? ghostController.Profile
-                    : null
-            );
-
-        target.GhostInteract(
-            context
-        );
-
-        if (ghostController != null)
-        {
-            ghostController
-                .CreateInteractionEvidenceAt(
-                    target
-                        .GhostInteractionPosition
-                );
-        }
-
-        Debug.Log(
-            "Ghost interacted with an object."
-        );
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(
-            transform.position,
-            0.3f
-        );
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.DrawWireSphere(
-            transform.position,
-            interactionRadius
-        );
-    }
+    private void TryInteractWithNearbyObject() => GetComponent<GhostWorldInteraction>().TryInteractNearby(interactionRadius);
+    private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, 0.3f);
+    private void OnDrawGizmosSelected() => Gizmos.DrawWireSphere(transform.position, interactionRadius);
 }

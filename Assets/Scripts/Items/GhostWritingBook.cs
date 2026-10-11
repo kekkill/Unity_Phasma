@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GhostWritingBook : MonoBehaviour, IGhostInteractable
+public class GhostWritingBook : MonoBehaviour, IGhostInteractionTarget
 {
     [Header("Writing")]
     [SerializeField] private GameObject writingVisual;
@@ -24,58 +24,20 @@ public class GhostWritingBook : MonoBehaviour, IGhostInteractable
         }
     }
 
-    public void GhostInteract(
-        GhostInteractionContext context)
+    public bool HasWriting => hasWriting;
+    public bool CanGhostInteract(GhostInteractionContext context)
     {
         PickupItem pickup = GetComponent<PickupItem>();
-        if (pickup != null && pickup.State != PickupItemState.Placed) return;
-        if (hasWriting)
-        {
-            return;
-        }
-
-        if (context.Profile == null)
-        {
-            Debug.LogWarning(
-                "GhostWritingBook: Ghost Profile is missing."
-            );
-
-            return;
-        }
-
-        if (!context.Profile.HasWritingEvidence)
-        {
-            Debug.Log(
-                "Ghost cannot leave writing evidence."
-            );
-
-            return;
-        }
-
-        float randomValue =
-            Random.value;
-
-        if (randomValue > writingChance)
-        {
-            Debug.Log(
-                "Ghost interacted with the book but did not write."
-            );
-
-            return;
-        }
-
-        hasWriting =
-            true;
-
-        if (writingVisual != null)
-        {
-            writingVisual.SetActive(
-                true
-            );
-        }
-
-        Debug.Log(
-            "Ghost wrote in the book."
-        );
+        return isActiveAndEnabled && !context.IsHunting && !hasWriting && context.Profile != null &&
+            context.Profile.HasWritingEvidence && (pickup == null || pickup.State == PickupItemState.Placed);
     }
+    public bool TryGhostInteract(GhostInteractionContext context)
+    {
+        if (!CanGhostInteract(context) || Random.value > writingChance) return false;
+        hasWriting = true;
+        if (writingVisual != null) writingVisual.SetActive(true);
+        Debug.Log("Ghost wrote in the book.");
+        return true;
+    }
+    public void GhostInteract(GhostInteractionContext context) => TryGhostInteract(context);
 }

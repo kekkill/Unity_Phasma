@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractable
+public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
 {
     [SerializeField] private Light targetLight;
     [SerializeField] private Transform switchVisual;
@@ -34,11 +34,14 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractable
         ToggleLight();
     }
 
-    public void GhostInteract(
-        GhostInteractionContext context)
+    public bool CanGhostInteract(GhostInteractionContext context) => isActiveAndEnabled && !context.IsHunting && targetLight != null;
+    public bool TryGhostInteract(GhostInteractionContext context)
     {
+        if (!CanGhostInteract(context)) return false;
         ToggleLight();
+        return true;
     }
+    public void GhostInteract(GhostInteractionContext context) => TryGhostInteract(context);
 
     private void ToggleLight()
     {

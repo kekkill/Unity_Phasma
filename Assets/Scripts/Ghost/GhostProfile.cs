@@ -24,9 +24,27 @@ public class GhostProfile : ScriptableObject
 
     [Header("Evidence")]
     [SerializeField] private bool hasFreezingEvidence;
-    [SerializeField] private bool hasEmfEvidence;
+    [SerializeField, InspectorName("EMF 5 Evidence")]
+    [Tooltip("All ghosts emit ordinary EMF. Only this flag permits level 5.")]
+    private bool hasEmfEvidence;
     [SerializeField] private bool hasUltravioletEvidence;
     [SerializeField] private bool hasWritingEvidence;
+
+    [Header("Activity")]
+    [SerializeField, Range(0f, 100f)] private float emfLevel3Anger = 25f;
+    [SerializeField, Range(0f, 100f)] private float emfLevel4Anger = 50f;
+    [SerializeField, Range(0f, 100f)] private float emfLevel5Anger = 75f;
+    [SerializeField, Range(0.1f, 1f)] private float angryIdleMultiplier = 0.4f;
+    [SerializeField, Min(0.1f)] private float huntInteractionInterval = 0.65f;
+    [SerializeField, Min(0f)] private float normalThrowImpulse = 2f;
+    [SerializeField, Min(0f)] private float huntThrowImpulse = 5f;
+    public float EmfLevel3Anger => Mathf.Clamp(emfLevel3Anger, 0f, 100f);
+    public float EmfLevel4Anger => Mathf.Clamp(emfLevel4Anger, EmfLevel3Anger, 100f);
+    public float EmfLevel5Anger => Mathf.Clamp(emfLevel5Anger, EmfLevel4Anger, 100f);
+    public float AngryIdleMultiplier => Mathf.Clamp(angryIdleMultiplier, 0.1f, 1f);
+    public float HuntInteractionInterval => Mathf.Max(0.1f, huntInteractionInterval);
+    public float NormalThrowImpulse => Mathf.Max(0f, normalThrowImpulse);
+    public float HuntThrowImpulse => Mathf.Max(0f, huntThrowImpulse);
 
     [Header("Perception")]
     [SerializeField] private float visionRange = 10f;

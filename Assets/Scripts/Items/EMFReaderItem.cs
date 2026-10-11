@@ -10,13 +10,14 @@ public class EMFReaderItem : MonoBehaviour
     private int previousLevel = -1;
 
     public int CurrentLevel => currentLevel;
+    public bool HasEmfFiveReading => currentLevel == 5;
 
     private void Update()
     {
-        DetectActivity();
+        RefreshReading();
     }
 
-    private void DetectActivity()
+    public void RefreshReading()
     {
         // По умолчанию прибор ничего не обнаруживает.
         currentLevel = 1;
@@ -33,7 +34,7 @@ public class EMFReaderItem : MonoBehaviour
             GhostActivityEvent activity =
                 hit.GetComponentInParent<GhostActivityEvent>();
 
-            if (activity == null)
+            if (activity == null || !activity.IsActive)
                 continue;
 
             if (activity.EmfLevel > currentLevel)

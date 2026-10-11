@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Door : MonoBehaviour, IInteractable, IGhostInteractable
+public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
 {
     [SerializeField] private float openAngle = 90f;
     [SerializeField] private float rotationSpeed = 180f;
@@ -53,26 +53,19 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractable
         ToggleDoor();
     }
 
-    public void GhostInteract(
-        GhostInteractionContext context)
+    public bool IsOpen => isOpen;
+    public bool CanGhostInteract(GhostInteractionContext context) => isActiveAndEnabled && (!context.IsHunting || !isOpen);
+    public bool TryGhostInteract(GhostInteractionContext context)
     {
-        ToggleDoor();
+        if (!CanGhostInteract(context)) return false;
+        SetOpen(context.IsHunting || !isOpen);
+        return true;
     }
-
-    private void ToggleDoor()
+    public void GhostInteract(GhostInteractionContext context) => TryGhostInteract(context);
+    private void ToggleDoor() => SetOpen(!isOpen);
+    public void SetOpen(bool value)
     {
-        isOpen =
-            !isOpen;
-
-        if (isOpen)
-        {
-            targetRotation =
-                openRotation;
-        }
-        else
-        {
-            targetRotation =
-                closedRotation;
-        }
+        isOpen = value;
+        targetRotation = isOpen ? openRotation : closedRotation;
     }
 }

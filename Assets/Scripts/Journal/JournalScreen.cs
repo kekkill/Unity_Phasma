@@ -8,9 +8,9 @@ public class JournalScreen : MonoBehaviour
     private JournalState journal;
     private Vector2 scroll;
     private GUIStyle heading, section, text, small, activeButton;
-    private static readonly string[] evidenceNames = { "Минусовая температура", "EMF", "Ультрафиолет", "Записи в книге" };
+    private static readonly string[] evidenceNames = { "Минусовая температура", "EMF 5", "Ультрафиолет", "Записи в книге" };
     private static readonly string[] evidenceHints = {
-        "Показание термометра ниже 0 °C.", "Отмечайте наблюдения по EMF-прибору.",
+        "Показание термометра ниже 0 °C.", "Улика — только уровень 5. Уровни 2–4 означают обычную активность.",
         "След, обнаруженный УФ-фонариком.", "Письмо призрака в установленной книге." };
     private static readonly string[] markNames = { "Не проверено", "Есть", "Исключено" };
     private static readonly string[] saltNames = { "Не проверено", "Обходит вне охоты", "Оставляет следы", "Игнорирует" };

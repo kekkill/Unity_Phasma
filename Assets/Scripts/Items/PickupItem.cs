@@ -6,6 +6,7 @@ public enum PickupItemState { Dropped, Held, Placed, Stored }
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(GhostThrowableItem))]
 public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private PickupItemState state;
