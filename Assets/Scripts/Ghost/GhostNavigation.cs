@@ -24,6 +24,7 @@ public class GhostNavigation : MonoBehaviour
 
     public Vector3 RequestedDestination => requestedDestination;
     public string LastMoveResult => lastMoveResult;
+    public float StandingOffset => agent != null ? agent.baseOffset : 0f;
     public bool IsReady => agent != null && agent.enabled && agent.isOnNavMesh;
     public bool HasArrived
     {
@@ -114,6 +115,20 @@ public class GhostNavigation : MonoBehaviour
         // Rooms are convex boxes: if all corners are inside, every path segment is inside.
         foreach (Vector3 corner in candidatePath.corners)
             if (!room.ContainsPoint(corner)) return false;
+        return true;
+    }
+
+    public bool TryConfinedPoint(Room room, Vector3 position, out Vector3 point)
+    {
+        point = default;
+        return room != null && TryReachablePoint(position, out point) &&
+            room.ContainsPoint(point) && PathStaysInRoom(room);
+    }
+
+    public bool MoveWithinRoom(Room room, Vector3 position, float speed)
+    {
+        if (!TryConfinedPoint(room, position, out Vector3 point) || !MoveTo(point, speed)) return false;
+        agent.autoRepath = false;
         return true;
     }
 

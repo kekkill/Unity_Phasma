@@ -10,6 +10,55 @@ public class GhostWorldInteraction : MonoBehaviour
     private readonly Dictionary<MonoBehaviour, float> cooldowns = new Dictionary<MonoBehaviour, float>();
     private readonly List<MonoBehaviour> staleTargets = new List<MonoBehaviour>();
     private readonly List<IGhostInteractionTarget> targets = new List<IGhostInteractionTarget>();
+    [Header("Runtime diagnostics")]
+    [SerializeField] private string lastInteractionResult = "Not attempted";
+    [SerializeField] private int completedInteractions;
+    public string LastInteractionResult => lastInteractionResult;
+    public int CompletedInteractions => completedInteractions;
+
+    // Choose a real object before moving. A random empty floor point is not an activity target.
+    public bool TryFindInteractionPoint(Room room, float radius, out Vector3 point)
+    {
+        point = default;
+        GhostController owner = GetComponent<GhostController>();
+        GhostNavigation navigation = GetComponent<GhostNavigation>();
+        GhostActor actor = GetComponent<GhostActor>();
+        GhostActionRestrictions restrictions = GetComponent<GhostActionRestrictions>();
+        if (!isActiveAndEnabled || room == null || owner == null || owner.Profile == null || owner.IsHunting ||
+            navigation == null || !navigation.IsReady || (actor != null && !actor.isActiveAndEnabled) ||
+            (restrictions != null && restrictions.IsActionBlocked(GhostActionType.Interaction))) return false;
+        var context = new GhostInteractionContext(actor, owner, owner.Profile);
+        Collider[] hits = Physics.OverlapSphere(room.GetComponent<BoxCollider>().bounds.center,
+            room.GetComponent<BoxCollider>().bounds.extents.magnitude, ~0, QueryTriggerInteraction.Ignore);
+        int first = hits.Length > 0 ? Random.Range(0, hits.Length) : 0;
+        for (int index = 0; index < hits.Length; index++)
+        {
+            Collider hit = hits[(first + index) % hits.Length];
+            if (SafeZone.ContainsAny(hit.bounds.center)) continue;
+            foreach (MonoBehaviour behaviour in hit.GetComponentsInParent<MonoBehaviour>())
+            {
+                if (behaviour is not IGhostInteractionTarget target || !target.CanGhostInteract(context) ||
+                    !room.ContainsPoint(target.GhostInteractionPosition) || SafeZone.ContainsAny(target.GhostInteractionPosition) ||
+                    (cooldowns.TryGetValue(behaviour, out float until) && Time.time < until)) continue;
+                Vector3 center = hit.bounds.center;
+                Vector3 towardsGhost = Vector3.ProjectOnPlane(transform.position - center, Vector3.up).normalized;
+                if (towardsGhost.sqrMagnitude < 0.01f) towardsGhost = Vector3.forward;
+                float distance = Mathf.Min(1.25f, Mathf.Max(0.1f, radius * 0.5f));
+                for (int attempt = 0; attempt < 8; attempt++)
+                {
+                    Vector3 candidate = center + Quaternion.Euler(0f, attempt * 45f, 0f) * towardsGhost * distance;
+                    candidate.y = room.FloorCenter.y;
+                    if (!navigation.TryConfinedPoint(room, candidate, out Vector3 floorPoint)) continue;
+                    Vector3 standing = floorPoint + Vector3.up * navigation.StandingOffset;
+                    if (Vector3.Distance(standing, hit.ClosestPoint(standing)) > radius ||
+                        !CanReachCollider(hit, behaviour, standing + Vector3.up * 0.3f)) continue;
+                    point = floorPoint;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     public void ResetHuntTimer() => nextHuntInteraction = 0f;
     public void TickHunt()
     {
@@ -24,7 +73,8 @@ public class GhostWorldInteraction : MonoBehaviour
         GhostActor actor = GetComponent<GhostActor>();
         GhostActionRestrictions restrictions = GetComponent<GhostActionRestrictions>();
         if (!isActiveAndEnabled || owner == null || owner.Profile == null || (actor != null && !actor.isActiveAndEnabled) ||
-            (restrictions != null && restrictions.IsActionBlocked(GhostActionType.Interaction))) return false;
+            (restrictions != null && restrictions.IsActionBlocked(GhostActionType.Interaction)))
+        { lastInteractionResult = "Interaction unavailable or blocked"; return false; }
         var context = new GhostInteractionContext(actor, owner, owner.Profile);
         Door nearestDoor = null;
         float nearestDoorDistance = float.PositiveInfinity;
@@ -51,18 +101,25 @@ public class GhostWorldInteraction : MonoBehaviour
                 }
             }
         }
-        if (targets.Count == 0) return false;
+        if (targets.Count == 0) { lastInteractionResult = "No eligible target in reach"; return false; }
         IGhostInteractionTarget chosen = targets[Random.Range(0, targets.Count)];
         if (nearestDoor != null) chosen = nearestDoor;
         Vector3 activityPosition = chosen.GhostInteractionPosition;
-        if (!chosen.TryGhostInteract(context)) return false;
+        if (!chosen.TryGhostInteract(context)) { lastInteractionResult = "Target declined the action"; return false; }
         cooldowns[(MonoBehaviour)chosen] = Time.time + Mathf.Max(0.1f, targetCooldown);
         owner.CreateInteractionEvidenceAt(activityPosition);
+        completedInteractions++;
+        lastInteractionResult = "Completed: " + ((MonoBehaviour)chosen).name;
+        Debug.Log("Ghost interaction completed: " + ((MonoBehaviour)chosen).name + " (EMF " +
+            GhostActivityRules.EmfLevel(owner.Profile, owner.CurrentAnger, owner.IsHunting) + ")", this);
         return true;
     }
     private bool CanReachCollider(Collider target, MonoBehaviour owner)
     {
-        Vector3 origin = transform.position + Vector3.up * 0.3f;
+        return CanReachCollider(target, owner, transform.position + Vector3.up * 0.3f);
+    }
+    private bool CanReachCollider(Collider target, MonoBehaviour owner, Vector3 origin)
+    {
         Vector3 destination = target.ClosestPoint(origin);
         Vector3 delta = destination - origin;
         if (delta.sqrMagnitude < 0.0001f) return true;

@@ -37,6 +37,7 @@ public class GhostActor : MonoBehaviour
     private Room ghostRoom;
 
     private float stateEndTime;
+    private bool plannedInteraction;
 
     public bool IsHunting =>
         currentState ==
@@ -145,6 +146,7 @@ public class GhostActor : MonoBehaviour
 
         currentState =
             GhostState.Hunt;
+        plannedInteraction = false;
     }
 
     private void UpdateHunt()
@@ -167,6 +169,7 @@ public class GhostActor : MonoBehaviour
 
     private void EnterIdle()
     {
+        plannedInteraction = false;
         navigation.Stop();
         currentState =
             GhostState.Idle;
@@ -200,7 +203,13 @@ public class GhostActor : MonoBehaviour
             GhostState.Roaming;
 
         bool outsideHome = !ghostRoom.ContainsPoint(transform.position);
-        bool assigned = navigation.TryRoomDestination(ghostRoom, moveSpeed, outsideHome);
+        Vector3 interactionPoint = default;
+        plannedInteraction = !outsideHome && Random.value <=
+            GhostActivityRules.InteractionChance(interactionChance, ghostController.CurrentAnger) &&
+            GetComponent<GhostWorldInteraction>().TryFindInteractionPoint(ghostRoom, interactionRadius, out interactionPoint);
+        bool assigned = plannedInteraction && navigation.MoveWithinRoom(ghostRoom, interactionPoint, moveSpeed);
+        if (!assigned) plannedInteraction = false;
+        if (!assigned) assigned = navigation.TryRoomDestination(ghostRoom, moveSpeed, outsideHome);
         if (!assigned && outsideHome)
         {
             // A closed door must not freeze normal behavior after the hunt either.
@@ -226,7 +235,12 @@ public class GhostActor : MonoBehaviour
             EnterIdle();
             return;
         }
-        if (navigation.HasArrived) DecideNextAction();
+        if (navigation.HasStalled) { EnterIdle(); return; }
+        if (navigation.HasArrived)
+        {
+            if (plannedInteraction) TryEnterInteraction();
+            else DecideNextAction();
+        }
     }
 
     private void DecideNextAction()
@@ -268,14 +282,14 @@ public class GhostActor : MonoBehaviour
         currentState =
             GhostState.Interaction;
 
-        TryInteractWithNearbyObject();
+        bool completed = TryInteractWithNearbyObject();
 
         stateEndTime =
             Time.time +
             interactionDuration;
 
         Debug.Log(
-            "Ghost -> Interaction"
+            completed ? "Ghost -> Interaction: completed" : "Ghost -> Interaction: no accessible target"
         );
     }
 
@@ -303,7 +317,7 @@ public class GhostActor : MonoBehaviour
                 );
     }
 
-    private void TryInteractWithNearbyObject() => GetComponent<GhostWorldInteraction>().TryInteractNearby(interactionRadius);
+    private bool TryInteractWithNearbyObject() => GetComponent<GhostWorldInteraction>().TryInteractNearby(interactionRadius);
     private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, 0.3f);
     private void OnDrawGizmosSelected() => Gizmos.DrawWireSphere(transform.position, interactionRadius);
 }
