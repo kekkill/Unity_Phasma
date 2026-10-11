@@ -1,61 +1,38 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(GhostController), typeof(GhostHuntController))]
+// Rules only: the sensor detects contact; pile and trail own their own state/presentation.
+[RequireComponent(typeof(GhostController), typeof(GhostHuntController), typeof(GhostSaltContactSensor))]
+[RequireComponent(typeof(SaltFootprintTrail))]
 public class GhostSaltReaction : MonoBehaviour
 {
     private GhostController controller;
     private GhostHuntController hunt;
-    private HashSet<SaltPile> inside;
-    private Vector3 lastFootprint;
-    private int footprintsRemaining;
+    private GhostSaltContactSensor sensor;
+    private SaltFootprintTrail trail;
     private void Awake()
     {
         controller = GetComponent<GhostController>();
         hunt = GetComponent<GhostHuntController>();
-        inside = new HashSet<SaltPile>();
+        sensor = GetComponent<GhostSaltContactSensor>();
+        trail = GetComponent<SaltFootprintTrail>();
     }
-    private void Update()
+    private void OnEnable() { sensor.Contacted += OnContact; }
+    private void OnDisable() { if (sensor != null) sensor.Contacted -= OnContact; }
+    private void OnContact(SaltContact contact)
     {
-        if (controller.Profile == null) return;
-        foreach (SaltPile pile in SaltPile.Active)
+        SaltPile pile = contact.Pile;
+        if (controller.Profile == null || pile == null || !pile.IsIntact) return;
+        switch (controller.Profile.SaltResponse)
         {
-            if (pile == null) continue;
-            if (!pile.Contains(transform.position)) { inside.Remove(pile); continue; }
-            bool entered = inside.Add(pile);
-            if (!pile.IsIntact) continue;
-            if (controller.Profile.SaltResponse == GhostSaltResponse.AvoidUntilHunt && hunt.IsHunting)
-                pile.Scatter();
-            else if (entered && controller.Profile.SaltResponse == GhostSaltResponse.LeaveFootprints)
-            {
-                footprintsRemaining = 6;
-                lastFootprint = transform.position - transform.forward;
-            }
-        }
-        Vector3 difference = transform.position - lastFootprint;
-        difference.y = 0f;
-        if (footprintsRemaining > 0 && difference.magnitude > 0.35f)
-        {
-            Vector3 origin = transform.position + Vector3.up;
-            RaycastHit hit = default;
-            bool foundFloor = false;
-            foreach (RaycastHit candidate in Physics.RaycastAll(origin, Vector3.down, 3f, ~0, QueryTriggerInteraction.Ignore))
-            {
-                if (candidate.collider.GetComponent<RuntimeNavigationWorld>() == null ||
-                    (foundFloor && candidate.distance >= hit.distance)) continue;
-                hit = candidate;
-                foundFloor = true;
-            }
-            if (foundFloor)
-            {
-                GameObject print = RuntimeVisuals.Primitive(PrimitiveType.Cube, null,
-                    hit.point + Vector3.up * 0.012f, new Vector3(0.12f, 0.015f, 0.25f), Color.gray);
-                print.name = "Salt footprint";
-                print.transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
-                Destroy(print, 30f);
-            }
-            lastFootprint = transform.position;
-            footprintsRemaining--;
+            case GhostSaltResponse.AvoidUntilHunt:
+                if (hunt.IsHunting) pile.Scatter();
+                break;
+            case GhostSaltResponse.LeaveFootprints:
+                if (!contact.IsEntry) return;
+                pile.MarkSteppedOn(contact.Position, transform.forward);
+                trail.BeginTrail(sensor.FeetPosition);
+                break;
+            // Ignore: physical contact produces no observable salt reaction.
         }
     }
 }

@@ -1052,6 +1052,8 @@ GameObject:
   - component: {fileID: 513613264}
   - component: {fileID: 513613265}
   - component: {fileID: 513613266}
+  - component: {fileID: 513613267}
+  - component: {fileID: 513613268}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -6096,6 +6098,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011f00ff66e944f4a9a2ce81511da097, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMissionPresentation
+--- !u!114 &513613267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86e62b718c6047669e6de85a109d4c97, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostSaltContactSensor
+  footPoint: {fileID: 0}
+  footRadius: 0.1
+  footHeight: 0.05
+  maxSweepDistance: 2
+--- !u!114 &513613268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c33af60c6594f37b4a725a1341c884d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::SaltFootprintTrail
+  stepsPerContact: 6
+  stepDistance: 0.35
+  lifetime: 30
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
