@@ -22,6 +22,34 @@ public static class InventoryValidation
         data.FindProperty(field).objectReferenceValue = value;
         data.ApplyModifiedPropertiesWithoutUndo();
     }
+    private static void CheckResolvedKeyboardBindings(InputActionAsset source)
+    {
+        // Resolve the actual layout, not just expected strings. No input events are
+        // queued, so this isolated device cannot switch the gameplay player's slots.
+        Keyboard keyboard = null;
+        InputActionAsset isolated = null;
+        try
+        {
+            keyboard = InputSystem.AddDevice<Keyboard>("Inventory binding validation");
+            isolated = UnityEngine.Object.Instantiate(source);
+            isolated.devices = new InputDevice[] { keyboard };
+            isolated.Enable();
+            InputActionMap map = isolated.FindActionMap("Player", true);
+            Check(map.FindAction("Slot1", true).controls.Contains(keyboard.digit1Key) &&
+                map.FindAction("Slot2", true).controls.Contains(keyboard.digit2Key) &&
+                map.FindAction("Slot3", true).controls.Contains(keyboard.digit3Key) &&
+                map.FindAction("Slot1", true).controls.Contains(keyboard.numpad1Key) &&
+                map.FindAction("Slot2", true).controls.Contains(keyboard.numpad2Key) &&
+                map.FindAction("Slot3", true).controls.Contains(keyboard.numpad3Key) &&
+                map.FindAction("Drop", true).controls.Contains(keyboard.gKey),
+                "Slot actions must resolve to real top-row/numpad 1/2/3 controls and Drop to G; unresolved paths are invalid.");
+        }
+        finally
+        {
+            if (isolated != null) { isolated.Disable(); UnityEngine.Object.Destroy(isolated); }
+            if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
+        }
+    }
     private static GameObject Player(Transform root, JournalCatalog catalog, Vector3 position)
     {
         var player = new GameObject("Inventory validation player");
@@ -124,8 +152,9 @@ public static class InventoryValidation
             Check(catalog != null && catalog.TryValidate(out _), "Real journal catalog must be valid.");
             InputActionAsset controls = AssetDatabase.LoadAssetAtPath<InputActionAsset>("Assets/Input/PlayerControls.inputactions");
             InputActionMap map = controls.FindActionMap("Player", true);
-            Check(Enumerable.Range(1, 3).All(i => map.FindAction("Slot" + i, true).bindings.Any(b => b.path == "<Keyboard>/digit" + i)) &&
-                map.FindAction("Drop", true).bindings.Any(b => b.path == "<Keyboard>/q"), "Three slot keys and Q must be bound in the real asset.");
+            Check(Enumerable.Range(1, 3).All(i => map.FindAction("Slot" + i, true).bindings.Any(b => b.path == "<Keyboard>/" + i)) &&
+                map.FindAction("Drop", true).bindings.Any(b => b.path == "<Keyboard>/g"), "Three slot keys and G must be bound in the real asset.");
+            CheckResolvedKeyboardBindings(controls);
             GameObject first = Player(root.transform, catalog, new Vector3(5000f, 0f, 5000f));
             GameObject second = Player(root.transform, catalog, new Vector3(5010f, 0f, 5000f));
             PlayerItemHolder holder = first.GetComponent<PlayerItemHolder>(), other = second.GetComponent<PlayerItemHolder>();
@@ -218,7 +247,7 @@ public static class InventoryValidation
             Check(controller.TrySelectSlot(2), "Switching must resume after the journal closing frame.");
             holder.DropCurrentItem();
             Check(Dropped(saltItem) && inventory.GetItem(2) == null && inventory.Count == 1 && salt.Portions == portions - 1,
-                "Q command must release selected ownership and restore world physics without resetting portions.");
+                "Drop command must release selected ownership and restore world physics without resetting portions.");
             Check(saltItem.GetComponentInChildren<SphereCollider>().enabled &&
                 !saltItem.GetComponentsInChildren<BoxCollider>().Single(c => c.gameObject.name == "Originally disabled collider").enabled,
                 "Drop must restore original child-collider flags, including originally disabled colliders.");

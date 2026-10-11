@@ -1,6 +1,6 @@
 # Roadmap
 
-1. Validate the three-slot inventory batch locally using Docs/INVENTORY_CHECK.md and Phasma/Validate Inventory (Play Mode): slot keys/HUD, pickup/drop, stored equipment, state preservation, placement/journal guards and death/restart. Cloud syntax/asset checks passed; Unity compilation/runtime and regressions are pending. Salt-contact validation passed locally at the preceding checkpoint (30 checks), with visible imprints/trail confirmed.
+1. Validate the three-slot inventory batch locally using Docs/INVENTORY_CHECK.md and Phasma/Validate Inventory (Play Mode): slot keys/HUD, pickup/drop, stored equipment, state preservation, placement/journal guards and death/restart. Previous local InventoryValidation passed (52 checks), but manual slot keys failed. Binding paths were corrected, original G drop restored and a real control-resolution assertion added (53 checks). Cloud checks passed; corrected Unity menu/manual keyboard and regressions await local verification. Salt-contact validation passed locally at the preceding checkpoint (30 checks), with visible imprints/trail confirmed.
 2. Record local results and fix any observed regressions, then agree the next medium-sized batch.
 3. Agree distinct evidence combinations and refine instrument/evidence conditions (including future EMF-5). All three current types still share four evidence flags and differ in salt/cross behavior.
 4. Expand single-player gameplay after agreeing scope: objectives, evidence feedback, hiding/noise mechanics, map furnishing and hunt balance. Economy/progression and final audiovisual presentation are separate later decisions.
@@ -9,3 +9,5 @@
 Navigation/door recovery, death/restart and defensive items were confirmed locally by the user (defensive menu: 17 checks plus manual gameplay). JournalValidation passed locally (33 checks); the user tentatively reports gameplay works. MissionValidation passed locally (73 checks), with successful extraction shown and manual gameplay reported working. Standalone builds and multiplayer remain unverified. Baseline 9bbd013 remains intact; feature branches are not automatically merged into main.
 
 The salt-contact batch separates physical detection, profile rules, state and presentation; its contact validation passed locally (30 checks), with visible footprints confirmed. It does not implement networking or new evidence combinations.
+
+Future phones are an explicit target: keep Input System actions and gameplay state independent of keyboard/touch. Agree a separate batch for touch sticks/buttons, responsive Canvas UI, mobile URP settings and builds/profiling on devices. Current OnGUI HUD/journal/results are temporary; desktop Editor validation does not establish mobile readiness.

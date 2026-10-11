@@ -91,7 +91,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 interactionText.text =
                     currentInteractable is PickupItem && itemHolder != null && itemHolder.Inventory.IsFull
-                        ? "Инвентарь заполнен (3/3). Q — выбросить предмет"
+                        ? "Инвентарь заполнен (3/3). G — выбросить предмет"
                         : currentInteractable.InteractionPrompt;
             }
         }

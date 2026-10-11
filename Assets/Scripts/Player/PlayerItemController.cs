@@ -50,7 +50,7 @@ public class PlayerItemController : MonoBehaviour
     {
         if (!isActiveAndEnabled || inputReader.GameplayBlocked || !itemHolder.Inventory.SelectSlot(slot)) return false;
         if (placement != null) placement.Cancel();
-        // 1/2/3 together with F/R/E/Q must not act on the newly selected item.
+        // 1/2/3 together with F/R/E/G must not act on the newly selected item.
         inputReader.ConsumeItemInputForFrame();
         return true;
     }

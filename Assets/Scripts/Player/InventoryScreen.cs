@@ -44,6 +44,6 @@ public class InventoryScreen : MonoBehaviour
         for (int i = 0; i < PlayerInventory.SlotCount; i++)
             GUI.Box(new Rect(left + i * (slotWidth + 6f), top, slotWidth, 48f),
                 (i + 1) + " · " + ItemLabel(inventory.GetItem(i)), i == inventory.SelectedSlot ? selectedStyle : slotStyle);
-        GUI.Label(new Rect(left, top + 50f, width, 25f), "1 / 2 / 3 — выбрать     E — подобрать     Q — выбросить", hintStyle);
+        GUI.Label(new Rect(left, top + 50f, width, 25f), "1 / 2 / 3 — выбрать     E — подобрать     G — выбросить", hintStyle);
     }
 }
