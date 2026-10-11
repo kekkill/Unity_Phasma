@@ -12,6 +12,7 @@ public class PlayerLifeState : MonoBehaviour
     public bool IsAlive => state == PlayerLifeStatus.Alive;
     public GameSession Session => session;
     public event Action<PlayerLifeState> Died;
+    public event Action<PlayerLifeState> SessionChanged;
 
     private void OnEnable()
     {
@@ -28,6 +29,7 @@ public class PlayerLifeState : MonoBehaviour
         if (session != null) session.Unregister(this);
         session = value;
         if (isActiveAndEnabled && session != null) session.Register(this);
+        SessionChanged?.Invoke(this);
     }
 
     public bool TryDie()

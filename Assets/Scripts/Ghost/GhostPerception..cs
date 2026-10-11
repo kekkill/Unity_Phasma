@@ -56,7 +56,7 @@ public class GhostPerception : MonoBehaviour
         RefreshTarget();
         if (ghostController == null ||
             ghostController.Profile == null ||
-            target == null || !target.IsAlive)
+            target == null || !target.CanBeDetected)
         {
             canSeeTarget = false;
             canHearTarget = false;
@@ -84,7 +84,7 @@ public class GhostPerception : MonoBehaviour
 
     public void RefreshTarget()
     {
-        GhostPerceptionTarget selected = target != null && target.IsAlive ? target : null;
+        GhostPerceptionTarget selected = target != null && target.CanBeDetected ? target : null;
         if (session != null && ghostController != null && ghostController.Profile != null)
         {
             selected = null;
@@ -94,6 +94,7 @@ public class GhostPerception : MonoBehaviour
             float audibleDistance = float.PositiveInfinity;
             foreach (GhostPerceptionTarget candidate in session.LivingTargets())
             {
+                if (!candidate.CanBeDetected) continue;
                 if (candidate == target) selected = candidate;
                 float distance = (candidate.transform.position - transform.position).sqrMagnitude;
                 if (CheckVision(candidate) && distance < visibleDistance)
@@ -156,6 +157,7 @@ public class GhostPerception : MonoBehaviour
 
     private bool CheckVision(GhostPerceptionTarget candidate)
     {
+        if (candidate == null || !candidate.CanBeDetected) return false;
         Vector3 origin =
             transform.position +
             Vector3.up * eyeHeight;
@@ -218,6 +220,7 @@ public class GhostPerception : MonoBehaviour
 
     private bool CheckHearing(GhostPerceptionTarget candidate)
     {
+        if (candidate == null || !candidate.CanBeDetected) return false;
         float noiseLevel =
             candidate.NoiseLevel;
 

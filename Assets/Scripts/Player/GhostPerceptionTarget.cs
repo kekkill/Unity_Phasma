@@ -8,6 +8,8 @@ public class GhostPerceptionTarget : MonoBehaviour
     public PlayerLifeState LifeState { get; private set; }
     public bool IsAlive => isActiveAndEnabled && (LifeState == null || LifeState.IsAlive);
 
+    public bool CanBeDetected => IsAlive && !SafeZone.ContainsAny(transform.position);
+
     public Vector3 VisionPosition
     {
         get
@@ -25,7 +27,7 @@ public class GhostPerceptionTarget : MonoBehaviour
     {
         get
         {
-            if (!IsAlive || noiseEmitter == null)
+            if (!CanBeDetected || noiseEmitter == null)
             {
                 return 0f;
             }

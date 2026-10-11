@@ -13,7 +13,7 @@ public class GhostAttack : MonoBehaviour
     public bool TryAttack(GhostPerceptionTarget target)
     {
         WasRepelled = false;
-        if (target == null || !target.IsAlive || target.LifeState == null ||
+        if (target == null || !target.CanBeDetected || target.LifeState == null ||
             restrictions.IsActionBlocked(GhostActionType.Attack)) return false;
         if (Vector3.Distance(transform.position, target.transform.position) > attackRange) return false;
         Vector3 origin = transform.position + Vector3.up * attackOriginHeight;

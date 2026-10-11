@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GhostSelectionMode { Manual, RandomFromCatalog }
+
+[DefaultExecutionOrder(-100)]
 public class GhostController : MonoBehaviour
 {
     [SerializeField] private Room[] rooms;
@@ -8,6 +11,27 @@ public class GhostController : MonoBehaviour
 
     [Header("Ghost Profile")]
     [SerializeField] private GhostProfile ghostProfile;
+    [SerializeField] private GhostSelectionMode selectionMode;
+    [SerializeField] private JournalCatalog selectionCatalog;
+    [Header("Runtime selection (Play Mode)")]
+    [SerializeField] private GhostProfile activeProfile;
+
+    private void Awake() { activeProfile = null; TryInitializeProfile(out _); }
+    public bool TryInitializeProfile(out string reason)
+    {
+        if (activeProfile != null) { reason = null; return true; }
+        if (selectionMode == GhostSelectionMode.Manual)
+        {
+            activeProfile = ghostProfile;
+            reason = activeProfile != null ? null : "Assign a manual Ghost Profile.";
+            return activeProfile != null;
+        }
+        if (selectionCatalog == null || !selectionCatalog.TryValidate(out _))
+        { reason = "Assign a valid selection catalog."; return false; }
+        activeProfile = selectionCatalog.Entries[Random.Range(0, selectionCatalog.Entries.Count)].Profile;
+        reason = null;
+        return true;
+    }
 
     [Header("EMF Evidence")]
     [SerializeField] private GhostActivityEvent activityPrefab;
@@ -23,7 +47,7 @@ public class GhostController : MonoBehaviour
         ghostRoom;
 
     public GhostProfile Profile =>
-        ghostProfile;
+        activeProfile != null ? activeProfile : selectionMode == GhostSelectionMode.Manual ? ghostProfile : null;
 
     public Room FindRoomAt(Vector3 position)
     {
@@ -35,10 +59,10 @@ public class GhostController : MonoBehaviour
 
     private void Start()
     {
-        if (ghostProfile == null)
+        if (!TryInitializeProfile(out string selectionError))
         {
             Debug.LogError(
-                "GhostController: Ghost Profile is not assigned."
+                "GhostController: " + selectionError
             );
 
             return;
@@ -61,7 +85,7 @@ public class GhostController : MonoBehaviour
 
         Debug.Log(
             "Ghost type: " +
-            ghostProfile.GhostName
+            Profile.GhostName
         );
     }
 
@@ -95,7 +119,7 @@ public class GhostController : MonoBehaviour
 
             room.SetGhostRoom(
                 isSelectedRoom,
-                ghostProfile.HasFreezingEvidence
+                Profile.HasFreezingEvidence
             );
         }
 
@@ -120,7 +144,7 @@ public class GhostController : MonoBehaviour
     public void TryCreateEmfActivityAt(
         Vector3 position)
     {
-        if (!ghostProfile.HasEmfEvidence)
+        if (!Profile.HasEmfEvidence)
         {
             Debug.Log(
                 "Ghost interaction left no EMF evidence."
@@ -162,7 +186,7 @@ public class GhostController : MonoBehaviour
     public void TryCreateUltravioletTraceAt(
         Vector3 position)
     {
-        if (!ghostProfile.HasUltravioletEvidence)
+        if (!Profile.HasUltravioletEvidence)
         {
             Debug.Log(
                 "Ghost interaction left no ultraviolet evidence."

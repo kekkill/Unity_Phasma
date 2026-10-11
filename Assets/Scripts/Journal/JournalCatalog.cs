@@ -28,14 +28,22 @@ public class JournalCatalog : ScriptableObject
             if (entry != null && entry.Id == id) return entry;
         return null;
     }
+    public JournalGhostEntry FindProfile(GhostProfile profile)
+    {
+        if (profile == null) return null;
+        foreach (JournalGhostEntry entry in Entries)
+            if (entry != null && entry.Profile == profile) return entry;
+        return null;
+    }
     public bool TryValidate(out string reason)
     {
         var ids = new HashSet<string>(StringComparer.Ordinal);
+        var profiles = new HashSet<GhostProfile>();
         if (Entries.Count == 0) { reason = "Journal catalog is empty."; return false; }
         foreach (JournalGhostEntry entry in Entries)
         {
-            if (entry == null || string.IsNullOrWhiteSpace(entry.Id) || entry.Profile == null || !ids.Add(entry.Id))
-            { reason = "Each journal entry needs a unique ID and a ghost profile."; return false; }
+            if (entry == null || string.IsNullOrWhiteSpace(entry.Id) || entry.Profile == null || !ids.Add(entry.Id) || !profiles.Add(entry.Profile))
+            { reason = "Each journal entry needs a unique ID and a distinct ghost profile."; return false; }
         }
         reason = null;
         return true;
