@@ -20,10 +20,24 @@ public class PlayerInputReader : MonoBehaviour
     private InputAction placeAction;
     private InputAction journalAction;
     private InputAction closeJournalAction;
+    private readonly InputAction[] slotActions = new InputAction[PlayerInventory.SlotCount];
+    private int consumedItemFrame = -1;
     private readonly HashSet<object> gameplayBlockers = new HashSet<object>();
     private int resumeAfterFrame = -1;
     public bool HasGameplayBlockers => gameplayBlockers.Count > 0;
     public bool GameplayBlocked => HasGameplayBlockers || Time.frameCount <= resumeAfterFrame;
+    private bool ItemInputBlocked => GameplayBlocked || consumedItemFrame == Time.frameCount;
+    public void ConsumeItemInputForFrame() { consumedItemFrame = Time.frameCount; }
+    public int RequestedSlotThisFrame
+    {
+        get
+        {
+            if (GameplayBlocked) return -1;
+            for (int i = 0; i < slotActions.Length; i++)
+                if (slotActions[i] != null && slotActions[i].WasPressedThisFrame()) return i;
+            return -1;
+        }
+    }
     public void SetGameplayBlocked(object owner, bool blocked)
     {
         if (owner == null) throw new ArgumentNullException(nameof(owner));
@@ -34,12 +48,12 @@ public class PlayerInputReader : MonoBehaviour
     // Menu actions stay available while gameplay actions are blocked.
     public bool JournalPressedThisFrame => journalAction != null && journalAction.WasPressedThisFrame();
     public bool CloseJournalPressedThisFrame => closeJournalAction != null && closeJournalAction.WasPressedThisFrame();
-    public bool PlacePressedThisFrame => !GameplayBlocked && placeAction != null && placeAction.WasPressedThisFrame();
+    public bool PlacePressedThisFrame => !ItemInputBlocked && placeAction != null && placeAction.WasPressedThisFrame();
     public Vector2 MoveInput => !GameplayBlocked && moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
     public Vector2 LookInput => !GameplayBlocked && lookAction != null ? lookAction.ReadValue<Vector2>() : Vector2.zero;
-    public bool InteractPressedThisFrame => !GameplayBlocked && interactAction != null && interactAction.WasPressedThisFrame();
-    public bool UsePressedThisFrame => !GameplayBlocked && useAction != null && useAction.WasPressedThisFrame();
-    public bool DropPressedThisFrame => !GameplayBlocked && dropAction != null && dropAction.WasPressedThisFrame();
+    public bool InteractPressedThisFrame => !ItemInputBlocked && interactAction != null && interactAction.WasPressedThisFrame();
+    public bool UsePressedThisFrame => !ItemInputBlocked && useAction != null && useAction.WasPressedThisFrame();
+    public bool DropPressedThisFrame => !ItemInputBlocked && dropAction != null && dropAction.WasPressedThisFrame();
     public bool CrouchIsPressed => !GameplayBlocked && crouchAction != null && crouchAction.IsPressed();
     public bool SprintIsPressed => !GameplayBlocked && sprintAction != null && sprintAction.IsPressed();
 
@@ -53,6 +67,8 @@ public class PlayerInputReader : MonoBehaviour
         placeAction = playerActionMap.FindAction("Place", false);
         journalAction = playerActionMap.FindAction("Journal", false);
         closeJournalAction = playerActionMap.FindAction("CloseJournal", false);
+        for (int i = 0; i < slotActions.Length; i++)
+            slotActions[i] = playerActionMap.FindAction("Slot" + (i + 1), false);
 
         moveAction =
             playerActionMap.FindAction("Move", true);

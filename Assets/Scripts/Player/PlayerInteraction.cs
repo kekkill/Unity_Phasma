@@ -15,9 +15,11 @@ public class PlayerInteraction : MonoBehaviour
 
     private PlayerInputReader inputReader;
     private IInteractable currentInteractable;
+    private PlayerItemHolder itemHolder;
 
     private void Awake()
     {
+        itemHolder = GetComponent<PlayerItemHolder>();
         inputReader =
             GetComponent<PlayerInputReader>();
     }
@@ -88,7 +90,9 @@ public class PlayerInteraction : MonoBehaviour
             if (canInteract)
             {
                 interactionText.text =
-                    currentInteractable.InteractionPrompt;
+                    currentInteractable is PickupItem && itemHolder != null && itemHolder.Inventory.IsFull
+                        ? "Инвентарь заполнен (3/3). Q — выбросить предмет"
+                        : currentInteractable.InteractionPrompt;
             }
         }
 

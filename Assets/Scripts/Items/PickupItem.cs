@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-public enum PickupItemState { Dropped, Held, Placed }
+// Append Stored to preserve serialized values in existing scenes/prefabs.
+public enum PickupItemState { Dropped, Held, Placed, Stored }
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
@@ -9,6 +10,7 @@ public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private PickupItemState state;
     public PickupItemState State => state;
+    public PlayerInventory InventoryOwner { get; internal set; }
     public event Action<PickupItemState> StateChanged;
     private Collider[] colliders;
     private bool[] originalEnabled;
@@ -43,7 +45,7 @@ public class PickupItem : MonoBehaviour, IInteractable
 
     public void AttachTo(Transform holdPoint)
     {
-        itemRigidbody.isKinematic = true;
+        SuspendPhysics();
         SetColliders(false);
         SetState(PickupItemState.Held);
 
@@ -51,6 +53,35 @@ public class PickupItem : MonoBehaviour, IInteractable
 
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
+        gameObject.SetActive(true);
+    }
+
+    public void Store(Transform storage)
+    {
+        SuspendPhysics();
+        SetColliders(false);
+        SetState(PickupItemState.Stored);
+        transform.SetParent(storage, false);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        // Keep state, but suppress lights, sensing, rendering and protection.
+        gameObject.SetActive(false);
+    }
+
+    private void SuspendPhysics()
+    {
+        if (!itemRigidbody.isKinematic)
+        {
+            itemRigidbody.linearVelocity = Vector3.zero;
+            itemRigidbody.angularVelocity = Vector3.zero;
+        }
+        itemRigidbody.isKinematic = true;
+        itemRigidbody.useGravity = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (InventoryOwner != null) InventoryOwner.ForgetDestroyedItem(this);
     }
 
     public void Drop(
@@ -61,7 +92,7 @@ public class PickupItem : MonoBehaviour, IInteractable
         transform.SetParent(null);
 
         transform.position = dropPosition;
-
+        gameObject.SetActive(true);
         SetColliders(true);
         SetState(PickupItemState.Dropped);
 
@@ -75,6 +106,7 @@ public class PickupItem : MonoBehaviour, IInteractable
     }
     private void SetState(PickupItemState value)
     {
+        if (state == value) return;
         state = value;
         StateChanged?.Invoke(state);
     }
@@ -112,7 +144,8 @@ public class PickupItem : MonoBehaviour, IInteractable
     {
         transform.SetParent(null);
         transform.SetPositionAndRotation(position, rotation);
-        itemRigidbody.isKinematic = true;
+        SuspendPhysics();
+        gameObject.SetActive(true);
         SetColliders(true);
         SetState(PickupItemState.Placed);
     }

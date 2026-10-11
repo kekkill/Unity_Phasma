@@ -8,6 +8,7 @@ public class PlayerItemPlacement : MonoBehaviour
     [SerializeField, Min(0.5f)] private float maxDistance = 3f;
     private PlayerInputReader input;
     private PlayerItemHolder holder;
+    private PlayerInventory inventory;
     private GameObject preview;
     private PickupItem selected;
     private RaycastHit surface;
@@ -22,6 +23,12 @@ public class PlayerItemPlacement : MonoBehaviour
     {
         input = GetComponent<PlayerInputReader>();
         holder = GetComponent<PlayerItemHolder>();
+        inventory = GetComponent<PlayerInventory>();
+    }
+    private void OnEnable() { inventory.Changed += OnInventoryChanged; }
+    private void OnInventoryChanged()
+    {
+        if (selected != holder.CurrentItem) Cancel();
     }
     public void Begin()
     {
@@ -38,7 +45,7 @@ public class PlayerItemPlacement : MonoBehaviour
         preview = null;
         selected = null;
     }
-    private void OnDisable() { Cancel(); }
+    private void OnDisable() { if (inventory != null) inventory.Changed -= OnInventoryChanged; Cancel(); }
     private void Update()
     {
         if (input.GameplayBlocked) { if (IsPlacing) Cancel(); return; }

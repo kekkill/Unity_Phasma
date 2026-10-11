@@ -21,7 +21,7 @@ public class PlayerDeathPresentation : MonoBehaviour
     private void OnDied(PlayerLifeState player)
     {
         PlayerItemHolder holder = GetComponent<PlayerItemHolder>();
-        if (holder != null) holder.DropCurrentItem();
+        if (holder != null) holder.DropAllItems();
         foreach (Behaviour control in controlsToDisable)
             if (control != null) control.enabled = false;
         foreach (Collider collision in collisionsToDisable)

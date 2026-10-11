@@ -1,76 +1,72 @@
 using UnityEngine;
 
+// Presents the selected inventory item in the hand and releases items into the world.
+[RequireComponent(typeof(PlayerInventory))]
 public class PlayerItemHolder : MonoBehaviour
 {
     [SerializeField] private Transform holdPoint;
-
     [Header("Throw")]
     [SerializeField] private float throwForce = 4f;
     [SerializeField] private float dropForwardOffset = 0.25f;
+    private PlayerInventory inventory;
+    private PlayerInputReader input;
+    public PlayerInventory Inventory => inventory;
+    public PickupItem CurrentItem => inventory != null ? inventory.SelectedItem : null;
+    public bool HasItem => CurrentItem != null;
+    private bool CanManageItems => inventory != null && inventory.CanModify && isActiveAndEnabled &&
+        (input == null || !input.GameplayBlocked);
 
-    private PickupItem currentItem;
-
-    public PickupItem CurrentItem => currentItem;
-    public bool HasItem => currentItem != null;
+    private void Awake()
+    {
+        inventory = GetComponent<PlayerInventory>();
+        input = GetComponent<PlayerInputReader>();
+    }
+    private void OnEnable()
+    {
+        inventory.Changed += RefreshHand;
+        RefreshHand();
+    }
+    private void OnDisable() { if (inventory != null) inventory.Changed -= RefreshHand; }
+    private void RefreshHand()
+    {
+        if (CurrentItem != null && holdPoint != null) CurrentItem.AttachTo(holdPoint);
+    }
 
     public bool TryPickup(PickupItem item)
     {
-        if (HasItem || item == null || !item.isActiveAndEnabled || item.State == PickupItemState.Held)
-            return false;
-
-        currentItem = item;
-
-        currentItem.AttachTo(holdPoint);
-
-        return true;
+        return CanManageItems && holdPoint != null && inventory.TryAdd(item);
     }
 
     public void UseCurrentItem(GameObject user)
     {
-        if (currentItem == null)
-            return;
-
-        MonoBehaviour[] behaviours =
-            currentItem.GetComponents<MonoBehaviour>();
-
-        foreach (MonoBehaviour behaviour in behaviours)
-        {
-            if (behaviour is IUsableItem usableItem)
-            {
-                usableItem.Use(user);
-                return;
-            }
-        }
+        if (!CanManageItems || CurrentItem == null || CurrentItem.State != PickupItemState.Held) return;
+        foreach (MonoBehaviour behaviour in CurrentItem.GetComponents<MonoBehaviour>())
+            if (behaviour is IUsableItem usableItem) { usableItem.Use(user); return; }
     }
 
     public bool PlaceCurrentItem(Vector3 position, Quaternion rotation)
     {
-        if (currentItem == null) return false;
-        PickupItem item = currentItem;
-        currentItem = null;
+        if (!CanManageItems || !inventory.TryRemoveSelected(out PickupItem item)) return false;
         item.Place(position, rotation);
         return true;
     }
 
     public void DropCurrentItem()
     {
-        if (currentItem == null)
-            return;
+        if (!CanManageItems || holdPoint == null || !inventory.TryRemoveSelected(out PickupItem item)) return;
+        Vector3 forward = holdPoint.forward;
+        item.Drop(holdPoint.position + forward * dropForwardOffset, forward, throwForce);
+    }
 
-        PickupItem itemToDrop = currentItem;
-
-        currentItem = null;
-
-        Vector3 throwDirection = holdPoint.forward;
-
-        Vector3 dropPosition =
-            holdPoint.position +
-            throwDirection * dropForwardOffset;
-
-        itemToDrop.Drop(
-            dropPosition,
-            throwDirection,
-            throwForce
-        );
+    public void DropAllItems()
+    {
+        if (inventory == null) return;
+        Vector3 origin = holdPoint != null ? holdPoint.position : transform.position + Vector3.up;
+        Vector3 forward = holdPoint != null ? holdPoint.forward : transform.forward;
+        Vector3 right = holdPoint != null ? holdPoint.right : transform.right;
+        PickupItem[] items = inventory.ReleaseAll();
+        for (int i = 0; i < items.Length; i++)
+            if (items[i] != null)
+                items[i].Drop(origin + forward * dropForwardOffset + right * ((i - 1) * 0.25f), forward, 0f);
     }
 }
