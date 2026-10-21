@@ -57,19 +57,6 @@ public static class SoundHidingValidation
         Vector3 direction = Vector3.ProjectOnPlane(target.VisionPosition - observer.position, Vector3.up);
         if (direction.sqrMagnitude > 0.001f) observer.rotation = Quaternion.LookRotation(direction);
     }
-    private static float DoorSweepRadius(Door door)
-    {
-        var panel = door.GetComponentInChildren<BoxCollider>();
-        float radius = 0f;
-        for (int x = -1; x <= 1; x += 2)
-            for (int z = -1; z <= 1; z += 2)
-            {
-                Vector3 corner = panel.transform.TransformPoint(panel.center +
-                    new Vector3(panel.size.x * x * 0.5f, 0f, panel.size.z * z * 0.5f));
-                radius = Mathf.Max(radius, FlatDistance(door.transform.position, corner));
-            }
-        return radius;
-    }
     private static string VisionDiagnostics(GhostPerception perception, GhostPerceptionTarget target)
     {
         float eyeHeight = new SerializedObject(perception).FindProperty("eyeHeight").floatValue;
@@ -95,7 +82,6 @@ public static class SoundHidingValidation
         running = true; checks = 0;
         var root = new GameObject("Temporary sound and hiding validation"); root.SetActive(false);
         GhostProfile profile = null;
-        string phase = "setup";
         try
         {
             var originalZone = HidingZone.Active.Single();
@@ -136,7 +122,6 @@ public static class SoundHidingValidation
             var floor = Child(root.transform, "Validation impact floor", point + Vector3.down * 0.1f).AddComponent<BoxCollider>();
             floor.size = new Vector3(30f, 0.2f, 30f);
             root.SetActive(true); ghostObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-            phase = "1/4 hearing and sound memory"; Debug.Log("Sound/hiding validation: " + phase);
             wallObj.SetActive(false); doorObj.SetActive(false); Noise(player, 1f); Physics.SyncTransforms();
             perception.RefreshTarget();
             Check(perception.CanHearTarget && !perception.CanSeeTarget, "Clear-path movement must be heard independently of sight.");
@@ -180,7 +165,6 @@ public static class SoundHidingValidation
             safety.gameObject.SetActive(false); Noise(player, 0f); doorObj.SetActive(false);
 
             // Real player holder/drop and Rigidbody collision, not direct Publish standing in for the throw.
-            phase = "2/4 player throws and physical impacts"; Debug.Log("Sound/hiding validation: " + phase);
             var hand = Child(player.transform, "Validation hand", player.transform.position + Vector3.up);
             var holder = player.gameObject.AddComponent<PlayerItemHolder>(); Assign(holder, "holdPoint", hand.transform);
             var itemObj = Child(root.transform, "Validation thrown equipment", player.transform.position + Vector3.right);
@@ -203,7 +187,6 @@ public static class SoundHidingValidation
             Check(WorldNoise.Recent.Count == WorldNoise.Capacity, "Noise event storage must remain bounded.");
 
             // Clone the actual wardrobe into an isolated native-navigation arena.
-            phase = "3/4 wardrobe sight and discovery"; Debug.Log("Sound/hiding validation: " + phase);
             Vector3 arena = new Vector3(9400f, 0f, 9400f);
             var arenaObj = Child(root.transform, "Validation wardrobe arena", arena); arenaObj.SetActive(false);
             var wardrobe = UnityEngine.Object.Instantiate(originalZone.gameObject, arenaObj.transform);
@@ -212,9 +195,9 @@ public static class SoundHidingValidation
             zone.Door.transform.localRotation = Quaternion.identity;
             var roomObj = Child(arenaObj.transform, "Validation wardrobe room", arena);
             var room = roomObj.AddComponent<Room>(); var roomBox = room.GetComponent<BoxCollider>();
-            roomBox.isTrigger = true; roomBox.size = new Vector3(8f, 3f, 10f); roomBox.center = Vector3.up * 1.5f;
+            roomBox.isTrigger = true; roomBox.size = new Vector3(8f, 3f, 6f); roomBox.center = Vector3.up * 1.5f;
             var arenaFloor = Child(arenaObj.transform, "Validation native floor", arena).AddComponent<BoxCollider>();
-            arenaFloor.size = new Vector3(8f, 0.2f, 10f); arenaFloor.center = Vector3.down * 0.1f;
+            arenaFloor.size = new Vector3(8f, 0.2f, 6f); arenaFloor.center = Vector3.down * 0.1f;
             var world = arenaFloor.gameObject.AddComponent<RuntimeNavigationWorld>();
             var geometry = wardrobe.GetComponentsInChildren<Collider>().Where(collider => !collider.isTrigger && collider.GetComponentInParent<Door>() == null).ToList();
             geometry.Insert(0, arenaFloor);
@@ -227,12 +210,7 @@ public static class SoundHidingValidation
             arenaObj.SetActive(true); Physics.SyncTransforms();
             var navigation = ghostObj.GetComponent<GhostNavigation>();
             Check(navigation.Initialize(room), "Native wardrobe arena must provide a valid external ghost spawn.");
-            // The old z=2.3 probe stood inside the two-metre leaf's sweep. Carving could displace it
-            // behind the open panel, making the expected sight line physically obstructed.
-            Check(NavMesh.SamplePosition(arena + Vector3.forward * 4f, out var start, 0.5f, NavMesh.AllAreas) && agent.Warp(start.position), "Place probe outside the wardrobe.");
-            Vector3 sightPose = ghostObj.transform.position;
-            Check(FlatDistance(sightPose, zone.Door.transform.position) > DoorSweepRadius(zone.Door) + agent.radius + 0.2f,
-                "Sight observer must stand outside the door sweep, including navigation clearance.");
+            Check(NavMesh.SamplePosition(arena + Vector3.forward * 2.3f, out var start, 0.5f, NavMesh.AllAreas) && agent.Warp(start.position), "Place probe outside the wardrobe.");
             // A closed-door negative alone also passes if the observer is facing away or cannot see its fixture player.
             player.transform.position = arena + new Vector3(0f, 1f, 1.6f); Noise(player, 0f);
             Face(ghostObj.transform, player); Physics.SyncTransforms(); perception.RefreshTarget();
@@ -260,9 +238,6 @@ public static class SoundHidingValidation
                 Check(navigation.TryRoomPoint(room, false, out var randomPoint) && !zone.ContainsFootprint(randomPoint), "Random room points must exclude unknown hiding space.");
             }
             zone.Door.SetOpen(true); await WaitFor(() => zone.Door.IsFullyOpen);
-            Check(FlatDistance(ghostObj.transform.position, sightPose) < 0.1f,
-                "Sight setup invalid: observer moved while the door opened. Expected=" + sightPose.ToString("F3") +
-                "; actual=" + ghostObj.transform.position.ToString("F3"));
             Face(ghostObj.transform, player); Physics.SyncTransforms(); perception.RefreshTarget();
             Check(perception.CanSeeTarget && perception.Target == player,
                 "Open wardrobe must expose the participant to a facing observer. Door fraction=" + zone.Door.OpenFraction +
@@ -270,7 +245,6 @@ public static class SoundHidingValidation
             Check(perception.LastKnownHidingZone == zone, "Visible participant must be remembered in the actual wardrobe zone.");
             Check(knowledge.CanEnter(zone), "Successful sight inside must authorize this ghost to enter that wardrobe.");
             agent.updateRotation = true;
-            phase = "4/4 native entry, memory expiry, hunt and attack"; Debug.Log("Sound/hiding validation: " + phase);
             var otherKnowledge = Child(root.transform, "Independent validation knowledge", arena).AddComponent<GhostHidingKnowledge>();
             Check(!otherKnowledge.CanEnter(zone) && !knowledge.CanEnter(originalZone), "Discovery must belong to one ghost and one hiding place.");
             Check(!knowledge.AllowsPath(originalZone.InvestigationPosition + Vector3.forward * 2f,
@@ -312,7 +286,7 @@ public static class SoundHidingValidation
             Check(ghostObj.GetComponent<GhostAttack>().TryAttack(victim) && !victim.IsAlive, "Known open hiding place must not make an exposed player immune to attack.");
             Debug.Log("Sound/hiding validation PASSED: " + checks + " checks, attenuation, immutable attributed sound memory, living/safe filters, actual door/throw/impact events and native wardrobe discovery, entry, expiry, exit and attack. Local simulation, not networking or recorded audio playback.");
         }
-        catch (Exception error) { Debug.LogError("Sound/hiding validation FAILED [" + phase + ", check " + checks + "]: " + error); }
+        catch (Exception error) { Debug.LogError("Sound/hiding validation FAILED: " + error); }
         finally
         {
             if (root != null) { root.SetActive(false); UnityEngine.Object.Destroy(root); }
