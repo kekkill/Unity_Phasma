@@ -1,4 +1,7 @@
+using System;
 using UnityEngine;
+
+public enum HuntPhase { Inactive, Warning, Active }
 
 [RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch), typeof(GhostAttack))]
 [RequireComponent(typeof(GhostWorldInteraction))]
@@ -14,6 +17,12 @@ public class GhostHuntController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool isHunting;
     [SerializeField] private HuntMode currentMode;
+    [SerializeField] private HuntSequenceProfile sequenceProfile;
+    [SerializeField] private HuntPhase phase;
+    private float warningEndTime;
+    public HuntPhase Phase => isHunting ? phase : HuntPhase.Inactive;
+    public HuntSequenceProfile SequenceProfile => sequenceProfile;
+    public event Action<bool> HuntStateChanged;
 
     [SerializeField] private Vector3 searchCenter;
     [SerializeField] private Vector3 searchTargetPosition;
@@ -106,7 +115,7 @@ public class GhostHuntController : MonoBehaviour
 
     public bool BeginHunt()
     {
-        if (!navigation.IsReady || Time.time < repelledUntil) return false;
+        if (isHunting || !isActiveAndEnabled || !navigation.IsReady || Time.time < repelledUntil) return false;
         if (ghostController == null ||
             ghostController.Profile == null ||
             ghostPerception == null ||
@@ -123,13 +132,32 @@ public class GhostHuntController : MonoBehaviour
         isHunting =
             true;
 
+        float warning = sequenceProfile != null ? sequenceProfile.WarningDuration : 0f;
+        warningEndTime = Time.time + warning;
+        phase = warning > 0f ? HuntPhase.Warning : HuntPhase.Active;
+
         huntEndTime =
-            Time.time +
+            warningEndTime +
             ghostController.Profile.MaxHuntDuration;
 
         ghostAggression.BeginHunt();
+        navigation.Stop();
+        HuntStateChanged?.Invoke(true);
         GetComponent<GhostWorldInteraction>().ResetHuntTimer();
         GetComponent<GhostActivityEmitter>()?.RefreshHuntSignal();
+
+        if (phase == HuntPhase.Warning)
+        {
+            Debug.Log("Ghost Hunt -> Warning (entrance locked, attacks delayed)", this);
+            return true;
+        }
+        StartPursuit();
+        return true;
+    }
+
+    private void StartPursuit()
+    {
+        phase = HuntPhase.Active;
 
         if (ghostPerception.CanSeeTarget)
         {
@@ -146,7 +174,6 @@ public class GhostHuntController : MonoBehaviour
             "Ghost -> HUNT"
         );
 
-        return true;
     }
 
     public bool UpdateHunt()
@@ -154,6 +181,12 @@ public class GhostHuntController : MonoBehaviour
         if (!isHunting)
         {
             return false;
+        }
+
+        if (phase == HuntPhase.Warning)
+        {
+            if (Time.time < warningEndTime) return true;
+            StartPursuit();
         }
 
         bool killedPlayer = attack.TryAttack(ghostPerception.Target);
@@ -251,7 +284,7 @@ public class GhostHuntController : MonoBehaviour
     {
         searchingBlockedTarget = false;
         wasHearingTarget = false;
-        roomSearch.Stop();
+        if (roomSearch != null) roomSearch.Stop();
         currentMode =
             HuntMode.Chase;
 
@@ -374,22 +407,25 @@ public class GhostHuntController : MonoBehaviour
     private void FinishHunt()
     {
         approachingHidingPlace = false;
-        roomSearch.Stop();
+        if (roomSearch != null) roomSearch.Stop();
         searchingBlockedTarget = false;
         wasHearingTarget = false;
         isHunting =
             false;
+        phase = HuntPhase.Inactive;
         GetComponent<GhostActivityEmitter>()?.StopHuntSignal();
 
-        ghostAggression
-            .EndHuntAndStartRecovery();
+        if (ghostAggression != null) ghostAggression.EndHuntAndStartRecovery();
 
         ScheduleNextHuntCheck();
+        HuntStateChanged?.Invoke(false);
 
         Debug.Log(
             "Ghost Hunt ended."
         );
     }
+
+    private void OnDisable() { if (isHunting) FinishHunt(); }
 
     private void ScheduleNextHuntCheck()
     {
@@ -412,7 +448,7 @@ public class GhostHuntController : MonoBehaviour
             );
 
         float delay =
-            Random.Range(
+            UnityEngine.Random.Range(
                 minimum,
                 maximum
             );

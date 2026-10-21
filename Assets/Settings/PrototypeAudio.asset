@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32e0195251c34655aea9a4b31d13cc26, type: 3}
+  m_Name: PrototypeAudio
+  m_EditorClassIdentifier: Assembly-CSharp::PrototypeAudioProfile
+  playerStep: {fileID: 8300000, guid: 3a510c3a84bf4808868b69b0fb880e9e, type: 3}
+  ghostStep: {fileID: 8300000, guid: 26dc46ffbeb04dd49bdbdde6d6f73582, type: 3}
+  ghostLoop: {fileID: 8300000, guid: b53fdde4f18d48d2afe8b0ce2f3e02b4, type: 3}
+  huntStart: {fileID: 8300000, guid: d2ce769491964e09abded3b86b836ff9, type: 3}
+  huntEnd: {fileID: 8300000, guid: db3047a6b2f54b5dab829ca166249be5, type: 3}
+  doorOpen: {fileID: 8300000, guid: 02cc80cdd4e24ded8a53f2c485263a61, type: 3}
+  doorClose: {fileID: 8300000, guid: 3ff14cc6588f4b76a10de5c57688c4a8, type: 3}
+  itemThrow: {fileID: 8300000, guid: bd8d8f89da944e50ab09bf7e21936971, type: 3}
+  impact: {fileID: 8300000, guid: 5a76dd9cf0ae45aa8e48ac944d742c1f, type: 3}
+  masterVolume: 0.7
+  ghostVoiceVolume: 0.45
+  playerStride: 1.4
+  ghostStride: 0.95
+  maxOneShotVoices: 12
+  minimumDistance: 1.2
+  maximumDistance: 18

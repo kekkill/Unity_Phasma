@@ -27,6 +27,7 @@ public class GhostThrowableItem : MonoBehaviour, IGhostInteractionTarget
         GetComponent<ThrownItemNoise>()?.Disarm();
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         body.AddForce(direction * impulse, ForceMode.Impulse);
+        GetComponent<PickupItem>()?.NotifyThrown();
         return true;
     }
     public void GhostInteract(GhostInteractionContext context) => TryGhostInteract(context);

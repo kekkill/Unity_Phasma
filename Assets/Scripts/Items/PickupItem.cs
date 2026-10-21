@@ -7,6 +7,7 @@ public enum PickupItemState { Dropped, Held, Placed, Stored }
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(GhostThrowableItem), typeof(ThrownItemNoise))]
+[RequireComponent(typeof(ItemAudio))]
 public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private PickupItemState state;
@@ -14,6 +15,8 @@ public class PickupItem : MonoBehaviour, IInteractable
     public PickupItemState State => state;
     public PlayerInventory InventoryOwner { get; internal set; }
     public event Action<PickupItemState> StateChanged;
+    public event Action Thrown;
+    internal void NotifyThrown() => Thrown?.Invoke();
     private Collider[] colliders;
     private bool[] originalEnabled;
     private Rigidbody itemRigidbody;
@@ -108,6 +111,7 @@ public class PickupItem : MonoBehaviour, IInteractable
             throwDirection.normalized * throwForce,
             ForceMode.Impulse
         );
+        if (throwForce > 0f) NotifyThrown();
     }
     private void SetState(PickupItemState value)
     {

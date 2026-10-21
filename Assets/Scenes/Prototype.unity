@@ -268,6 +268,7 @@ GameObject:
   - component: {fileID: 277929993}
   - component: {fileID: 50040000}
   - component: {fileID: 64000000}
+  - component: {fileID: 67000010}
   m_Layer: 0
   m_Name: EMFReader
   m_TagString: Untagged
@@ -519,6 +520,7 @@ GameObject:
   - component: {fileID: 331973596}
   - component: {fileID: 50040001}
   - component: {fileID: 64000001}
+  - component: {fileID: 67000011}
   m_Layer: 0
   m_Name: ProtectionWard
   m_TagString: Untagged
@@ -1324,6 +1326,7 @@ GameObject:
   - component: {fileID: 633607404}
   - component: {fileID: 633607405}
   - component: {fileID: 64000002}
+  - component: {fileID: 67000000}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -2744,6 +2747,7 @@ GameObject:
   - component: {fileID: 1944482477}
   - component: {fileID: 50040002}
   - component: {fileID: 64000003}
+  - component: {fileID: 67000012}
   m_Layer: 0
   m_Name: GhostWritingBook
   m_TagString: Untagged
@@ -2914,6 +2918,7 @@ GameObject:
   - component: {fileID: 1964078697}
   - component: {fileID: 50040003}
   - component: {fileID: 64000004}
+  - component: {fileID: 67000013}
   m_Layer: 0
   m_Name: UVFlashlight
   m_TagString: Untagged
@@ -3146,6 +3151,7 @@ GameObject:
   - component: {fileID: 1988192544}
   - component: {fileID: 50040004}
   - component: {fileID: 64000005}
+  - component: {fileID: 67000014}
   m_Layer: 0
   m_Name: FlashLight
   m_TagString: Untagged
@@ -3366,6 +3372,7 @@ GameObject:
   - component: {fileID: 2097593008}
   - component: {fileID: 50040005}
   - component: {fileID: 64000006}
+  - component: {fileID: 67000015}
   m_Layer: 0
   m_Name: Thermometer
   m_TagString: Untagged
@@ -3534,6 +3541,7 @@ GameObject:
   - component: {fileID: 2107965710}
   - component: {fileID: 50040006}
   - component: {fileID: 64000007}
+  - component: {fileID: 67000016}
   m_Layer: 0
   m_Name: MotionSensor
   m_TagString: Untagged
@@ -5226,3 +5234,99 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94020ba2c31e4bfab4666ffdd2d575af, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::GhostHidingInvestigation
+--- !u!114 &67000000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633607403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 533586ed08024a28b15980155900f054, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::DoorAudio
+--- !u!114 &67000010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277929988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331973595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944482476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964078696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1988192537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2097593001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio
+--- !u!114 &67000016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107965709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6cbc5de51e410c938b28d91c3a4108, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAudio

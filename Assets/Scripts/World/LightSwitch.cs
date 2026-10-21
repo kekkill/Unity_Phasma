@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
@@ -9,6 +10,15 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
     [SerializeField] private float offAngle = 20f;
 
     private bool isOn;
+    private readonly HashSet<object> suppressors = new HashSet<object>();
+    public bool IsOn => isOn;
+    public void SetSuppressed(object owner, bool suppressed)
+    {
+        if (owner == null) return;
+        if (suppressed) suppressors.Add(owner); else suppressors.Remove(owner);
+        ApplyLight();
+    }
+    private void ApplyLight() { if (targetLight != null) targetLight.enabled = isOn && suppressors.Count == 0; }
 
     public string InteractionPrompt =>
         isOn
@@ -48,11 +58,7 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
         isOn =
             !isOn;
 
-        if (targetLight != null)
-        {
-            targetLight.enabled =
-                isOn;
-        }
+        ApplyLight();
 
         UpdateVisual();
     }

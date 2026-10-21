@@ -4,6 +4,8 @@ Run: PYTHONPATH=/tmp/phasma-syntax-tools python Tools/check_assets.py
 from pathlib import Path
 import json
 import re
+import struct
+import wave
 import yaml
 from tree_sitter import Language, Parser
 import tree_sitter_c_sharp
@@ -54,21 +56,41 @@ for scene in ['Prototype', 'RoomSearchPrototype']:
         assert data['m_EditorClassIdentifier'] == 'Assembly-CSharp::' + cls
     pickup_guid = re.search('guid: (\\w+)', (assets / 'Scripts/Items/PickupItem.cs.meta').read_text())[1]
     noise_guid = re.search('guid: (\\w+)', (assets / 'Scripts/Items/ThrownItemNoise.cs.meta').read_text())[1]
+    item_audio_guid = re.search('guid: (\\w+)', (assets / 'Scripts/Audio/ItemAudio.cs.meta').read_text())[1]
+    door_guid = re.search('guid: (\\w+)', (assets / 'Scripts/World/Door.cs.meta').read_text())[1]
+    door_audio_guid = re.search('guid: (\\w+)', (assets / 'Scripts/Audio/DoorAudio.cs.meta').read_text())[1]
     components = [obj['MonoBehaviour'] for obj in objects.values() if 'MonoBehaviour' in obj]
     for pickup in [data for data in components if data['m_Script']['guid'] == pickup_guid]:
         assert any(data['m_GameObject'] == pickup['m_GameObject'] and data['m_Script']['guid'] == noise_guid for data in components)
+        assert any(data['m_GameObject'] == pickup['m_GameObject'] and data['m_Script']['guid'] == item_audio_guid for data in components)
+    for door in [data for data in components if data['m_Script']['guid'] == door_guid]:
+        assert any(data['m_GameObject'] == door['m_GameObject'] and data['m_Script']['guid'] == door_audio_guid for data in components)
     if scene == 'RoomSearchPrototype':
         zone = mono(65000003)
         assert zone['door']['fileID'] == 65000102 and zone['approachPoint']['fileID'] == 65000051
         assert objects[65000002]['BoxCollider']['m_IsTrigger'] == 1
         nav = mono(1971981892)
         assert {65000014, 65000024, 65000034, 65000044}.issubset({ref['fileID'] for ref in nav['geometry']})
-        assert {1556033313, 65000114} == {ref['fileID'] for ref in nav['movingObstacles']}
+        assert {1556033313, 65000114, 66000014} == {ref['fileID'] for ref in nav['movingObstacles']}
         assert mono(65000102)['initiallyOpen'] == 0 and mono(65000102)['openAngle'] == -90
         # Closet root/body remain inside the Bedroom's existing six-metre footprint.
         position = objects[65000001]['Transform']['m_LocalPosition']
         assert -8 < position['x'] - 1.075 and position['x'] + 1.075 < -2
         assert -3 < position['z'] - 1.075 and position['z'] + 1.075 < 3
+        # Stationary seal and rotating leaf have different parents: opening cannot rotate the seal away.
+        assert mono(66000002)['leafPivot']['fileID'] == 66000031 and mono(66000002)['initiallyOpen'] == 1
+        assert objects[66000021]['Transform']['m_Father']['fileID'] == 66000001
+        assert objects[66000011]['Transform']['m_Father']['fileID'] == 66000031
+        barrier = objects[66000022]['BoxCollider']
+        assert barrier['m_Enabled'] == 0 and barrier['m_IsTrigger'] == 0
+        assert barrier['m_Size']['x'] >= 2 and barrier['m_Size']['y'] >= 3
+        assert mono(66000102)['entrance']['fileID'] == 66000002 and mono(66000102)['exitBarrier']['fileID'] == 66000022
+        assert mono(66000102)['session']['fileID'] == 50010002
+        assert {ref['fileID'] for ref in mono(66000102)['roomLights']} == {2017521005, 60010006}
+        assert mono(513613274)['hunt']['fileID'] == 513613261
+        assert mono(1277915033)['m_GameObject']['fileID'] == 1277915010
+        for reference in [mono(66000202)['profile'], mono(513613261)['sequenceProfile']]:
+            assert reference['guid'] in guids and reference['fileID'] == 11400000
     print(f'{scene}: {len(objects)} unique objects; local references, owners and sound/hiding wiring passed.')
 
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
@@ -80,5 +102,20 @@ for name, path in [('Drop', '<Keyboard>/g'), ('Interact', '<Keyboard>/e'), ('Use
 for path in (assets / 'Editor').glob('*.cs'):
     for reference in re.findall(r'LoadAssetAtPath<\w+>\("([^"]+)"\)', path.read_text()):
         assert (root / reference).exists(), f'Missing validation asset: {reference}'
+assert not (assets / 'Editor/SoundHidingValidation.cs').exists(), 'Removed fixture must stay removed.'
+audio_profile = yaml.safe_load((assets / 'Settings/PrototypeAudio.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
+for field in ['playerStep', 'ghostStep', 'ghostLoop', 'huntStart', 'huntEnd', 'doorOpen', 'doorClose', 'itemThrow', 'impact']:
+    reference = audio_profile[field]
+    assert reference['fileID'] == 8300000 and reference['guid'] in guids, f'Missing clip: {field}'
+    clip = Path(str(guids[reference['guid']])[:-5])
+    with wave.open(str(clip), 'rb') as stream:
+        assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (1, 2, 24000)
+        pcm = stream.readframes(stream.getnframes())
+    samples = struct.unpack('<' + 'h' * (len(pcm) // 2), pcm)
+    assert 0 < max(abs(value) for value in samples) < 32767 and samples[0] == 0, f'Empty/clipped clip: {clip}'
+assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav')) < 512 * 1024
+sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
+assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
+print('Hunt entrance/lighting/audio links and nine bounded mono PCM clips passed.')
 print(f'{len(sources)} C# files parsed; {len(guids)} unique GUIDs; input, area IDs and validation asset paths passed.')
 print('Static checks only. Unity compilation, Editor validations, physics, NavMesh and gameplay are NOT run by this script.')
