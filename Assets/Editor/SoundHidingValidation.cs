@@ -83,6 +83,8 @@ public static class SoundHidingValidation
             var perception = ghostObj.AddComponent<GhostPerception>(); perception.enabled = false;
             Assign(perception, "target", player); Assign(perception, "session", session);
             var hunt = ghostObj.AddComponent<GhostHuntController>();
+            // This phase has no NavMesh. Enable the agent through Initialize only after the arena is built.
+            var agent = ghostObj.GetComponent<NavMeshAgent>(); agent.enabled = false;
             var hearing = ghostObj.GetComponent<GhostHearing>();
             var knowledge = ghostObj.GetComponent<GhostHidingKnowledge>();
             var wallObj = Child(root.transform, "Validation acoustic wall", point + new Vector3(0f, 1.3f, 2f));
@@ -185,7 +187,6 @@ public static class SoundHidingValidation
             arenaObj.SetActive(true); Physics.SyncTransforms();
             var navigation = ghostObj.GetComponent<GhostNavigation>();
             Check(navigation.Initialize(room), "Native wardrobe arena must provide a valid external ghost spawn.");
-            var agent = ghostObj.GetComponent<NavMeshAgent>();
             Check(NavMesh.SamplePosition(arena + Vector3.forward * 2.3f, out var start, 0.5f, NavMesh.AllAreas) && agent.Warp(start.position), "Place probe outside the wardrobe.");
             ghostObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             player.transform.position = arena + Vector3.up; Noise(player, 0f); Physics.SyncTransforms(); perception.RefreshTarget();
@@ -194,8 +195,14 @@ public static class SoundHidingValidation
             var context = new GhostInteractionContext(null, controller, profile, true);
             Check(!zone.Door.TryGhostInteract(context), "Random hunt interaction cannot open an unknown wardrobe.");
             Check(!ghostObj.GetComponent<GhostAttack>().TryAttack(player), "Attack must independently protect undiscovered hiding space.");
-            Check(NavMesh.SamplePosition(zone.InvestigationPosition, out var interior, 0.5f, NavMesh.AllAreas) &&
-                (interior.mask & (1 << NavMesh.GetAreaFromName("Hiding"))) != 0, "Wardrobe interior must have its real Hiding NavMesh area.");
+            // InvestigationPosition is a standing-body target 0.6m above the floor, not a ground probe.
+            Vector3 floorProbe = zone.transform.TransformPoint(zone.Volume.center - Vector3.up * (zone.Volume.size.y * 0.5f));
+            Check(NavMesh.SamplePosition(floorProbe + Vector3.up * 0.1f, out var interior, 0.35f, NavMesh.AllAreas),
+                "Wardrobe floor has no nearby NavMesh. Floor position: " + floorProbe.ToString("F3"));
+            Check(zone.ContainsFootprint(interior.position) &&
+                (interior.mask & (1 << NavMesh.GetAreaFromName("Hiding"))) != 0,
+                "Wardrobe floor must have its real Hiding NavMesh area. Sample: " + interior.position.ToString("F3") +
+                "; area mask: " + interior.mask + "; expected Hiding mask: " + (1 << NavMesh.GetAreaFromName("Hiding")));
             for (int i = 0; i < 5; i++)
             {
                 Check(navigation.TryRoomPoint(room, false, out var randomPoint) && !zone.ContainsFootprint(randomPoint), "Random room points must exclude unknown hiding space.");
