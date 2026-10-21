@@ -55,7 +55,7 @@ public class PlayerItemHolder : MonoBehaviour
     {
         if (!CanManageItems || holdPoint == null || !inventory.TryRemoveSelected(out PickupItem item)) return;
         Vector3 forward = holdPoint.forward;
-        item.Drop(holdPoint.position + forward * dropForwardOffset, forward, throwForce);
+        item.Drop(holdPoint.position + forward * dropForwardOffset, forward, throwForce, GetComponent<GhostPerceptionTarget>());
     }
 
     public void DropAllItems()

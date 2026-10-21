@@ -38,6 +38,7 @@ public class GhostWorldInteraction : MonoBehaviour
             foreach (MonoBehaviour behaviour in hit.GetComponentsInParent<MonoBehaviour>())
             {
                 if (behaviour is not IGhostInteractionTarget target || !target.CanGhostInteract(context) ||
+                    !AllowsHidingInteraction(target.GhostInteractionPosition) ||
                     !room.ContainsPoint(target.GhostInteractionPosition) || SafeZone.ContainsAny(target.GhostInteractionPosition) ||
                     (cooldowns.TryGetValue(behaviour, out float until) && Time.time < until)) continue;
                 Vector3 center = hit.bounds.center;
@@ -89,6 +90,7 @@ public class GhostWorldInteraction : MonoBehaviour
             foreach (MonoBehaviour behaviour in hit.GetComponentsInParent<MonoBehaviour>())
             {
                 if (behaviour is not IGhostInteractionTarget target || targets.Contains(target) ||
+                    !AllowsHidingInteraction(target.GhostInteractionPosition) ||
                     !target.CanGhostInteract(context) || cooldowns.ContainsKey(behaviour) ||
                     SafeZone.ContainsAny(target.GhostInteractionPosition) || !CanReachCollider(hit, behaviour)) continue;
                 // Hunt policy is enforced here too, so future targets cannot accidentally add new hunt evidence.
@@ -117,6 +119,12 @@ public class GhostWorldInteraction : MonoBehaviour
     private bool CanReachCollider(Collider target, MonoBehaviour owner)
     {
         return CanReachCollider(target, owner, transform.position + Vector3.up * 0.3f);
+    }
+    private bool AllowsHidingInteraction(Vector3 position)
+    {
+        HidingZone zone = HidingZone.FindAt(position);
+        GhostHidingKnowledge knowledge = GetComponent<GhostHidingKnowledge>();
+        return zone == null || (knowledge != null && knowledge.CanEnter(zone));
     }
     private bool CanReachCollider(Collider target, MonoBehaviour owner, Vector3 origin)
     {

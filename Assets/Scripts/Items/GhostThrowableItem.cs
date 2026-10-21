@@ -24,6 +24,7 @@ public class GhostThrowableItem : MonoBehaviour, IGhostInteractionTarget
         float impulse = context.IsHunting ? context.Profile.HuntThrowImpulse : context.Profile.NormalThrowImpulse;
         if (impulse <= 0f) return false;
         Rigidbody body = GetComponent<Rigidbody>();
+        GetComponent<ThrownItemNoise>()?.Disarm();
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         body.AddForce(direction * impulse, ForceMode.Impulse);
         return true;

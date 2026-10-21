@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-10-11.
+Updated: 2026-10-21.
 
 ## Scope and baseline
 Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile controls, responsive UI and device builds/performance are not implemented/verified yet. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Current gameplay scene: Assets/Scenes/RoomSearchPrototype.unity. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
@@ -48,7 +48,7 @@ Inventory local result and correction, 2026-10-11: user supplied `Inventory vali
 Inventory correction local follow-up, 2026-10-11: the user reports "теперь все работает" after corrected slot bindings and restoration of G. Treat manual inventory behavior as reported working; no screenshot/log of the revised 53-check menu was supplied, so that rerun remains unconfirmed. The next evidence/activity batch was approved and is recorded below.
 
 
-## Current batch: anger-driven EMF and hunt interactions
+## Previous batch: anger-driven EMF and hunt interactions
 
 Branch: feature/anger-emf-hunt-interactions. User approved EMF-5 as the evidence signature, deterministic anger-based levels, maximum hunt activity limited to doors/dropped equipment/EMF and no new UV during hunts. The preceding agreed scope also includes distinct catalog evidence combinations and instrument readouts.
 
@@ -70,3 +70,18 @@ Normal-activity follow-up, 2026-10-11: user provided a gameplay log identifying 
 Correction on the same feature branch: Kitchen receives its own cloned scene LightSwitch/Light and colliders/visuals; both scenes retain layout/metadata and place the clone inside their respective Kitchen zone. Startup TestGhostActivity/UltravioletTrace instances are inactive scene overrides, while runtime-spawn prefabs remain active. Actor can choose an eligible normal target and approach it before interaction, respecting chance, cooldowns, action blocks, safety, physical occlusion and a full confined native path. GhostWorldInteraction owns target/destination choice and successful-action diagnostics; GhostNavigation owns confined movement; Actor owns timing/state. Hunt policy and EMF thresholds are unchanged. Planned actions clear on hunt/idle/path failure; stalled ordinary movement recovers to Idle.
 
 New Phasma/Validate Normal Evidence (Play Mode) checks actual Bedroom/Kitchen switch availability and clones those source targets into isolated native-navigation rooms. A real running Actor, with only fixture timers accelerated and hunts blocked, must walk to the switch and produce repeated normal interactions, real EMF-5 and UV flashlight reveal without directly calling emitters. This catches the missing Kitchen target and autonomous-activity gap that previous signal tests missed. Cloud syntax parsing (88 C# files), scene references/wiring (180 unique GUIDs), legacy/main room target bounds, seed overrides, unchanged prior metadata/input/navigation sources and git diff --check passed. Unity compilation/new menu/changed actual-mission behavior and regressions are UNRUN here; local follow-up is pending. See Docs/EMF_HUNT_CHECK.md. The previous local 62-check pass remains historical evidence for that earlier revision, not proof of this correction.
+
+
+## Current batch: sound and hiding (2026-10-21)
+
+Branch feature/sound-and-hiding, based on remote 67978a0. Fresh cloud checkout initially contained baseline/main only; fetched the existing agreed feature work before modifying code. Normal-evidence follow-up: user reports working behavior, with screenshots of repeated KitchenLightSwitch EMF 4/3 and a normal validation fixture EMF 5. No complete NormalEvidenceValidation PASSED line was supplied, so that menu completion remains unconfirmed.
+
+Approved scope: walls/closed doors attenuate hearing, player door/throw actions make noise with remembered origin, and a wardrobe which the ghost cannot randomly enter/open unless it saw/heard someone inside. Implemented local gameplay noise, not recorded sound clips/voice/network transport. Existing Input System bindings remain unchanged; no touch UI added.
+
+WorldNoise owns bounded immutable position/source/kind/lifetime events; GhostHearing/AcousticSurface compute physical transmission (default wall 0.25, closed door 0.55, opening interpolation to 0.9 while intersected). Door publishes player-only interaction noise, PlayerItemHolder/PickupItem publish throws, ThrownItemNoise publishes up to three real impacts and disarms on pickup/store/place or ghost throw. Dead/safe/ended participants cannot supply events. Perception selects a visible participant first, otherwise an audible source, and stores the actual observation position; a thrown object does not reveal the author's later hidden location. Old serialized perception fields and GUIDs are preserved.
+
+RoomSearchPrototype includes a physical Wardrobe at (-6.5, 0, -1.7), closed outward-opening E door, side/back walls and roof, HidingZone trigger and external approach marker. It is not a SafeZone. GhostHidingKnowledge stores per-ghost/per-zone finite evidence from real sensory observations. Hiding area ID 4 is filtered from unknown navigation; full path segment checks prevent another unknown zone leaking through a shared area mask. World interaction and attack independently guard unknown hiding space. GhostHidingInvestigation approaches a known door while ordinary hunt interaction opens it, waits for physical/carving access, then resumes normal chase/search toward the observation area. Expired knowledge permits exit but not re-entry; revoked paths report failure for recovery. Salt ID 3 is retained, and path checks preserve avoidance where area modifiers overlap. Runtime minimum region area 0.1 preserves a small closet interior.
+
+Both gameplay scenes explicitly wire hearing/knowledge/investigation, original-door acoustics and impact adapters. New dynamic Door/PickupItem objects inherit components via RequireComponent. Wardrobe geometry is added only to current RoomSearchPrototype, preserving legacy Prototype layout. Static scene refs and original input/metadata remain intact. Docs/SOUND_HIDING_CHECK.md details ownership, settings, local Phasma menu and manual checks.
+
+Cloud checks passed: Tools/check_assets.py parsed 96 C# files and checked 188 unique GUIDs, local object references/owners for 250 legacy and 365 main-scene objects, new bake/carving/zone links, original Salt/new Hiding IDs, E/F/G/numeric slots and validation asset paths; git diff --check passed. Reusable environment install_script/start_skill draft saved with pinned Python dependencies and source-check workflow, publication not performed. Unity Editor/C# compiler unavailable: Unity compilation, SoundHidingValidation, actual physics/navigation/hunt integration and regressions are UNRUN in cloud and await local results. Existing historical test passes are not evidence that this new revision ran.

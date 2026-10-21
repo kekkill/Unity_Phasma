@@ -2,6 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(GhostNavigation), typeof(GhostRoomSearch), typeof(GhostAttack))]
 [RequireComponent(typeof(GhostWorldInteraction))]
+[RequireComponent(typeof(GhostHidingInvestigation))]
 public class GhostHuntController : MonoBehaviour
 {
     private enum HuntMode
@@ -27,6 +28,7 @@ public class GhostHuntController : MonoBehaviour
     private GhostRoomSearch roomSearch;
     private bool wasHearingTarget;
     private bool searchingBlockedTarget;
+    private bool approachingHidingPlace;
     [SerializeField] private float repelledUntil;
     private float nextHuntCheckTime;
     private float huntEndTime;
@@ -182,6 +184,17 @@ public class GhostHuntController : MonoBehaviour
         }
 
         GetComponent<GhostWorldInteraction>().TickHunt();
+        HidingZone hidingPlace = ghostPerception.HasKnownTargetPosition ? ghostPerception.LastKnownHidingZone : null;
+        if (GetComponent<GhostHidingInvestigation>().TryApproach(hidingPlace, ghostController.Profile.HuntMoveSpeed))
+        {
+            approachingHidingPlace = true;
+            return true;
+        }
+        if (approachingHidingPlace)
+        {
+            approachingHidingPlace = false;
+            EnterSearch(hidingPlace != null ? hidingPlace.InvestigationPosition : ghostPerception.LastKnownPosition);
+        }
 
         // Видит игрока:
         // можно преследовать его точную текущую позицию.
@@ -282,6 +295,7 @@ public class GhostHuntController : MonoBehaviour
         }
 
         searchCenter =
+            ghostPerception.LastKnownHidingZone != null ? ghostPerception.LastKnownHidingZone.InvestigationPosition :
             ghostPerception.LastKnownPosition;
 
         searchCenter.y =
@@ -359,6 +373,7 @@ public class GhostHuntController : MonoBehaviour
 
     private void FinishHunt()
     {
+        approachingHidingPlace = false;
         roomSearch.Stop();
         searchingBlockedTarget = false;
         wasHearingTarget = false;

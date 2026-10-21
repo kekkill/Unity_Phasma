@@ -14,9 +14,6 @@ public class PlayerNoiseEmitter : MonoBehaviour
 
     private CharacterController characterController;
 
-    private float temporaryNoiseLevel;
-    private float temporaryNoiseEndTime;
-
     public float CurrentNoiseLevel =>
         currentNoiseLevel;
 
@@ -52,28 +49,13 @@ public class PlayerNoiseEmitter : MonoBehaviour
                 );
         }
 
-        if (Time.time >= temporaryNoiseEndTime)
-        {
-            temporaryNoiseLevel = 0f;
-        }
-
-        currentNoiseLevel =
-            Mathf.Max(
-                movementNoise,
-                temporaryNoiseLevel
-            );
+        currentNoiseLevel = movementNoise;
     }
 
     public void EmitNoise(
         float noiseLevel,
         float duration)
     {
-        temporaryNoiseLevel =
-            Mathf.Clamp01(
-                noiseLevel
-            );
-
-        temporaryNoiseEndTime =
-            Time.time + duration;
+        WorldNoise.Publish(transform.position, GetComponent<GhostPerceptionTarget>(), noiseLevel, duration);
     }
 }

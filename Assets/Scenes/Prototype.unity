@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 277929989}
   - component: {fileID: 277929993}
   - component: {fileID: 50040000}
+  - component: {fileID: 64000000}
   m_Layer: 0
   m_Name: EMFReader
   m_TagString: Untagged
@@ -517,6 +518,7 @@ GameObject:
   - component: {fileID: 331973597}
   - component: {fileID: 331973596}
   - component: {fileID: 50040001}
+  - component: {fileID: 64000001}
   m_Layer: 0
   m_Name: ProtectionWard
   m_TagString: Untagged
@@ -1058,6 +1060,9 @@ GameObject:
   - component: {fileID: 513613268}
   - component: {fileID: 513613269}
   - component: {fileID: 513613270}
+  - component: {fileID: 513613271}
+  - component: {fileID: 513613272}
+  - component: {fileID: 513613273}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -1318,6 +1323,7 @@ GameObject:
   m_Component:
   - component: {fileID: 633607404}
   - component: {fileID: 633607405}
+  - component: {fileID: 64000002}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -2737,6 +2743,7 @@ GameObject:
   - component: {fileID: 1944482478}
   - component: {fileID: 1944482477}
   - component: {fileID: 50040002}
+  - component: {fileID: 64000003}
   m_Layer: 0
   m_Name: GhostWritingBook
   m_TagString: Untagged
@@ -2906,6 +2913,7 @@ GameObject:
   - component: {fileID: 1964078698}
   - component: {fileID: 1964078697}
   - component: {fileID: 50040003}
+  - component: {fileID: 64000004}
   m_Layer: 0
   m_Name: UVFlashlight
   m_TagString: Untagged
@@ -3137,6 +3145,7 @@ GameObject:
   - component: {fileID: 1988192538}
   - component: {fileID: 1988192544}
   - component: {fileID: 50040004}
+  - component: {fileID: 64000005}
   m_Layer: 0
   m_Name: FlashLight
   m_TagString: Untagged
@@ -3356,6 +3365,7 @@ GameObject:
   - component: {fileID: 2097593002}
   - component: {fileID: 2097593008}
   - component: {fileID: 50040005}
+  - component: {fileID: 64000006}
   m_Layer: 0
   m_Name: Thermometer
   m_TagString: Untagged
@@ -3523,6 +3533,7 @@ GameObject:
   - component: {fileID: 2107965711}
   - component: {fileID: 2107965710}
   - component: {fileID: 50040006}
+  - component: {fileID: 64000007}
   m_Layer: 0
   m_Name: MotionSensor
   m_TagString: Untagged
@@ -5065,3 +5076,153 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 60010012}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &64000000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277929988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331973595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633607403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a894809ea2e24350932b2bb217c8c51a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::AcousticSurface
+  transmission: 0.25
+  closedDoorTransmission: 0.55
+  openDoorTransmission: 0.9
+--- !u!114 &64000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1944482476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964078696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1988192537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2097593001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &64000007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107965709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5f5a89428e4d1d9df90e457da15fe3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ThrownItemNoise
+  minimumImpactSpeed: 1
+  impactCooldown: 0.2
+--- !u!114 &513613271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cea894a8e2f4275912c22179aa3d832, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostHidingKnowledge
+--- !u!114 &513613272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9252e4a5d79a4bf99ee6797b36eb19d3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostHearing
+  unconfiguredBarrierTransmission: 0.25
+--- !u!114 &513613273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513613253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94020ba2c31e4bfab4666ffdd2d575af, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GhostHidingInvestigation

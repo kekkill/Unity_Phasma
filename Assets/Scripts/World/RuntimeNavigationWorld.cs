@@ -17,8 +17,8 @@ public class RuntimeNavigationWorld : MonoBehaviour
     private AsyncOperation saltUpdate;
     private bool saltDirty;
 
-    private void OnEnable() { SaltPile.Changed += MarkSaltDirty; MarkSaltDirty(); }
-    private void OnDisable() { SaltPile.Changed -= MarkSaltDirty; }
+    private void OnEnable() { SaltPile.Changed += MarkSaltDirty; HidingZone.Changed += MarkSaltDirty; MarkSaltDirty(); }
+    private void OnDisable() { SaltPile.Changed -= MarkSaltDirty; HidingZone.Changed -= MarkSaltDirty; }
     private void MarkSaltDirty() { saltDirty = true; }
     private void Update()
     {
@@ -30,10 +30,9 @@ public class RuntimeNavigationWorld : MonoBehaviour
     {
         var sources = new List<NavMeshBuildSource>(staticSources);
         int area = NavMesh.GetAreaFromName("Salt");
-        if (area < 0) return sources;
         foreach (SaltPile pile in SaltPile.Active)
         {
-            if (pile == null || !pile.IsIntact || !buildBounds.Contains(pile.transform.position)) continue;
+            if (area < 0 || pile == null || !pile.IsIntact || !buildBounds.Contains(pile.transform.position)) continue;
             sources.Add(new NavMeshBuildSource
             {
                 shape = NavMeshBuildSourceShape.ModifierBox,
@@ -43,6 +42,19 @@ public class RuntimeNavigationWorld : MonoBehaviour
                     Quaternion.identity, Vector3.one)
             });
         }
+        int hidingArea = NavMesh.GetAreaFromName("Hiding");
+        if (hidingArea >= 0)
+            foreach (HidingZone zone in HidingZone.Active)
+            {
+                if (zone == null || !buildBounds.Contains(zone.transform.position)) continue;
+                sources.Add(new NavMeshBuildSource
+                {
+                    shape = NavMeshBuildSourceShape.ModifierBox, area = hidingArea,
+                    size = new Vector3(zone.Volume.size.x, 1f, zone.Volume.size.z),
+                    transform = zone.transform.localToWorldMatrix * Matrix4x4.Translate(new Vector3(
+                        zone.Volume.center.x, zone.Volume.center.y - zone.Volume.size.y * 0.5f + 0.2f, zone.Volume.center.z))
+                });
+            }
         return sources;
     }
 
@@ -81,6 +93,7 @@ public class RuntimeNavigationWorld : MonoBehaviour
         NavMeshBuildSettings settings = NavMesh.GetSettingsByID(0);
         settings.agentRadius = 0.35f;
         settings.agentHeight = 1.8f;
+        settings.minRegionArea = 0.1f; // Preserve small wardrobe interiors.
         settings.overrideVoxelSize = true;
         settings.voxelSize = 0.1f;
         staticSources = sources;

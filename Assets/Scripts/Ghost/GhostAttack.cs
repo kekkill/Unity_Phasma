@@ -16,6 +16,9 @@ public class GhostAttack : MonoBehaviour
         if (target == null || !target.CanBeDetected || target.LifeState == null ||
             restrictions.IsActionBlocked(GhostActionType.Attack)) return false;
         if (Vector3.Distance(transform.position, target.transform.position) > attackRange) return false;
+        HidingZone zone = HidingZone.FindAt(target.transform.position);
+        GhostHidingKnowledge knowledge = GetComponent<GhostHidingKnowledge>();
+        if (zone != null && (knowledge == null || !knowledge.CanEnter(zone))) return false;
         Vector3 origin = transform.position + Vector3.up * attackOriginHeight;
         Vector3 delta = target.VisionPosition - origin;
         RaycastHit[] hits = Physics.RaycastAll(origin, delta.normalized, delta.magnitude + 0.05f,

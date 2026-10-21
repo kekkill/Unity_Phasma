@@ -6,10 +6,11 @@ public enum PickupItemState { Dropped, Held, Placed, Stored }
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(GhostThrowableItem))]
+[RequireComponent(typeof(GhostThrowableItem), typeof(ThrownItemNoise))]
 public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private PickupItemState state;
+    [SerializeField, Range(0f, 1f)] private float throwNoise = 0.65f;
     public PickupItemState State => state;
     public PlayerInventory InventoryOwner { get; internal set; }
     public event Action<PickupItemState> StateChanged;
@@ -71,6 +72,7 @@ public class PickupItem : MonoBehaviour, IInteractable
 
     private void SuspendPhysics()
     {
+        GetComponent<ThrownItemNoise>()?.Disarm();
         if (!itemRigidbody.isKinematic)
         {
             itemRigidbody.linearVelocity = Vector3.zero;
@@ -88,7 +90,7 @@ public class PickupItem : MonoBehaviour, IInteractable
     public void Drop(
         Vector3 dropPosition,
         Vector3 throwDirection,
-        float throwForce)
+        float throwForce, GhostPerceptionTarget noiseSource = null)
     {
         transform.SetParent(null);
 
@@ -100,6 +102,8 @@ public class PickupItem : MonoBehaviour, IInteractable
         itemRigidbody.isKinematic = false;
         itemRigidbody.useGravity = true;
 
+        GetComponent<ThrownItemNoise>()?.Arm(noiseSource);
+        if (throwForce > 0f) WorldNoise.Publish(dropPosition, noiseSource, throwNoise, 0.5f, WorldNoiseKind.Throw);
         itemRigidbody.AddForce(
             throwDirection.normalized * throwForce,
             ForceMode.Impulse

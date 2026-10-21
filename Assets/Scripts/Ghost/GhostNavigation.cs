@@ -3,6 +3,7 @@ using UnityEngine.AI;
 
 // The actor chooses what to do; this component owns local pathfinding and movement.
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(GhostHidingKnowledge))]
 public class GhostNavigation : MonoBehaviour
 {
     [SerializeField, Min(0.05f)] private float sampleRadius = 1f;
@@ -12,6 +13,7 @@ public class GhostNavigation : MonoBehaviour
     private int baseAreaMask;
     private NavMeshAgent agent;
     private NavMeshPath candidatePath;
+    private GhostHidingKnowledge hiding;
     [Header("Runtime diagnostics")]
     [SerializeField] private bool hasDestination;
     [SerializeField] private Vector3 requestedDestination;
@@ -19,6 +21,7 @@ public class GhostNavigation : MonoBehaviour
     private int pathAssignedFrame;
     private Vector3 lastProgressPosition;
     private float lastProgressTime;
+    private bool pathInvalidated;
     public bool HasStalled => IsReady && hasDestination && !HasArrived &&
         !agent.pathPending && Time.time - lastProgressTime > 2f;
 
@@ -40,7 +43,7 @@ public class GhostNavigation : MonoBehaviour
             return delta.sqrMagnitude <= tolerance * tolerance;
         }
     }
-    public bool HasFailedPath => !IsReady || (hasDestination &&
+    public bool HasFailedPath => pathInvalidated || !IsReady || (hasDestination &&
         Time.frameCount > pathAssignedFrame + 2 && !agent.pathPending &&
         ((!agent.hasPath && !HasArrived) || agent.pathStatus != NavMeshPathStatus.PathComplete));
 
@@ -48,6 +51,8 @@ public class GhostNavigation : MonoBehaviour
     {
         UpdateSaltMask();
         if (!IsReady || !hasDestination) return;
+        if (!hiding.AllowsPath(transform.position, agent.path.corners) || !PathAvoidsSalt(agent.path.corners))
+        { Stop(); pathInvalidated = true; lastMoveResult = "Path no longer permitted"; return; }
         Vector3 progress = transform.position - lastProgressPosition;
         progress.y = 0f;
         if (progress.sqrMagnitude > 0.0025f)
@@ -61,6 +66,7 @@ public class GhostNavigation : MonoBehaviour
     {
         controller = GetComponent<GhostController>();
         hunt = GetComponent<GhostHuntController>();
+        hiding = GetComponent<GhostHidingKnowledge>();
         candidatePath = new NavMeshPath();
         agent = GetComponent<NavMeshAgent>();
         if (agent == null) agent = gameObject.AddComponent<NavMeshAgent>();
@@ -100,12 +106,15 @@ public class GhostNavigation : MonoBehaviour
     {
         UpdateSaltMask();
         point = default;
+        if (hiding == null) hiding = GetComponent<GhostHidingKnowledge>();
+        if (hiding != null && !hiding.CanEnterAt(position) && HidingZone.FindAt(transform.position) != HidingZone.FindAt(position)) return false;
         if (!IsReady || !NavMesh.SamplePosition(position, out NavMeshHit hit,
             sampleRadius, agent.areaMask)) return false;
         // Nonserialized runtime references can be lost after a script/domain reload.
         if (candidatePath == null) candidatePath = new NavMeshPath();
         if (!agent.CalculatePath(hit.position, candidatePath) ||
-            candidatePath.status != NavMeshPathStatus.PathComplete) return false;
+            candidatePath.status != NavMeshPathStatus.PathComplete || !hiding.AllowsPath(transform.position, candidatePath.corners) ||
+            !PathAvoidsSalt(candidatePath.corners)) return false;
         point = hit.position;
         return true;
     }
@@ -115,6 +124,29 @@ public class GhostNavigation : MonoBehaviour
         // Rooms are convex boxes: if all corners are inside, every path segment is inside.
         foreach (Vector3 corner in candidatePath.corners)
             if (!room.ContainsPoint(corner)) return false;
+        return true;
+    }
+
+    private bool PathAvoidsSalt(Vector3[] corners)
+    {
+        if (controller == null || controller.Profile == null || controller.Profile.SaltResponse != GhostSaltResponse.AvoidUntilHunt ||
+            (hunt != null && hunt.IsHunting)) return true;
+        foreach (SaltPile pile in SaltPile.Active)
+        {
+            if (pile == null || !pile.IsIntact || pile.Contains(transform.position)) continue;
+            Vector3 previous = transform.position;
+            foreach (Vector3 corner in corners)
+            {
+                if (Mathf.Abs(corner.y - pile.transform.position.y) < 1f)
+                {
+                    Vector3 delta = Vector3.ProjectOnPlane(corner - previous, Vector3.up);
+                    Vector3 offset = Vector3.ProjectOnPlane(pile.transform.position - previous, Vector3.up);
+                    float t = delta.sqrMagnitude > 0f ? Mathf.Clamp01(Vector3.Dot(offset, delta) / delta.sqrMagnitude) : 0f;
+                    if ((offset - delta * t).sqrMagnitude < pile.Radius * pile.Radius) return false;
+                }
+                previous = corner;
+            }
+        }
         return true;
     }
 
@@ -171,6 +203,7 @@ public class GhostNavigation : MonoBehaviour
 
     public bool MoveTo(Vector3 destination, float speed)
     {
+        pathInvalidated = false;
         if (!TryReachablePoint(destination, out Vector3 point))
         {
             Stop();
@@ -210,11 +243,16 @@ public class GhostNavigation : MonoBehaviour
             foreach (SaltPile pile in SaltPile.Active)
                 if (pile != null && pile.IsIntact && pile.Contains(transform.position)) { avoid = false; break; }
         int mask = avoid && area >= 0 ? baseAreaMask & ~(1 << area) : baseAreaMask;
+        int hidingArea = NavMesh.GetAreaFromName("Hiding");
+        if (hiding == null) hiding = GetComponent<GhostHidingKnowledge>();
+        if (hidingArea >= 0 && hiding != null && !hiding.HasKnownZone && HidingZone.FindAt(transform.position) == null)
+            mask &= ~(1 << hidingArea);
         if (agent.areaMask != mask) agent.areaMask = mask;
     }
 
     public void Stop()
     {
+        pathInvalidated = false;
         hasDestination = false;
         if (!IsReady) return;
         agent.isStopped = true;
