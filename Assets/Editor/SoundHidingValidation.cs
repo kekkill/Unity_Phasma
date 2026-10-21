@@ -52,6 +52,27 @@ public static class SoundHidingValidation
     { float until = Time.time + seconds; return WaitFor(() => Time.time >= until); }
     private static void Noise(GhostPerceptionTarget target, float level) => Number(target.GetComponent<PlayerNoiseEmitter>(), "currentNoiseLevel", level);
     private static float FlatDistance(Vector3 a, Vector3 b) => Vector3.ProjectOnPlane(a - b, Vector3.up).magnitude;
+    private static void Face(Transform observer, GhostPerceptionTarget target)
+    {
+        Vector3 direction = Vector3.ProjectOnPlane(target.VisionPosition - observer.position, Vector3.up);
+        if (direction.sqrMagnitude > 0.001f) observer.rotation = Quaternion.LookRotation(direction);
+    }
+    private static string VisionDiagnostics(GhostPerception perception, GhostPerceptionTarget target)
+    {
+        float eyeHeight = new SerializedObject(perception).FindProperty("eyeHeight").floatValue;
+        Vector3 origin = perception.transform.position + Vector3.up * eyeHeight;
+        Vector3 delta = target.VisionPosition - origin;
+        var profile = perception.GetComponent<GhostController>().Profile;
+        var hits = Physics.RaycastAll(origin, delta.normalized, delta.magnitude + 0.03f, ~0, QueryTriggerInteraction.Ignore)
+            .Where(hit => !hit.collider.transform.IsChildOf(perception.transform) && hit.collider.GetComponentInParent<PickupItem>() == null)
+            .OrderBy(hit => hit.distance).ToArray();
+        string firstHit = hits.Length == 0 ? "none" : hits[0].collider.name + " at " + hits[0].point.ToString("F3");
+        return " Origin=" + origin.ToString("F3") + "; target=" + target.VisionPosition.ToString("F3") +
+            "; distance/range=" + delta.magnitude.ToString("F3") + "/" + profile.VisionRange +
+            "; angle/half-FOV=" + Vector3.Angle(perception.transform.forward, Vector3.ProjectOnPlane(delta, Vector3.up)).ToString("F1") +
+            "/" + (profile.VisionAngle * 0.5f) + "; detectable=" + target.CanBeDetected + "; first solid hit=" + firstHit +
+            "; participant bounds=" + target.GetComponent<CharacterController>().bounds;
+    }
     [MenuItem("Phasma/Validate Sound and Hiding (Play Mode)")]
     public static async void Validate()
     {
@@ -85,6 +106,8 @@ public static class SoundHidingValidation
             var hunt = ghostObj.AddComponent<GhostHuntController>();
             // This phase has no NavMesh. Enable the agent through Initialize only after the arena is built.
             var agent = ghostObj.GetComponent<NavMeshAgent>(); agent.enabled = false;
+            // Vision probes control facing explicitly; native movement owns rotation again after those probes.
+            agent.updateRotation = false;
             var hearing = ghostObj.GetComponent<GhostHearing>();
             var knowledge = ghostObj.GetComponent<GhostHidingKnowledge>();
             var wallObj = Child(root.transform, "Validation acoustic wall", point + new Vector3(0f, 1.3f, 2f));
@@ -188,8 +211,15 @@ public static class SoundHidingValidation
             var navigation = ghostObj.GetComponent<GhostNavigation>();
             Check(navigation.Initialize(room), "Native wardrobe arena must provide a valid external ghost spawn.");
             Check(NavMesh.SamplePosition(arena + Vector3.forward * 2.3f, out var start, 0.5f, NavMesh.AllAreas) && agent.Warp(start.position), "Place probe outside the wardrobe.");
-            ghostObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-            player.transform.position = arena + Vector3.up; Noise(player, 0f); Physics.SyncTransforms(); perception.RefreshTarget();
+            // A closed-door negative alone also passes if the observer is facing away or cannot see its fixture player.
+            player.transform.position = arena + new Vector3(0f, 1f, 1.6f); Noise(player, 0f);
+            Face(ghostObj.transform, player); Physics.SyncTransforms(); perception.RefreshTarget();
+            Check(perception.CanSeeTarget && perception.Target == player,
+                "Native-agent sight control must see the participant outside the closed wardrobe." + VisionDiagnostics(perception, player));
+            Check(!knowledge.CanEnter(zone), "Seeing a participant outside must not reveal the wardrobe.");
+            player.transform.position = arena + Vector3.up;
+            Check(HidingZone.FindAt(player.transform.position) == zone, "Fixture participant must actually occupy the wardrobe volume.");
+            Face(ghostObj.transform, player); Physics.SyncTransforms(); perception.RefreshTarget();
             Check(player.CanBeDetected && !perception.CanSeeTarget && !perception.CanHearTarget, "Closed wardrobe blocks sight without making the player globally invulnerable.");
             Check(!knowledge.CanEnter(zone) && !navigation.TryReachablePoint(zone.InvestigationPosition, out _), "Unknown wardrobe must be inaccessible to native movement.");
             var context = new GhostInteractionContext(null, controller, profile, true);
@@ -207,8 +237,14 @@ public static class SoundHidingValidation
             {
                 Check(navigation.TryRoomPoint(room, false, out var randomPoint) && !zone.ContainsFootprint(randomPoint), "Random room points must exclude unknown hiding space.");
             }
-            zone.Door.SetOpen(true); await WaitFor(() => zone.Door.IsFullyOpen); Physics.SyncTransforms(); perception.RefreshTarget();
-            Check(perception.CanSeeTarget && perception.LastKnownHidingZone == zone && knowledge.CanEnter(zone), "Actually seeing a player inside must authorize this ghost.");
+            zone.Door.SetOpen(true); await WaitFor(() => zone.Door.IsFullyOpen);
+            Face(ghostObj.transform, player); Physics.SyncTransforms(); perception.RefreshTarget();
+            Check(perception.CanSeeTarget && perception.Target == player,
+                "Open wardrobe must expose the participant to a facing observer. Door fraction=" + zone.Door.OpenFraction +
+                "." + VisionDiagnostics(perception, player));
+            Check(perception.LastKnownHidingZone == zone, "Visible participant must be remembered in the actual wardrobe zone.");
+            Check(knowledge.CanEnter(zone), "Successful sight inside must authorize this ghost to enter that wardrobe.");
+            agent.updateRotation = true;
             var otherKnowledge = Child(root.transform, "Independent validation knowledge", arena).AddComponent<GhostHidingKnowledge>();
             Check(!otherKnowledge.CanEnter(zone) && !knowledge.CanEnter(originalZone), "Discovery must belong to one ghost and one hiding place.");
             Check(!knowledge.AllowsPath(originalZone.InvestigationPosition + Vector3.forward * 2f,
