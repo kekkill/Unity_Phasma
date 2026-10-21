@@ -49,7 +49,7 @@ public class GhostAggression : MonoBehaviour
         }
 
         currentAnger =
-            ghostController.Profile.InitialAnger;
+            ghostController.StartingAnger;
 
         UpdateHuntChance();
     }

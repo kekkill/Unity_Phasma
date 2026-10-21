@@ -132,13 +132,13 @@ public class GhostHuntController : MonoBehaviour
         isHunting =
             true;
 
-        float warning = sequenceProfile != null ? sequenceProfile.WarningDuration : 0f;
+        float warning = sequenceProfile != null ? sequenceProfile.WarningDuration * ghostController.HuntWarningMultiplier : 0f;
         warningEndTime = Time.time + warning;
         phase = warning > 0f ? HuntPhase.Warning : HuntPhase.Active;
 
         huntEndTime =
             warningEndTime +
-            ghostController.Profile.MaxHuntDuration;
+            ghostController.HuntDuration;
 
         ghostAggression.BeginHunt();
         navigation.Stop();
@@ -218,7 +218,7 @@ public class GhostHuntController : MonoBehaviour
 
         GetComponent<GhostWorldInteraction>().TickHunt();
         HidingZone hidingPlace = ghostPerception.HasKnownTargetPosition ? ghostPerception.LastKnownHidingZone : null;
-        if (GetComponent<GhostHidingInvestigation>().TryApproach(hidingPlace, ghostController.Profile.HuntMoveSpeed))
+        if (GetComponent<GhostHidingInvestigation>().TryApproach(hidingPlace, ghostController.HuntMoveSpeed))
         {
             approachingHidingPlace = true;
             return true;
@@ -311,7 +311,7 @@ public class GhostHuntController : MonoBehaviour
         chasePosition.y =
             transform.position.y;
 
-        navigation.MoveTo(chasePosition, ghostController.Profile.HuntMoveSpeed);
+        navigation.MoveTo(chasePosition, ghostController.HuntMoveSpeed);
     }
 
     private void UpdateHeardTarget()
@@ -346,7 +346,7 @@ public class GhostHuntController : MonoBehaviour
         if (navigation.TryReachablePoint(searchTargetPosition, out _))
         {
             searchingBlockedTarget = false;
-            navigation.MoveTo(searchTargetPosition, ghostController.Profile.HuntMoveSpeed);
+            navigation.MoveTo(searchTargetPosition, ghostController.HuntMoveSpeed);
         }
         else UpdateBlockedTargetSearch();
     }
@@ -358,10 +358,10 @@ public class GhostHuntController : MonoBehaviour
             searchingBlockedTarget = true;
             currentMode = HuntMode.Search;
             roomSearch.Begin(transform.position,
-                ghostController.FindRoomAt(transform.position), ghostController.Profile.HuntMoveSpeed);
+                ghostController.FindRoomAt(transform.position), ghostController.HuntMoveSpeed);
             Debug.Log("Ghost Hunt: target unreachable, searching accessible rooms", this);
         }
-        roomSearch.Tick(ghostController.Profile.HuntMoveSpeed);
+        roomSearch.Tick(ghostController.HuntMoveSpeed);
     }
 
     private void EnterSearch(
@@ -385,7 +385,7 @@ public class GhostHuntController : MonoBehaviour
             ghostController.Profile.SearchDuration;
 
         roomSearch.Begin(searchCenter, ghostPerception.LastKnownRoom,
-            ghostController.Profile.HuntMoveSpeed);
+            ghostController.HuntMoveSpeed);
 
         Debug.Log(
             "Ghost Hunt -> Search"
@@ -401,7 +401,7 @@ public class GhostHuntController : MonoBehaviour
             return;
         }
 
-        roomSearch.Tick(ghostController.Profile.HuntMoveSpeed);
+        roomSearch.Tick(ghostController.HuntMoveSpeed);
     }
 
     private void FinishHunt()
@@ -437,14 +437,14 @@ public class GhostHuntController : MonoBehaviour
 
         float minimum =
             Mathf.Min(
-                ghostController.Profile.MinHuntCheckInterval,
-                ghostController.Profile.MaxHuntCheckInterval
+                ghostController.MinHuntCheckInterval,
+                ghostController.MaxHuntCheckInterval
             );
 
         float maximum =
             Mathf.Max(
-                ghostController.Profile.MinHuntCheckInterval,
-                ghostController.Profile.MaxHuntCheckInterval
+                ghostController.MinHuntCheckInterval,
+                ghostController.MaxHuntCheckInterval
             );
 
         float delay =

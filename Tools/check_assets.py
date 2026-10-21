@@ -93,6 +93,56 @@ for scene in ['Prototype', 'RoomSearchPrototype']:
             assert reference['guid'] in guids and reference['fileID'] == 11400000
     print(f'{scene}: {len(objects)} unique objects; local references, owners and sound/hiding wiring passed.')
 
+# The front end is a separate build scene; all mission choices are authored, not Inspector TODOs.
+menu = scene_objects(assets / 'Scenes/MainMenu.unity')
+catalog_guid = re.search(r'^guid: (\w+)', (assets / 'Settings/MissionPreparation.asset.meta').read_text(), re.M)[1]
+assert menu[1002]['MonoBehaviour']['catalog']['guid'] == catalog_guid
+assert sum('Camera' in obj for obj in menu.values()) == 1
+assert sum('AudioListener' in obj for obj in menu.values()) == 1
+assert menu[330585546]['Transform']['m_Father']['fileID'] == 0
+main = scene_objects(assets / 'Scenes/RoomSearchPrototype.unity')
+setup = main[50010005]['MonoBehaviour']
+assert setup['catalog']['guid'] == catalog_guid
+spawns = setup['equipment']
+assert {row['id'] for row in spawns} == set(range(6)) and len(spawns) == 6
+expected_items = ['FlashLight', 'Thermometer', 'EMFReader', 'UVFlashlight', 'GhostWritingBook', 'MotionSensor']
+for row in spawns:
+    item = main[row['item']['fileID']]['GameObject']
+    assert item['m_Name'] == expected_items[row['id']] and item['m_IsActive'] == 1
+assert main[331973595]['GameObject']['m_IsActive'] == 0, 'Do not resurrect the old ward.'
+for fid in [513613254, 50020002]:
+    assert main[fid]['MonoBehaviour']['missionSetup']['fileID'] == 50010005
+power = main[68000005]['MonoBehaviour']
+assert power['initiallyPowered'] == 0 and power['indicator']['fileID'] == 68000013
+for fid in [2017521005, 60010006]:
+    switch = main[fid]['MonoBehaviour']
+    assert switch['circuit']['fileID'] == 68000005
+    assert main[switch['targetLight']['fileID']]['Light']['m_Enabled'] == 1, 'Logical initial switch position must survive circuit startup.'
+assert 68000004 in {ref['fileID'] for ref in main[1971981892]['MonoBehaviour']['geometry']}
+assert main[50010004]['MonoBehaviour']['buildingPower']['fileID'] == 68000005
+assert main[68000022]['Light']['m_Enabled'] == 1
+
+def asset_data(path): return yaml.safe_load(path.read_text().split('\n', 3)[3])['MonoBehaviour']
+catalog = asset_data(assets / 'Settings/MissionPreparation.asset')
+assert catalog['sceneName'] == 'RoomSearchPrototype'
+assert len(catalog['equipment']) == 8 and {option['id'] for option in catalog['equipment']} == set(range(8))
+assert len(catalog['difficulties']) == 3
+for reference in catalog['difficulties']:
+    profile = asset_data(Path(str(guids[reference['guid']])[:-5]))
+    for field in ['huntSpeedMultiplier', 'huntDurationMultiplier', 'huntCheckIntervalMultiplier']:
+        assert profile[field] > 0
+normal_path = Path(str(guids[catalog['defaultDifficulty']['guid']])[:-5])
+assert normal_path.name == 'DifficultyNormal.asset'
+normal = asset_data(normal_path)
+assert all(value == 1 for key, value in normal.items() if key.endswith('Multiplier'))
+build = yaml.safe_load((root / 'ProjectSettings/EditorBuildSettings.asset').read_text().split('\n', 3)[3])['EditorBuildSettings']['m_Scenes']
+assert build[0]['path'] == 'Assets/Scenes/MainMenu.unity' and build[0]['enabled'] == 1
+for scene in build:
+    if not scene['enabled']: continue
+    assert (root / scene['path']).exists()
+    assert guids[scene['guid']] == root / (scene['path'] + '.meta')
+print(f'MainMenu: {len(menu)} objects; build order, difficulty/catalog, equipment and power references passed.')
+
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
 assert areas[3]['name'] == 'Salt' and areas[4]['name'] == 'Hiding'
 input_data = json.loads((assets / 'Input/PlayerControls.inputactions').read_text())

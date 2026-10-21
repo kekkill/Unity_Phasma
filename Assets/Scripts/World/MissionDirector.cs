@@ -8,6 +8,7 @@ public class MissionDirector : MonoBehaviour
     [SerializeField] private GhostController ghost;
     [SerializeField] private JournalCatalog catalog;
     [SerializeField] private SafeZone safeZone;
+    [SerializeField] private BuildingPower buildingPower;
     private bool configured;
     private void Start()
     {
@@ -26,6 +27,8 @@ public class MissionDirector : MonoBehaviour
     private void OnGUI()
     {
         if (!configured || session.HasEnded) return;
+        bool needsPower = buildingPower != null && !buildingPower.IsPowered;
+        if (needsPower) GUI.Label(new Rect(30f, 88f, 465f, 24f), "Питание выключено. Щиток — в коридоре у входа (E).");
         GUI.Box(new Rect(15f, 15f, 490f, 72f), session.Phase == MissionPhase.Preparation ? "Подготовка" : "Расследование");
         GUI.Label(new Rect(30f, 42f, 465f, 40f), session.Phase == MissionPhase.Preparation ?
             "Возьмите оборудование и войдите в дом. J — журнал.\nСиняя пристройка — безопасная зона." :

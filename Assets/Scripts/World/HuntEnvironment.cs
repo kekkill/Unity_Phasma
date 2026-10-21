@@ -28,9 +28,9 @@ public class HuntEnvironment : MonoBehaviour
     }
     private void Update()
     {
-        bool warning = hunt != null && hunt.Phase == HuntPhase.Warning && (session == null || !session.HasEnded);
+        bool hunting = hunt != null && hunt.IsHunting && (session == null || !session.HasEnded);
         float interval = hunt != null && hunt.SequenceProfile != null ? hunt.SequenceProfile.FlickerInterval : 0.18f;
-        bool darkPulse = warning && Mathf.FloorToInt((Time.time - startedAt) / interval) % 2 == 0;
+        bool darkPulse = hunting && Mathf.FloorToInt((Time.time - startedAt) / interval) % 2 == 0;
         foreach (var lightSwitch in roomLights)
             if (lightSwitch != null) lightSwitch.SetSuppressed(this, darkPulse);
     }

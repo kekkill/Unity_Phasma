@@ -26,7 +26,7 @@ public class PlayerLook : MonoBehaviour
     private void Update()
     {
         Vector2 lookInput =
-            inputReader.LookInput * mouseSensitivity;
+            inputReader.LookInput * mouseSensitivity * GamePreferences.Sensitivity;
 
         transform.Rotate(
             Vector3.up * lookInput.x

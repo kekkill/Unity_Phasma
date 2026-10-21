@@ -1,11 +1,13 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(GameSession))]
 public class RoundEndScreen : MonoBehaviour
 {
     private GameSession session;
-    private Vector2 scroll;
+    private GameObject screen;
+    private CanvasGroup controls;
+    private Text status;
     private void OnEnable()
     {
         session = GetComponent<GameSession>();
@@ -15,34 +17,31 @@ public class RoundEndScreen : MonoBehaviour
     private void OnDisable()
     {
         if (session != null) session.MissionEnded -= Show;
+        if (screen != null) Destroy(screen);
     }
     private void Show()
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
-    private void OnGUI()
-    {
-        if (session == null || session.Result == null) return;
+        if (screen != null || session.Result == null) return;
+        Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+        screen = MenuUi.Create(transform, "Миссия завершена", out RectTransform content, out controls);
         MissionResult result = session.Result;
-        float width = Mathf.Min(520f, Screen.width - 30f), height = Mathf.Min(380f, Screen.height - 30f);
-        Rect panel = new Rect((Screen.width - width) / 2f, (Screen.height - height) / 2f, width, height);
-        GUI.Box(panel, "Миссия завершена");
-        GUILayout.BeginArea(new Rect(panel.x + 20f, panel.y + 35f, width - 40f, height - 95f));
-        scroll = GUILayout.BeginScrollView(scroll);
-        GUILayout.Label(result.Reason == MissionEndReason.AllPlayersDead ? "Все игроки погибли." :
+        MenuUi.Label(content, result.Reason == MissionEndReason.AllPlayersDead ? "Все игроки погибли." :
             result.TeamSuccess ? "Вы вернулись и верно определили призрака." : "Вы вернулись, но версия оказалась неверной.");
-        GUILayout.Label("Настоящий тип: " + result.ActualGhostName);
-        GUILayout.Space(15f);
+        MenuUi.Label(content, "Настоящий тип: " + result.ActualGhostName);
         foreach (ParticipantMissionResult player in result.Participants)
         {
-            GUILayout.Label(player.PlayerName + (player.Survived ? " — выжил" : " — погиб"));
-            GUILayout.Label("Версия: " + player.SelectedGhostName + (player.Correct ? " (верно)" : " (неверно)"));
-            GUILayout.Space(10f);
+            MenuUi.Label(content, player.PlayerName + (player.Survived ? " — выжил" : " — погиб"));
+            MenuUi.Label(content, "Версия: " + player.SelectedGhostName + (player.Correct ? " (верно)" : " (неверно)"), 20);
         }
-        GUILayout.EndScrollView();
-        GUILayout.EndArea();
-        if (GUI.Button(new Rect(panel.x + (width - 200f) / 2f, panel.yMax - 50f, 200f, 35f), "Начать заново"))
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        status = MenuUi.Label(content, "");
+        MenuUi.Select(MenuUi.Button(content, "Начать заново", Retry));
+        MenuUi.Button(content, "К подготовке миссии", ReturnToPreparation);
+    }
+    private void Retry() => ReportLoad(MissionFlow.TryRetry(out string reason), reason);
+    private void ReturnToPreparation() => ReportLoad(MissionFlow.TryReturnToPreparation(out string reason), reason);
+    private void ReportLoad(bool started, string reason)
+    {
+        controls.interactable = !started;
+        status.text = started ? "Загрузка…" : reason;
     }
 }

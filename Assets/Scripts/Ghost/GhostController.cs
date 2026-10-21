@@ -9,6 +9,14 @@ public class GhostController : MonoBehaviour
 {
     [SerializeField] private Room[] rooms;
     [SerializeField] private GhostActor ghostActor;
+    [SerializeField] private MissionSceneSetup missionSetup;
+    private MissionDifficultyProfile Difficulty => missionSetup != null ? missionSetup.Difficulty : null;
+    public float StartingAnger => Mathf.Clamp(Profile.InitialAnger * (Difficulty != null ? Difficulty.InitialAngerMultiplier : 1f), 0, 100);
+    public float HuntMoveSpeed => Profile.HuntMoveSpeed * (Difficulty != null ? Difficulty.HuntSpeedMultiplier : 1f);
+    public float HuntDuration => Profile.MaxHuntDuration * (Difficulty != null ? Difficulty.HuntDurationMultiplier : 1f);
+    public float MinHuntCheckInterval => Profile.MinHuntCheckInterval * (Difficulty != null ? Difficulty.HuntCheckIntervalMultiplier : 1f);
+    public float MaxHuntCheckInterval => Profile.MaxHuntCheckInterval * (Difficulty != null ? Difficulty.HuntCheckIntervalMultiplier : 1f);
+    public float HuntWarningMultiplier => Difficulty != null ? Difficulty.WarningDurationMultiplier : 1f;
 
     [Header("Ghost Profile")]
     [SerializeField] private GhostProfile ghostProfile;

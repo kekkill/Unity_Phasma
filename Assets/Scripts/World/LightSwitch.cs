@@ -5,6 +5,7 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
 {
     [SerializeField] private Light targetLight;
     [SerializeField] private Transform switchVisual;
+    [SerializeField] private BuildingPower circuit;
 
     [SerializeField] private float onAngle = -20f;
     [SerializeField] private float offAngle = 20f;
@@ -18,7 +19,21 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
         if (suppressed) suppressors.Add(owner); else suppressors.Remove(owner);
         ApplyLight();
     }
-    private void ApplyLight() { if (targetLight != null) targetLight.enabled = isOn && suppressors.Count == 0; }
+    private void ApplyLight()
+    {
+        if (targetLight != null)
+            targetLight.enabled = isOn && (circuit == null || circuit.IsPowered) && suppressors.Count == 0;
+    }
+    private void OnEnable()
+    {
+        if (circuit != null) circuit.PowerChanged += OnPowerChanged;
+        ApplyLight();
+    }
+    private void OnDisable()
+    {
+        if (circuit != null) circuit.PowerChanged -= OnPowerChanged;
+    }
+    private void OnPowerChanged(bool powered) => ApplyLight();
 
     public string InteractionPrompt =>
         isOn
@@ -37,6 +52,7 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
         }
 
         UpdateVisual();
+        ApplyLight();
     }
 
     public void Interact(GameObject interactor)
