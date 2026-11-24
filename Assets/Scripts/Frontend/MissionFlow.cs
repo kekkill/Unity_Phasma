@@ -6,10 +6,10 @@ using UnityEngine.SceneManagement;
 public static class MissionFlow
 {
     public static MissionLaunchRequest CurrentRequest { get; private set; }
-    public static bool OpenPreparation { get; private set; }
+    public static MissionLaunchRequest PreparationDraft { get; set; }
     public static bool IsLoading { get; private set; }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void Reset() { CurrentRequest = null; OpenPreparation = false; IsLoading = false; }
+    private static void Reset() { CurrentRequest = null; PreparationDraft = null; IsLoading = false; }
     public static bool TryStart(MissionLaunchRequest request, out string reason)
     {
         if (request == null || request.Difficulty == null) { reason = "Выберите сложность."; return false; }
@@ -20,14 +20,8 @@ public static class MissionFlow
         return false;
     }
     public static bool TryRetry(out string reason) => TryLoad(SceneManager.GetActiveScene().name, out reason);
-    public static bool TryReturnToPreparation(out string reason)
-    {
-        bool previous = OpenPreparation;
-        OpenPreparation = true;
-        if (TryLoad("MainMenu", out reason)) return true;
-        OpenPreparation = previous;
-        return false;
-    }
+    public static bool TryReturnToPreparation(out string reason) => TryLoad("InvestigationHub", out reason);
+    public static bool TryReturnToMenu(out string reason) => TryLoad("MainMenu", out reason);
     private static bool TryLoad(string scene, out string reason)
     {
         if (IsLoading) { reason = "Миссия уже загружается."; return false; }

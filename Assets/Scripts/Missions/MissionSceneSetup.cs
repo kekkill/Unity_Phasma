@@ -18,7 +18,7 @@ public class MissionSceneSetup : MonoBehaviour
     private void Awake()
     {
         MissionLaunchRequest selected = MissionFlow.CurrentRequest;
-        request = selected != null && selected.SceneName == gameObject.scene.name ? selected : catalog != null ? catalog.DefaultRequest() : null;
+        request = selected != null && selected.SceneName == gameObject.scene.name ? selected : catalog != null ? catalog.DefaultRequest(gameObject.scene.name) : null;
         foreach (var spawn in equipment)
             if (spawn.item != null) spawn.item.SetActive(Includes(spawn.id));
     }

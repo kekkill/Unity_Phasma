@@ -47,7 +47,7 @@ def scene_objects(path):
                 assert data['m_GameObject']['fileID'] == fid, f'Component owner mismatch: {path}/{fid}'
     return objects
 
-for scene in ['Prototype', 'RoomSearchPrototype']:
+for scene in ['Prototype', 'RoomSearchPrototype', 'ArchiveInvestigation']:
     objects = scene_objects(assets / f'Scenes/{scene}.unity')
     def mono(fid): return objects[fid]['MonoBehaviour']
     for fid, cls in [(513613271, 'GhostHidingKnowledge'), (513613272, 'GhostHearing'), (513613273, 'GhostHidingInvestigation')]:
@@ -124,7 +124,9 @@ assert main[68000022]['Light']['m_Enabled'] == 1
 
 def asset_data(path): return yaml.safe_load(path.read_text().split('\n', 3)[3])['MonoBehaviour']
 catalog = asset_data(assets / 'Settings/MissionPreparation.asset')
-assert catalog['sceneName'] == 'RoomSearchPrototype'
+maps = [option['sceneName'] for option in catalog['maps']]
+assert maps == ['RoomSearchPrototype', 'ArchiveInvestigation']
+assert all(option['displayName'] and option['description'] for option in catalog['maps'])
 assert len(catalog['equipment']) == 8 and {option['id'] for option in catalog['equipment']} == set(range(8))
 assert len(catalog['difficulties']) == 3
 for reference in catalog['difficulties']:
@@ -142,6 +144,46 @@ for scene in build:
     assert (root / scene['path']).exists()
     assert guids[scene['guid']] == root / (scene['path'] + '.meta')
 print(f'MainMenu: {len(menu)} objects; build order, difficulty/catalog, equipment and power references passed.')
+
+enabled = {Path(scene['path']).stem for scene in build if scene['enabled']}
+assert set(maps + ['InvestigationHub']).issubset(enabled)
+hub = scene_objects(assets / 'Scenes/InvestigationHub.unity')
+assert hub[1002]['MonoBehaviour']['isHub'] == 1
+assert hub[1002]['MonoBehaviour']['catalog']['guid'] == catalog_guid
+assert sum('Camera' in obj for obj in hub.values()) == 1
+assert any(obj.get('GameObject', {}).get('m_Name') == 'Planning Desk' for obj in hub.values())
+
+archive = scene_objects(assets / 'Scenes/ArchiveInvestigation.unity')
+def archive_component(fid): return archive[fid]['MonoBehaviour']
+for fid in [50010002, 50010003, 50010004, 50010005, 50030063, 66000102]:
+    assert archive_component(fid)['m_Enabled'] == 1
+assert archive_component(50010005) == setup
+terminal = next(obj['MonoBehaviour'] for obj in archive.values()
+                if obj.get('MonoBehaviour', {}).get('m_EditorClassIdentifier') == 'Assembly-CSharp::ExtractionTerminal')
+assert terminal['safeZone'] == archive_component(50010004)['safeZone'] == {'fileID': 50030063}
+assert terminal['session'] == archive_component(66000102)['session'] == {'fileID': 50010002}
+assert archive_component(66000102)['exitBarrier'] == {'fileID': 66000022}
+assert {'fileID': 71000101} in archive_component(513613254)['rooms']
+assert {'fileID': 71000101} in archive_component(50001003)['connectedRooms']
+assert archive_component(71000101)['connectedRooms'] == [{'fileID': 50001003}]
+assert archive_component(71000101)['canBeGhostRoom'] == 1
+nav = archive_component(1971981892)
+nav_geometry = {ref['fileID'] for ref in nav['geometry']}
+assert 50030012 not in nav_geometry, 'Safe annex floor must remain outside navigation.'
+assert {71000004 + 10*i for i in range(8)}.issubset(nav_geometry)
+assert {'fileID': 72000114} in nav['movingObstacles']
+assert archive_component(72000003)['door'] == {'fileID': 72000102}
+assert {'fileID': 71010006} in archive_component(66000102)['roomLights']
+assert archive_component(71010006)['circuit'] == {'fileID': 68000005}
+# The adjoining floor surfaces meet at z=3 and the two wall segments leave a 3m opening.
+west = archive[2127530396]['Transform']
+east = archive[71000001]['Transform']
+floor = archive[71000011]['Transform']
+assert abs(east['m_LocalPosition']['x'] - east['m_LocalScale']['x'] / 2 - 1.5) < 1e-6
+assert abs(west['m_LocalPosition']['x'] + west['m_LocalScale']['x'] / 2 + 1.5) < 1e-6
+assert floor['m_LocalPosition']['z'] - floor['m_LocalScale']['z'] / 2 == 3
+print('InvestigationHub and both map choices enabled. Archive room, static geometry, hunt, power and extraction wiring passed.')
+
 
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
 assert areas[3]['name'] == 'Salt' and areas[4]['name'] == 'Hiding'

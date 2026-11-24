@@ -18,20 +18,29 @@ public class MissionEquipmentOption
     public string DisplayName => displayName;
 }
 
+[Serializable]
+public class MissionMapOption
+{
+    [SerializeField] private string sceneName;
+    [SerializeField] private string displayName;
+    [SerializeField] private string description;
+    public string SceneName => sceneName;
+    public string DisplayName => displayName;
+    public string Description => description;
+}
+
 [CreateAssetMenu(menuName = "Phasma/Mission Preparation Catalog")]
 public class MissionPreparationCatalog : ScriptableObject
 {
-    [SerializeField] private string sceneName = "RoomSearchPrototype";
-    [SerializeField] private string mapName = "Небольшой дом";
+    [SerializeField] private MissionMapOption[] maps = new MissionMapOption[0];
     [SerializeField] private MissionDifficultyProfile defaultDifficulty;
     [SerializeField] private MissionDifficultyProfile[] difficulties = new MissionDifficultyProfile[0];
     [SerializeField] private MissionEquipmentOption[] equipment = new MissionEquipmentOption[0];
-    public string SceneName => sceneName;
-    public string MapName => mapName;
+    public IReadOnlyList<MissionMapOption> Maps => Array.AsReadOnly(maps);
     public MissionDifficultyProfile DefaultDifficulty => defaultDifficulty;
     public IReadOnlyList<MissionDifficultyProfile> Difficulties => Array.AsReadOnly(difficulties);
     public IReadOnlyList<MissionEquipmentOption> Equipment => Array.AsReadOnly(equipment);
-    public MissionLaunchRequest DefaultRequest()
+    public MissionLaunchRequest DefaultRequest(string sceneName)
     {
         var selected = new List<EquipmentId>();
         foreach (var option in equipment) selected.Add(option.Id);

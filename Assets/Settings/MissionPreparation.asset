@@ -12,8 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac9f9f99be404a2f907e3eccc0c9b836, type: 3}
   m_Name: MissionPreparation
   m_EditorClassIdentifier: Assembly-CSharp::MissionPreparationCatalog
-  sceneName: RoomSearchPrototype
-  mapName: Небольшой дом
+  maps:
+  - sceneName: RoomSearchPrototype
+    displayName: Небольшой дом
+    description: Спальня и кухня по обе стороны коридора.
+  - sceneName: ArchiveInvestigation
+    displayName: Архивный дом
+    description: За коридором открывается архив со стеллажами и вторым укрытием.
   defaultDifficulty: {fileID: 11400000, guid: 1a8a5a74a16f4ec891d4ede43c2c6942, type: 2}
   difficulties:
   - {fileID: 11400000, guid: a100361a286f4dc79fc1af3b2e9e099d, type: 2}
