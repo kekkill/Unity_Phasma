@@ -138,7 +138,7 @@ assert normal_path.name == 'DifficultyNormal.asset'
 normal = asset_data(normal_path)
 assert all(value == 1 for key, value in normal.items() if key.endswith('Multiplier'))
 build = yaml.safe_load((root / 'ProjectSettings/EditorBuildSettings.asset').read_text().split('\n', 3)[3])['EditorBuildSettings']['m_Scenes']
-assert build[0]['path'] == 'Assets/Scenes/MainMenu.unity' and build[0]['enabled'] == 1
+assert build[0]['path'] == 'Assets/Scenes/InvestigationHub.unity' and build[0]['enabled'] == 1
 for scene in build:
     if not scene['enabled']: continue
     assert (root / scene['path']).exists()
@@ -146,12 +146,35 @@ for scene in build:
 print(f'MainMenu: {len(menu)} objects; build order, difficulty/catalog, equipment and power references passed.')
 
 enabled = {Path(scene['path']).stem for scene in build if scene['enabled']}
-assert set(maps + ['InvestigationHub']).issubset(enabled)
+assert set(maps + ['InvestigationHub', 'MainMenu']).issubset(enabled)
 hub = scene_objects(assets / 'Scenes/InvestigationHub.unity')
 assert hub[1002]['MonoBehaviour']['isHub'] == 1
 assert hub[1002]['MonoBehaviour']['catalog']['guid'] == catalog_guid
 assert sum('Camera' in obj for obj in hub.values()) == 1
 assert any(obj.get('GameObject', {}).get('m_Name') == 'Planning Desk' for obj in hub.values())
+phone = hub[74000021]['MonoBehaviour']
+assert phone['m_EditorClassIdentifier'] == 'Assembly-CSharp::HubPhone'
+assert phone['menu'] == {'fileID': 1002}
+body = hub[phone['phoneBody']['fileID']]['BoxCollider']
+assert body['m_GameObject'] == phone['m_GameObject'] and body['m_Enabled'] and not body['m_IsTrigger']
+reader = hub[phone['playerInput']['fileID']]['MonoBehaviour']
+assert reader['m_EditorClassIdentifier'] == 'Assembly-CSharp::PlayerInputReader'
+assert reader['inputActions']['guid'] in guids
+assert hub[330585546]['Transform']['m_Father'] == {'fileID': 1277915012}
+assert hub[1277915014]['MonoBehaviour']['headTransform'] == {'fileID': 330585546}
+assert phone['playerCamera'] == {'fileID': 330585545}
+assert all(hub[i]['BoxCollider']['m_Enabled'] for i in range(74000000, 74000010))
+ring_path = Path(str(guids[phone['ring']['guid']])[:-5])
+with wave.open(str(ring_path), 'rb') as stream:
+    rate = stream.getframerate()
+    assert stream.getnframes() == rate * 2 and stream.getnchannels() == 1 and stream.getsampwidth() == 2
+    ring = struct.unpack('<' + 'h' * (rate * 2), stream.readframes(rate * 2))
+    assert max(map(abs, ring[:rate // 2])) > 1000
+    assert not any(ring[rate // 2:rate * 9 // 10])
+    assert max(map(abs, ring[rate:rate * 14 // 10])) > 1000
+    assert not any(ring[rate * 15 // 10:])
+print('Hub player, room colliders, dispatch phone references and two ring bursts passed.')
+
 
 archive = scene_objects(assets / 'Scenes/ArchiveInvestigation.unity')
 def archive_component(fid): return archive[fid]['MonoBehaviour']
@@ -205,7 +228,7 @@ for field in ['playerStep', 'ghostStep', 'ghostLoop', 'huntStart', 'huntEnd', 'd
         pcm = stream.readframes(stream.getnframes())
     samples = struct.unpack('<' + 'h' * (len(pcm) // 2), pcm)
     assert 0 < max(abs(value) for value in samples) < 32767 and samples[0] == 0, f'Empty/clipped clip: {clip}'
-assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav')) < 512 * 1024
+assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav')) < 640 * 1024
 sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
 print('Hunt entrance/lighting/audio links and nine bounded mono PCM clips passed.')

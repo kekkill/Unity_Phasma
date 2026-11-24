@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,15 +15,19 @@ public class MainMenuScreen : MonoBehaviour
     private CanvasGroup controls;
     private RectTransform content;
     private Text status;
+    private HubPhone phone;
+    public bool IsOpen => page != null && page.activeSelf;
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
-        if (catalog == null) { BeginPage("Не назначены настройки подготовки"); return; }
         if (!isHub)
         {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             ShowHome();
             return;
         }
+
+        if (catalog == null) return;
 
         var previous = MissionFlow.PreparationDraft ?? MissionFlow.CurrentRequest;
         map = catalog.Maps.FirstOrDefault(option => option.SceneName == previous?.SceneName)
@@ -30,8 +35,46 @@ public class MainMenuScreen : MonoBehaviour
         difficulty = previous?.Difficulty ?? catalog.DefaultDifficulty;
         foreach (var option in catalog.Equipment)
             if (previous == null || previous.Includes(option.Id)) equipment.Add(option.Id);
-        ShowPreparation();
     }
+
+    public void OpenFromPhone(HubPhone source)
+    {
+        phone = source;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        if (catalog == null)
+        {
+            BeginPage("Не назначены настройки подготовки");
+            MenuUi.Select(MenuUi.Button(content, "Закрыть", CloseToHub));
+        }
+        else ShowPreparation();
+
+        StartCoroutine(Reveal(controls));
+    }
+
+    public void CloseToHub()
+    {
+        if (!IsOpen || MissionFlow.IsLoading) return;
+        page.SetActive(false);
+        Destroy(page);
+        page = null;
+        phone.ResumeExploration();
+    }
+
+    private IEnumerator Reveal(CanvasGroup group)
+    {
+        const float duration = 0.24f;
+        group.alpha = 0f;
+        group.interactable = false;
+        while (group != null && group.gameObject.activeSelf && group.alpha < 1f)
+        {
+            yield return null;
+            if (group == null || !group.gameObject.activeSelf) yield break;
+            group.alpha = Mathf.MoveTowards(group.alpha, 1f, Time.unscaledDeltaTime / duration);
+        }
+        if (group != null) group.interactable = true;
+    }
+
     private void BeginPage(string title)
     {
         if (page != null) { page.SetActive(false); Destroy(page); }
@@ -49,7 +92,8 @@ public class MainMenuScreen : MonoBehaviour
     }
     private void ShowPreparation(bool focusDifficulty = false)
     {
-        BeginPage("Штаб расследований");
+        BeginPage("Диспетчерская");
+        MenuUi.Button(content, "Положить трубку", CloseToHub);
         MenuUi.Label(content, "Режим", 26);
         MenuUi.Label(content, "✓ Одиночная игра");
         MenuUi.Button(content, "Кооператив — позже", () => { }).interactable = false;

@@ -9,7 +9,7 @@ public static class MenuUi
 {
     private static readonly Color TextColor = new Color(0.91f, 0.94f, 0.97f);
     private static Font Font => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-    public static GameObject Create(Transform owner, string title, out RectTransform content, out CanvasGroup controls, bool showLocation = false)
+    public static GameObject Create(Transform owner, string title, out RectTransform content, out CanvasGroup controls, bool dispatchOverlay = false)
     {
         EnsureEventSystem();
         var root = new GameObject(title, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
@@ -21,13 +21,14 @@ public static class MenuUi
         scaler.referenceResolution = new Vector2(1280, 720);
         scaler.matchWidthOrHeight = 0.5f;
         controls = root.GetComponent<CanvasGroup>();
-        Image background = Image(root.transform, "Background", new Color(0.025f, 0.035f, 0.055f, showLocation ? 0.14f : 0.97f));
+        Image background = Image(root.transform, "Background", new Color(0.025f, 0.035f, 0.055f, dispatchOverlay ? 0.76f : 0.97f));
         Stretch(background.rectTransform);
         RectTransform safe = Rect(root.transform, "Safe area");
         safe.gameObject.AddComponent<MenuSafeArea>();
         RectTransform frame = Rect(safe, "Panel");
-        frame.anchorMin = new Vector2(0.08f, 0.04f);
-        frame.anchorMax = new Vector2(showLocation && Screen.width >= Screen.height * 1.5f ? 0.54f : 0.92f, 0.96f);
+        float margin = dispatchOverlay && Screen.width >= Screen.height * 1.5f ? 0.20f : 0.08f;
+        frame.anchorMin = new Vector2(margin, 0.04f);
+        frame.anchorMax = new Vector2(1f - margin, 0.96f);
         frame.offsetMin = frame.offsetMax = Vector2.zero;
         var viewportImage = Image(frame, "Viewport", new Color(0.07f, 0.09f, 0.13f));
         Stretch(viewportImage.rectTransform);
