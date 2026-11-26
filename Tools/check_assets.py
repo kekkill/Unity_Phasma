@@ -17,15 +17,18 @@ sources = list(assets.rglob('*.cs'))
 for path in sources:
     assert not parser.parse(path.read_bytes()).root_node.has_error, f'C# syntax: {path}'
     assert path.with_suffix(path.suffix + '.meta').exists(), f'Missing metadata: {path}'
+guid_format = re.compile(r"[0-9a-f]{32}")
 guids = {}
 for path in assets.rglob('*.meta'):
-    match = re.search(r'^guid: (\w+)', path.read_text(), re.M)
-    assert match, f'Missing GUID: {path}'
+    match = re.search(r'^guid: (\S+)$', path.read_text(), re.M)
+    assert match and guid_format.fullmatch(match[1]), f'Invalid metadata GUID: {path}'
     assert match[1] not in guids, f'Duplicate GUID: {path}, {guids.get(match[1])}'
     guids[match[1]] = path
 
 def scene_objects(path):
     text = path.read_text()
+    for match in re.finditer(r'\bguid:[ \t]*([^,}\s]*)', text):
+        assert guid_format.fullmatch(match[1]), f'Invalid scene GUID {match[1]!r}: {path}'
     objects = {}
     for block in re.split(r'(?=^--- !u!)', text, flags=re.M)[1:]:
         fid = int(re.search(r'&(\d+)', block)[1])
@@ -285,6 +288,10 @@ assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fil
 board = archive_component(75500505)
 assert board['m_GameObject'] == {'fileID': 75500500}
 assert board['mission'] == {'fileID': 50010005} and board['breaker'] == {'fileID': 68000001}
+board_material, = archive[75500503]['MeshRenderer']['m_Materials']
+assert board_material['fileID'] == 2100000
+assert guids[board_material['guid']] == assets / 'ArchivePresentation/ArchiveWallPlan.mat.meta'
+
 assert archive[75500504]['BoxCollider']['m_Enabled'] and not archive[75500504]['BoxCollider']['m_IsTrigger']
 for name, count in [('Easy', 3), ('Normal', 2), ('Hard', 1)]:
     assert asset_data(assets / f'Settings/Difficulty{name}.asset')['equipmentMapHints'] == count
