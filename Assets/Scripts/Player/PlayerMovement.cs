@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     {
         characterController =
             GetComponent<CharacterController>();
+        characterController.gameObject.layer = LayerMask.NameToLayer("ActorBody");
 
         inputReader =
             GetComponent<PlayerInputReader>();

@@ -68,6 +68,9 @@ public class GhostNavigation : MonoBehaviour
         hunt = GetComponent<GhostHuntController>();
         hiding = GetComponent<GhostHidingKnowledge>();
         candidatePath = new NavMeshPath();
+        int actorLayer = LayerMask.NameToLayer("ActorBody");
+        foreach (Collider body in GetComponentsInChildren<Collider>(true))
+            if (!body.isTrigger) body.gameObject.layer = actorLayer;
         agent = GetComponent<NavMeshAgent>();
         if (agent == null) agent = gameObject.AddComponent<NavMeshAgent>();
         baseAreaMask = agent.areaMask;

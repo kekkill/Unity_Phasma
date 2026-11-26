@@ -222,6 +222,16 @@ assert floor['m_LocalPosition']['z'] - floor['m_LocalScale']['z'] / 2 == 3
 print('InvestigationHub and both map choices enabled. Archive room, static geometry, hunt, power and extraction wiring passed.')
 
 
+tags = yaml.safe_load((root / 'ProjectSettings/TagManager.asset').read_text().split('\n', 3)[3])['TagManager']
+physics = yaml.safe_load((root / 'ProjectSettings/DynamicsManager.asset').read_text().split('\n', 3)[3])['PhysicsManager']
+actor = tags['layers'].index('ActorBody')
+equipment = tags['layers'].index('Equipment')
+collision_rows = struct.unpack('<32I', bytes.fromhex(physics['m_LayerCollisionMatrix']['_data']))
+assert not (collision_rows[actor] & (1 << equipment))
+assert not (collision_rows[equipment] & (1 << actor))
+assert collision_rows[actor] & 1 and collision_rows[equipment] & 1
+print('Equipment and actor bodies ignore each other and retain Default layer contacts.')
+
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
 assert areas[3]['name'] == 'Salt' and areas[4]['name'] == 'Hiding'
 input_data = json.loads((assets / 'Input/PlayerControls.inputactions').read_text())

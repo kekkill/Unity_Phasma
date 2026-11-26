@@ -137,6 +137,9 @@ public class GhostWorldInteraction : MonoBehaviour
         foreach (RaycastHit hit in hits)
         {
             if (hit.collider.transform.IsChildOf(transform) || hit.distance >= closest) continue;
+            // Equipment is reachable as a target, but cannot shield another object from the ghost.
+            if (!hit.collider.transform.IsChildOf(owner.transform) &&
+                hit.collider.GetComponentInParent<PickupItem>() != null) continue;
             closest = hit.distance; first = hit.collider;
         }
         return first == null || first.transform.IsChildOf(owner.transform);

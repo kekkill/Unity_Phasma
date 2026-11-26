@@ -15,13 +15,17 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     [Header("Player interaction noise")]
     [SerializeField, Range(0f, 1f)] private float interactionNoise = 0.85f;
     [SerializeField, Min(0.05f)] private float noiseDuration = 0.6f;
+    [SerializeField, Min(0f)] private float ghostOpenHold = 0.9f;
     private bool isOpen;
+    private float playerCloseAllowedAt;
+    private bool PlayerCloseBlocked => isOpen && Time.time < playerCloseAllowedAt;
     private readonly HashSet<object> lockOwners = new HashSet<object>();
     public bool IsLocked => lockOwners.Count > 0;
     public event Action<bool> OpenStateChanged;
 
     public string InteractionPrompt =>
         IsLocked ? "Вход заперт на время охоты" :
+        PlayerCloseBlocked ? "Дверь открыта призраком" :
         isOpen
             ? "[E] Закрыть " + displayName
             : "[E] Открыть " + displayName;
@@ -63,7 +67,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
 
     public void Interact(GameObject interactor)
     {
-        if (IsLocked) return;
+        if (IsLocked || PlayerCloseBlocked) return;
         ToggleDoor();
         var source = interactor != null ? interactor.GetComponent<GhostPerceptionTarget>() : null;
         WorldNoise.Publish(NoisePosition, source, interactionNoise, noiseDuration, WorldNoiseKind.Door,
@@ -88,7 +92,13 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     public bool TryGhostInteract(GhostInteractionContext context)
     {
         if (!CanGhostInteract(context)) return false;
-        SetOpen(context.IsHunting || !isOpen);
+        bool opening = !isOpen;
+        if (opening)
+        {
+            float swingTime = Quaternion.Angle(Pivot.localRotation, openRotation) / Mathf.Max(1f, rotationSpeed);
+            playerCloseAllowedAt = Time.time + swingTime + ghostOpenHold;
+        }
+        SetOpen(opening);
         return true;
     }
     public void GhostInteract(GhostInteractionContext context) => TryGhostInteract(context);
@@ -98,6 +108,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
         if (value && IsLocked) return;
         bool changed = isOpen != value;
         isOpen = value;
+        if (!isOpen) playerCloseAllowedAt = 0f;
         targetRotation = isOpen ? openRotation : closedRotation;
         if (changed) OpenStateChanged?.Invoke(isOpen);
     }
