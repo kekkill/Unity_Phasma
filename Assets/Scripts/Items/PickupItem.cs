@@ -29,11 +29,11 @@ public class PickupItem : MonoBehaviour, IInteractable
     {
         colliders = GetComponentsInChildren<Collider>(true);
         originalEnabled = new bool[colliders.Length];
-        int equipmentLayer = LayerMask.NameToLayer("Equipment");
+        bool useEquipmentLayer = EquipmentCollisionLayers.TryGet(out _, out int equipmentLayer);
         for (int i = 0; i < colliders.Length; i++)
         {
             originalEnabled[i] = colliders[i].enabled;
-            if (!colliders[i].isTrigger) colliders[i].gameObject.layer = equipmentLayer;
+            if (useEquipmentLayer && !colliders[i].isTrigger) colliders[i].gameObject.layer = equipmentLayer;
         }
         itemRigidbody =
             GetComponent<Rigidbody>();

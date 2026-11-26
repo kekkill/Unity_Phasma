@@ -19,7 +19,8 @@ public class PlayerMovement : MonoBehaviour
     {
         characterController =
             GetComponent<CharacterController>();
-        characterController.gameObject.layer = LayerMask.NameToLayer("ActorBody");
+        if (EquipmentCollisionLayers.TryGet(out int actorLayer, out _))
+            characterController.gameObject.layer = actorLayer;
 
         inputReader =
             GetComponent<PlayerInputReader>();
