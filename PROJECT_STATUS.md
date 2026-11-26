@@ -7,7 +7,7 @@ Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phone
 
 ## Current batch
 
-The user reported the earlier hub and archive mission working in local Play Mode. The hub phone now plays two rings and fades to black before moving the player into a separate preparation room. The map board previews each map's description on hover and selects map and difficulty. The wall rack owns equipment selection, the terminal summarizes the mission and launches it, and the return door takes the player back to the phone room. These stations share the same launch request. The fade and player control belong to HubPhone, and station pages belong to MainMenuScreen.
+The user reported the earlier hub and archive mission working in local Play Mode. The hub phone now plays two rings and fades to black before moving the player into a separate preparation room. The map board previews each map's description on hover and selects map and difficulty. The wall rack owns equipment selection, and the terminal summarizes the mission and launches it. The phone runs once per session. Returning from results or re-entering the hub after the call spawns the player directly in preparation. These stations share the same launch request. The fade and player control belong to HubPhone, and station pages belong to MainMenuScreen.
 
 ArchiveInvestigation extends the original layout with a connected ghost room, shelves, a worktable, a powered light and a second hiding cabinet. It uses the existing safe annex, hunt seal, evidence, extraction and result systems.
 

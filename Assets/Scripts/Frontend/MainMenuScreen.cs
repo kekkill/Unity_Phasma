@@ -94,7 +94,7 @@ public class MainMenuScreen : MonoBehaviour
         MenuUi.Label(content, "Найдите улики, определите призрака и вернитесь живым.");
         status = MenuUi.Label(content, "");
         MenuUi.Select(MenuUi.Button(content, "В штаб", () =>
-            ReportLoad(MissionFlow.TryReturnToPreparation(out string reason), reason)));
+            ReportLoad(MissionFlow.TryEnterHub(out string reason), reason)));
         MenuUi.Button(content, "Настройки", ShowSettings);
         if (!Application.isMobilePlatform) MenuUi.Button(content, "Выйти", Quit);
     }

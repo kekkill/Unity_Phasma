@@ -165,11 +165,12 @@ assert hub[1277915014]['MonoBehaviour']['headTransform'] == {'fileID': 330585546
 assert phone['playerCamera'] == {'fileID': 330585545}
 assert all(hub[i]['BoxCollider']['m_Enabled'] for i in range(74000000, 74000010))
 assert phone['preparationArrival'] == {'fileID': 75003101}
-assert phone['hubArrival'] == {'fileID': 75003111}
+assert 'hubArrival' not in phone
+assert 75001035 not in hub and hub[75001034]['BoxCollider']['m_Enabled']
 arrival = hub[75003101]['Transform']['m_LocalPosition']
 assert 18.5 < arrival['x'] < 29.5 and -4.5 < arrival['z'] < 4.5 and arrival['y'] > 1
 assert all(hub[75000004 + 10*i]['BoxCollider']['m_Enabled'] for i in range(6))
-for kind in range(4):
+for kind in range(3):
     base = 75001000 + 10*kind
     station = hub[base+5]['MonoBehaviour']
     assert station['kind'] == kind and station['prompt']
@@ -186,7 +187,7 @@ with wave.open(str(ring_path), 'rb') as stream:
     assert not any(ring[rate // 2:rate * 9 // 10])
     assert max(map(abs, ring[rate:rate * 14 // 10])) > 1000
     assert not any(ring[rate * 15 // 10:])
-print('Hub player, arrival points, four preparation stations, colliders and two ring bursts passed.')
+print('Hub player, preparation arrival, three preparation stations, colliders and two ring bursts passed.')
 
 
 archive = scene_objects(assets / 'Scenes/ArchiveInvestigation.unity')

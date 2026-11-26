@@ -1,6 +1,6 @@
 # Roadmap
 
-1. Current batch adds a separate preparation room reached from the hub phone. It has a map board, equipment rack, launch terminal and return door.
+1. Current batch adds a separate preparation room reached from the hub phone. It has a map board, equipment rack, and launch terminal. The phone is the one-way entry to preparation for the session.
 2. Check the phone transfer, all stations, their shared selection and mission return in ordinary Play Mode. See [mission preparation](Docs/MISSION_PREPARATION.md).
 3. SoundHidingValidation and its menu stay removed. Do not restore them or add an elaborate replacement without agreement. Explain changed gameplay checks in plain language, distinguish static checks from actual Unity execution. Distance-based sound-location uncertainty and visible-target chase zigzag remain deferred by the user.
 4. Phones need their own agreed batch: gameplay touch controls using the same Input System actions; migrate remaining OnGUI HUD/journal; mobile URP/build settings; actual device layouts/performance. Current scalable menu/results Canvas and safe-area support have not been verified on phones and do not establish mobile readiness.
