@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <mxfile host="app.diagrams.net">
-  <diagram id="archive-layout" name="Архивный дом">
-    <mxGraphModel grid="1" gridSize="10" page="1" pageWidth="1200" pageHeight="1020">
+  <diagram id="archive-layout" name="Улица и первый этаж">
+    <mxGraphModel grid="1" gridSize="10" page="1" pageWidth="1430" pageHeight="1160">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="title" value="Архивный дом" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=30;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="100" y="28" width="720" height="38" />
         </mxCell>
-        <mxCell id="subtitle" value="Черновая планировка · вид сверху · 1 метр ≈ 50 единиц схемы" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+        <mxCell id="subtitle" value="План 01 · улица и первый этаж · 1 м ≈ 50 ед." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=14;fontStyle=0;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="100" y="62" width="730" height="24" />
         </mxCell>
         <mxCell id="archive" value="" style="whiteSpace=wrap;fillColor=#eef1f3;strokeColor=none;" vertex="1" parent="1">
@@ -23,8 +23,14 @@
         <mxCell id="kitchen" value="" style="whiteSpace=wrap;fillColor=#f8f0dd;strokeColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="550" y="380" width="250" height="300" />
         </mxCell>
-        <mxCell id="safe" value="" style="whiteSpace=wrap;fillColor=#d7edf6;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="350" y="680" width="200" height="170" />
+        <mxCell id="workroom" value="" style="fillColor=#d7edf6;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="800" y="485" width="222" height="195" />
+        </mxCell>
+        <mxCell id="yard" value="" style="fillColor=#eff2e8;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="243" y="693" width="446" height="308" />
+        </mxCell>
+        <mxCell id="street" value="" style="fillColor=#d9e1e4;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="243" y="907" width="446" height="92" />
         </mxCell>
         <mxCell id="north" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="100" y="120" width="700" height="8" />
@@ -33,7 +39,7 @@
           <mxGeometry as="geometry" x="100" y="120" width="8" height="568" />
         </mxCell>
         <mxCell id="east" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="792" y="120" width="8" height="568" />
+          <mxGeometry as="geometry" x="792" y="120" width="8" height="478" />
         </mxCell>
         <mxCell id="partition-a" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="100" y="376" width="66" height="8" />
@@ -62,15 +68,6 @@
         <mxCell id="south-right" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="490" y="676" width="310" height="8" />
         </mxCell>
-        <mxCell id="annex-left" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="346" y="680" width="8" height="170" />
-        </mxCell>
-        <mxCell id="annex-right" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="546" y="680" width="8" height="170" />
-        </mxCell>
-        <mxCell id="annex-south" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="346" y="846" width="208" height="8" />
-        </mxCell>
         <mxCell id="archive-west" value="Проход" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="166" y="371" width="80" height="18" />
         </mxCell>
@@ -83,8 +80,8 @@
         <mxCell id="kitchen-door" value="Дверь" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="520" y="572" width="60" height="26" />
         </mxCell>
-        <mxCell id="hunt-door" value="Вход" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="410" y="671" width="80" height="18" />
+        <mxCell id="hunt-door" value="Парадная дверь" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="385" y="667" width="130" height="26" />
         </mxCell>
         <mxCell id="cabinet1" value="Шкаф" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="120" y="448" width="62" height="55" />
@@ -93,10 +90,10 @@
           <mxGeometry as="geometry" x="122" y="529" width="78" height="113" />
         </mxCell>
         <mxCell id="kitchen-counter" value="Столешница" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="695" y="426" width="84" height="47" />
+          <mxGeometry as="geometry" x="678" y="428" width="100" height="46" />
         </mxCell>
         <mxCell id="kitchen-table" value="Стол" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="684" y="522" width="78" height="65" />
+          <mxGeometry as="geometry" x="660" y="503" width="89" height="56" />
         </mxCell>
         <mxCell id="shelf-a" value="Стеллаж" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="280" y="174" width="42" height="111" />
@@ -108,19 +105,13 @@
           <mxGeometry as="geometry" x="548" y="178" width="42" height="108" />
         </mxCell>
         <mxCell id="worktable" value="Рабочий стол" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="635" y="163" width="127" height="50" />
+          <mxGeometry as="geometry" x="606" y="255" width="140" height="44" />
         </mxCell>
         <mxCell id="cabinet2" value="Шкаф" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="124" y="164" width="75" height="52" />
         </mxCell>
         <mxCell id="breaker" value="Щиток" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="478" y="631" width="58" height="29" />
-        </mxCell>
-        <mxCell id="gear" value="Приборы" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="364" y="740" width="64" height="70" />
-        </mxCell>
-        <mxCell id="exit" value="Терминал" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="456" y="797" width="82" height="35" />
         </mxCell>
         <mxCell id="archive-label" value="Архив" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=19;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="365" y="304" width="160" height="42" />
@@ -134,26 +125,169 @@
         <mxCell id="kitchen-label" value="Кухня" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=19;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="573" y="392" width="128" height="42" />
         </mxCell>
-        <mxCell id="safe-label" value="Безопасная зона" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=19;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="360" y="694" width="183" height="42" />
+        <mxCell id="east-lower" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="792" y="665" width="8" height="15" />
         </mxCell>
-        <mxCell id="legend-title" value="Как читается план" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=20;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="126" width="330" height="36" />
+        <mxCell id="workroom-north" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="792" y="485" width="230" height="8" />
         </mxCell>
-        <mxCell id="legend-routes" value="Кольцо&#10;Коридор → спальня → архив → кухня → коридор." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="178" width="305" height="75" />
+        <mxCell id="workroom-east" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1014" y="485" width="8" height="195" />
         </mxCell>
-        <mxCell id="legend-access" value="Проёмы около 1,6 м. Стеллажи стоят с проходами с двух сторон." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="270" width="305" height="72" />
+        <mxCell id="workroom-south" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="792" y="672" width="230" height="8" />
         </mxCell>
-        <mxCell id="legend-furniture" value="Мебель стоит на месте. Игрок и призрак обходят её. Шкафы открываются, если у них есть механика укрытия." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="368" width="305" height="110" />
+        <mxCell id="workroom-door" value="Дверь" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="764" y="620" width="70" height="22" />
         </mxCell>
-        <mxCell id="legend-annex" value="У пристройки один вход. В охоту он блокируется, а пристройка остаётся безопасной зоной." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="492" width="305" height="99" />
+        <mxCell id="workroom-label" value="Рабочая комната" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="814" y="494" width="183" height="30" />
         </mxCell>
-        <mxCell id="legend-validation" value="Размеры предварительные. На блок-ауте проверить обзор, проходы и NavMesh у дверей и стеллажей." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
-          <mxGeometry as="geometry" x="840" y="610" width="305" height="96" />
+        <mxCell id="monitor" value="Камеры" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="819" y="529" width="78" height="43" />
+        </mxCell>
+        <mxCell id="supply" value="Приборы" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="910" y="529" width="87" height="43" />
+        </mxCell>
+        <mxCell id="phone" value="Телефон&lt;br&gt;вызов машины" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e9f4f8;strokeColor=#5d8fa4;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="906" y="608" width="89" height="48" />
+        </mxCell>
+        <mxCell id="stairs-down" value="A · Лестница ↓&lt;br&gt;в подвал" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dce6f5;strokeColor=#647da2;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="690" y="139" width="96" height="99" />
+        </mxCell>
+        <mxCell id="porch" value="Крыльцо" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#f7f1e2;strokeColor=#af9d7a;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="360" y="696" width="180" height="47" />
+        </mxCell>
+        <mxCell id="path" value="Дорожка" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#f7f1e2;strokeColor=#af9d7a;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="394" y="768" width="112" height="54" />
+        </mxCell>
+        <mxCell id="street-label" value="Улица" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="260" y="951" width="85" height="29" />
+        </mxCell>
+        <mxCell id="car" value="Машина компании&lt;br&gt;высадка и эвакуация" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e4f1f3;strokeColor=#4b8088;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="354" y="921" width="192" height="59" />
+        </mxCell>
+        <mxCell id="start" value="Старт управления&lt;br&gt;после высадки" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="374" y="846" width="152" height="40" />
+        </mxCell>
+        <mxCell id="road-start" edge="1" parent="1" source="car" target="start" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeColor=#378b67;strokeWidth=2;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="start-path" edge="1" parent="1" source="start" target="path" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeColor=#378b67;strokeWidth=2;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="path-porch" edge="1" parent="1" source="path" target="porch" style="html=1;edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=block;endFill=1;strokeColor=#378b67;strokeWidth=2;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="escape-label" value="После звонка: обратный путь&lt;br&gt;от крыльца к машине" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="524" y="796" width="156" height="70" />
+        </mxCell>
+        <mxCell id="legend-title" value="Маршрут миссии" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=21;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="127" width="340" height="33" />
+        </mxCell>
+        <mxCell id="legend-arrival" value="1 · Прибытие" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=17;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="176" width="336" height="25" />
+        </mxCell>
+        <mxCell id="legend-arrival-detail" value="Игрок на переднем пассажирском сиденье. Водитель — сотрудник компании. После остановки и короткого жеста напарника игрок выходит. Управление передаётся у машины, затем она уезжает." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="207" width="323" height="121" />
+        </mxCell>
+        <mxCell id="legend-door" value="2 · Вход и расследование" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=17;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="346" width="336" height="25" />
+        </mxCell>
+        <mxCell id="legend-door-detail" value="С улицы можно войти через парадную дверь. После входа дверь закрывается и блокирует выход до звонка. Лестница A в архиве ведёт в подвал." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="377" width="323" height="85" />
+        </mxCell>
+        <mxCell id="legend-call" value="3 · Звонок и выезд" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=17;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="483" width="336" height="25" />
+        </mxCell>
+        <mxCell id="legend-call-detail" value="Телефон в рабочей комнате вызывает машину. Реплика на английском: «We’ll be there in one minute.» Парадная дверь доступна сразу после звонка. Машина возвращается к месту высадки через минуту. Взаимодействие с машиной завершает миссию." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="514" width="323" height="133" />
+        </mxCell>
+        <mxCell id="legend-pacing" value="Темп" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=17;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="675" width="336" height="25" />
+        </mxCell>
+        <mxCell id="legend-pacing-detail" value="Выраженные изменения дома и реальности в основном приходятся на финал. Конкретные события и особые предметы остаются на этапе идей." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="706" width="323" height="91" />
+        </mxCell>
+        <mxCell id="legend-scale" value="Проёмы ≈ 1,6 м. Мебель закреплена. Проверить ширину проходов на блок-ауте." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1051" y="843" width="323" height="78" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="archive-basement" name="Подвал">
+    <mxGraphModel grid="1" gridSize="10" page="1" pageWidth="1220" pageHeight="630">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Подвал «Архивного дома»" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=30;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="28" width="720" height="39" />
+        </mxCell>
+        <mxCell id="subtitle" value="План 02 · уровень −1 · лестница A совпадает с лестницей в архиве" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="64" width="860" height="26" />
+        </mxCell>
+        <mxCell id="storage" value="" style="fillColor=#f0ece5;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="432" y="120" width="232" height="260" />
+        </mxCell>
+        <mxCell id="landing" value="" style="fillColor=#eef1f3;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="664" y="120" width="136" height="180" />
+        </mxCell>
+        <mxCell id="service" value="" style="fillColor=#e6eaed;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="664" y="300" width="136" height="80" />
+        </mxCell>
+        <mxCell id="outer-n" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="432" y="120" width="368" height="8" />
+        </mxCell>
+        <mxCell id="outer-w" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="432" y="120" width="8" height="260" />
+        </mxCell>
+        <mxCell id="outer-e" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="792" y="120" width="8" height="260" />
+        </mxCell>
+        <mxCell id="outer-s" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="432" y="372" width="368" height="8" />
+        </mxCell>
+        <mxCell id="partition-n" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="660" y="120" width="8" height="141" />
+        </mxCell>
+        <mxCell id="partition-s" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="660" y="340" width="8" height="40" />
+        </mxCell>
+        <mxCell id="partition-service" value="" style="fillColor=#263746;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="733" y="296" width="59" height="8" />
+        </mxCell>
+        <mxCell id="storage-label" value="Кладовая" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="454" y="132" width="170" height="27" />
+        </mxCell>
+        <mxCell id="shelf-left" value="Стеллаж" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="454" y="176" width="52" height="105" />
+        </mxCell>
+        <mxCell id="shelf-upper" value="Стеллаж" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="548" y="168" width="81" height="37" />
+        </mxCell>
+        <mxCell id="crates" value="Ящики" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e8dfd3;strokeColor=#a88c6e;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="458" y="312" width="78" height="37" />
+        </mxCell>
+        <mxCell id="storage-opening" value="Проём" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#e1f0e8;strokeColor=#539474;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="625" y="289" width="75" height="23" />
+        </mxCell>
+        <mxCell id="stairs-up" value="A · Лестница ↑&lt;br&gt;в архив" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dce6f5;strokeColor=#647da2;fontColor=#263746;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="690" y="139" width="96" height="99" />
+        </mxCell>
+        <mxCell id="landing-label" value="Площадка" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="685" y="254" width="103" height="30" />
+        </mxCell>
+        <mxCell id="service-label" value="Тех. ниша" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="679" y="327" width="107" height="29" />
+        </mxCell>
+        <mxCell id="legend-title" value="Связь с домом" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=21;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="850" y="127" width="310" height="34" />
+        </mxCell>
+        <mxCell id="legend-stair" value="Спуск из архива ведёт на площадку. Из неё можно пройти в кладовую и техническую нишу. Выход из подвала — по той же лестнице." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=16;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="850" y="172" width="315" height="110" />
+        </mxCell>
+        <mxCell id="legend-clearance" value="Между стеллажами и проёмом остаётся проход. На блок-ауте проверить обход мебели и движение призрака по лестнице." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontColor=#263746;fontSize=15;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="850" y="306" width="315" height="105" />
         </mxCell>
       </root>
     </mxGraphModel>
