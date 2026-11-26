@@ -1,6 +1,6 @@
 # Roadmap
 
-1. Current batch implements the Archive street, house loop, workroom and basement. Verify the passenger intro, navigation on both floors, phone call, 60-second pickup and departure in Play Mode.
+1. Verify the Archive workroom map at all difficulties, cold breath, crouch volume, and basement lighting. Finish an ordinary Play Mode run through the passenger intro, both floors and the return car. Use modular environment assets to replace representative blockout props after the route is confirmed.
 2. Profile the Archive PC build during exploration, hunt and monitor use. Use the same route on Android once a representative build and device are available. See the [mission route and profiling check](Docs/ARCHIVE_MISSION.md).
 3. SoundHidingValidation and its menu stay removed. Do not restore them or add an elaborate replacement without agreement. Explain changed gameplay checks in plain language, distinguish static checks from actual Unity execution. Distance-based sound-location uncertainty and visible-target chase zigzag remain deferred by the user.
 4. Phones need their own agreed batch: gameplay touch controls using the same Input System actions; migrate remaining OnGUI HUD/journal; mobile URP/build settings; actual device layouts/performance. Current scalable menu/results Canvas and safe-area support have not been verified on phones and do not establish mobile readiness.

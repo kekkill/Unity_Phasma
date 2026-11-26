@@ -281,6 +281,38 @@ assert not ceiling_above(6.8, 6.0)
 ramp = archive[75000151]['Transform']
 assert 25 < -ramp['m_LocalEulerAnglesHint']['x'] < 40
 assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fileID': 75500111}]
+
+board = archive_component(75500505)
+assert board['m_GameObject'] == {'fileID': 75500500}
+assert board['mission'] == {'fileID': 50010005} and board['breaker'] == {'fileID': 68000001}
+assert archive[75500504]['BoxCollider']['m_Enabled'] and not archive[75500504]['BoxCollider']['m_IsTrigger']
+for name, count in [('Easy', 3), ('Normal', 2), ('Hard', 1)]:
+    assert asset_data(assets / f'Settings/Difficulty{name}.asset')['equipmentMapHints'] == count
+assert [hint['reserveIndex'] for hint in board['hints']] == [3, 4, 0]
+assert [hint['floor'] for hint in board['hints']] == [1, 0, 1]
+assert [floor['title'] for floor in board['floors']] == ['Подвал', 'Первый этаж']
+for hint in board['hints']:
+    position = archive_setup['reservePositions'][hint['reserveIndex']]
+    collider = archive[hint['room']['fileID']]['BoxCollider']
+    owner = archive[collider['m_GameObject']['fileID']]['GameObject']
+    transform = archive[owner['m_Component'][0]['component']['fileID']]['Transform']
+    for axis in ('x', 'y', 'z'):
+        center = transform['m_LocalPosition'][axis] + collider['m_Center'][axis]
+        assert abs(position[axis] - center) < collider['m_Size'][axis] / 2
+
+breath = archive_component(75500510)
+assert breath['m_GameObject'] == {'fileID': 1277915010} and breath['coldThreshold'] == 7
+textures = [(floor['plan'], (864, 576)) for floor in board['floors']]
+textures += [(board['icons'], (576, 64)), (breath['vapor'], (128, 92))]
+for reference, dimensions in textures:
+    assert reference['fileID'] == 2800000
+    texture = Path(str(guids[reference['guid']])[:-5]).read_bytes()
+    assert texture[:8] == b'\x89PNG\r\n\x1a\n' and struct.unpack('>II', texture[16:24]) == dimensions
+assert archive[75200202]['Light']['m_Shadows']['m_Type'] == 1
+assert archive[75200202]['Light']['m_Type'] == 0
+assert archive_component(75200201)['m_AdditionalLightsShadowResolutionTier'] == 0
+print('Workroom map floors, reserve locations, difficulty limits, PNG assets, breath and basement spotlight passed.')
+
 print('Archive floor ring, stair geometry, safe workroom, phone, outdoor pickup point and camera links passed.')
 
 

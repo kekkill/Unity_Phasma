@@ -10,6 +10,8 @@ public class MissionDifficultyProfile : ScriptableObject
     [SerializeField, Min(0.1f)] private float huntDurationMultiplier = 1f;
     [SerializeField, Min(0.1f)] private float huntCheckIntervalMultiplier = 1f;
     [SerializeField, Min(0f)] private float warningDurationMultiplier = 1f;
+    [SerializeField, Min(0)] private int equipmentMapHints = 2;
+    public int EquipmentMapHints => Mathf.Max(0, equipmentMapHints);
     public string DisplayName => displayName;
     public string Description => description;
     public float InitialAngerMultiplier => Mathf.Max(0f, initialAngerMultiplier);

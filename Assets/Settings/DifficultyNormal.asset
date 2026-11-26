@@ -19,3 +19,4 @@ MonoBehaviour:
   huntDurationMultiplier: 1
   huntCheckIntervalMultiplier: 1
   warningDurationMultiplier: 1
+  equipmentMapHints: 2

@@ -13,6 +13,7 @@ public class PlayerNoiseEmitter : MonoBehaviour
     private float currentNoiseLevel;
 
     private CharacterController characterController;
+    private PlayerCrouch crouch;
 
     public float CurrentNoiseLevel =>
         currentNoiseLevel;
@@ -21,6 +22,7 @@ public class PlayerNoiseEmitter : MonoBehaviour
     {
         characterController =
             GetComponent<CharacterController>();
+        crouch = GetComponent<PlayerCrouch>();
     }
 
     private void Update()
@@ -49,7 +51,7 @@ public class PlayerNoiseEmitter : MonoBehaviour
                 );
         }
 
-        currentNoiseLevel = movementNoise;
+        currentNoiseLevel = crouch != null && crouch.IsCrouched ? movementNoise * 0.55f : movementNoise;
     }
 
     public void EmitNoise(

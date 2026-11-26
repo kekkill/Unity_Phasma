@@ -5,9 +5,15 @@ public class PlayerFootstepAudio : MonoBehaviour
 {
     private CharacterController body;
     private PlayerLifeState life;
+    private PlayerCrouch crouch;
     private Vector3 previousPosition;
     private float travelled;
-    private void Awake() { body = GetComponent<CharacterController>(); life = GetComponent<PlayerLifeState>(); }
+    private void Awake()
+    {
+        body = GetComponent<CharacterController>();
+        life = GetComponent<PlayerLifeState>();
+        crouch = GetComponent<PlayerCrouch>();
+    }
     private void OnEnable() { previousPosition = transform.position; travelled = 0f; }
     private void LateUpdate()
     {
@@ -23,6 +29,8 @@ public class PlayerFootstepAudio : MonoBehaviour
         travelled %= audioWorld.Profile.PlayerStride;
         float speed = Vector3.ProjectOnPlane(body.velocity, Vector3.up).magnitude;
         Vector3 foot = new Vector3(transform.position.x, body.bounds.min.y + 0.03f, transform.position.z);
-        WorldAudio.Play(SoundCue.PlayerStep, foot, Mathf.Lerp(0.18f, 0.5f, Mathf.Clamp01(speed / 6.5f)));
+        float volume = Mathf.Lerp(0.18f, 0.5f, Mathf.Clamp01(speed / 6.5f));
+        if (crouch != null && crouch.IsCrouched) volume *= 0.45f;
+        WorldAudio.Play(SoundCue.PlayerStep, foot, volume);
     }
 }

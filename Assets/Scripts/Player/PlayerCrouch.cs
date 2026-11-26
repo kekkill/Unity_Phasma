@@ -20,6 +20,9 @@ public class PlayerCrouch : MonoBehaviour
     private CharacterController characterController;
     private PlayerInputReader inputReader;
 
+    public bool IsCrouched => characterController != null &&
+        characterController.height < (standingHeight + crouchingHeight) * 0.5f;
+
     private float standingCenterY;
     private float crouchingCenterY;
 

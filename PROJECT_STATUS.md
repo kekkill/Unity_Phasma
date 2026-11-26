@@ -12,6 +12,8 @@ Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phone
 
 ## Current batch
 
+The Archive workroom has an interactive two-floor map. The breaker is marked on the ground floor. Three reserve locations use icons for the actual assigned items, with three, two or one hints on Easy, Normal or Hard. A marker disappears when its item is carried away. Below 7 °C the Archive player sees a brief first-person breath effect. Crouching reduces step volume and the player's movement noise heard by the ghost. The Archive uses warmer workroom lighting, cooler archive lighting and one low-tier shadowed basement spotlight on the existing PC profile. Static checks passed. Unity compilation and an ordinary Play Mode check are pending.
+
 Equipment ignores contact with actor colliders through per-collider filtering. Floor and wall collisions, item pickup and deliberate ghost throws remain available. Doors opened by a ghost block manual closing while the door swings, plus 0.9 seconds. The intended archive extension is documented as an editable [floor plan](Docs/ARCHIVE_LAYOUT.drawio). Copied projects use the same contact filtering with the Assets update alone. The user confirmed in local Play Mode that player and ghost movement no longer pushes equipment. The three equipment contact lookups now use the current Unity 6.6 API in response to CS0618 warnings. Static checks passed. Unity recompilation of the lookup change and door timing remain to be verified.
 
 

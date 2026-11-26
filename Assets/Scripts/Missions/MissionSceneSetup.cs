@@ -17,6 +17,7 @@ public class MissionSceneSetup : MonoBehaviour
     [SerializeField] private Vector3[] reservePositions = Array.Empty<Vector3>();
     private readonly List<EquipmentSpawn> createdEquipment = new();
     private MissionLaunchRequest request;
+    private EquipmentSpawn[] reserveEquipment;
     public bool UsesCarriedEquipment => carriedInventory != null;
     public MissionDifficultyProfile Difficulty => request != null ? request.Difficulty : null;
     public bool Includes(EquipmentId id) => request == null || request.Includes(id);
@@ -37,6 +38,7 @@ public class MissionSceneSetup : MonoBehaviour
     {
         if (!UsesCarriedEquipment) return;
 
+        reserveEquipment = new EquipmentSpawn[reservePositions.Length];
         int reserveIndex = 0;
         foreach (var spawn in equipment)
             AssignEquipment(spawn, ref reserveIndex);
@@ -50,6 +52,26 @@ public class MissionSceneSetup : MonoBehaviour
         if (spawn.item == null || !spawn.item.TryGetComponent(out PickupItem item)) return;
         if (Includes(spawn.id) && carriedInventory.TryAdd(item)) return;
         if (reserveIndex < reservePositions.Length)
+        {
+            reserveEquipment[reserveIndex] = spawn;
             spawn.item.transform.position = reservePositions[reserveIndex++];
+        }
+    }
+
+    public bool TryGetReserve(int index, out EquipmentId id, out PickupItem item)
+    {
+        var spawn = reserveEquipment != null && index >= 0 && index < reserveEquipment.Length
+            ? reserveEquipment[index] : null;
+        id = spawn != null ? spawn.id : default;
+        item = null;
+        return spawn != null && spawn.item != null && spawn.item.TryGetComponent(out item);
+    }
+
+    public string EquipmentName(EquipmentId id)
+    {
+        if (catalog != null)
+            foreach (var option in catalog.Equipment)
+                if (option.Id == id) return option.DisplayName;
+        return id.ToString();
     }
 }
