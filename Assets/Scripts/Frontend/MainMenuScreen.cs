@@ -35,8 +35,11 @@ public class MainMenuScreen : MonoBehaviour
         map = catalog.Maps.FirstOrDefault(option => option.SceneName == previous?.SceneName)
             ?? catalog.Maps.FirstOrDefault();
         difficulty = previous?.Difficulty ?? catalog.DefaultDifficulty;
-        foreach (var option in catalog.Equipment)
-            if (previous == null || previous.Includes(option.Id)) equipment.Add(option.Id);
+        var options = catalog.Equipment;
+        var selected = previous == null
+            ? options.Take(PlayerInventory.SlotCount)
+            : options.Where(option => previous.Includes(option.Id));
+        equipment.UnionWith(selected.Select(option => option.Id));
         LimitCarriedEquipment();
     }
 
