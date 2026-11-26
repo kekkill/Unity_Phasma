@@ -6,6 +6,7 @@ public class PlayerItemPlacement : MonoBehaviour
 {
     [SerializeField] private Camera playerCamera;
     [SerializeField, Min(0.5f)] private float maxDistance = 3f;
+    [SerializeField] private RuntimeNavigationWorld navigationWorld;
     private PlayerInputReader input;
     private PlayerItemHolder holder;
     private PlayerInventory inventory;
@@ -60,7 +61,8 @@ public class PlayerItemPlacement : MonoBehaviour
             out surface, maxDistance, ~0, QueryTriggerInteraction.Ignore) && surface.normal.y > 0.9f;
         SaltContainer salt = selected.GetComponent<SaltContainer>();
         if (salt != null) valid &= salt.Portions > 0 && surface.collider != null &&
-            surface.collider.GetComponent<RuntimeNavigationWorld>() != null;
+            (surface.collider.GetComponent<RuntimeNavigationWorld>() != null ||
+                (navigationWorld != null && navigationWorld.SupportsSaltOn(surface.collider)));
         Vector3 forward = playerCamera.transform.forward;
         forward.y = 0f;
         rotation = forward.sqrMagnitude > 0.001f ? Quaternion.LookRotation(forward) : Quaternion.identity;

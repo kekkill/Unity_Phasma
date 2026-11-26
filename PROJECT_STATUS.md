@@ -12,9 +12,11 @@ Equipment ignores contact with actor colliders through per-collider filtering. F
 
 The user reported the earlier hub and archive mission working in local Play Mode. The hub phone now plays two rings and fades to black before moving the player into a separate preparation room. The map board previews each map's description on hover and selects map and difficulty. The wall rack owns equipment selection, and the terminal summarizes the mission and launches it. The phone runs once per session. Returning from results or re-entering the hub after the call spawns the player directly in preparation. These stations share the same launch request. The fade and player control belong to HubPhone, and station pages belong to MainMenuScreen.
 
-ArchiveInvestigation extends the original layout with a connected ghost room, shelves, a worktable, a powered light and a second hiding cabinet. It uses the existing safe annex, hunt seal, evidence, extraction and result systems.
+ArchiveInvestigation follows the two-page plan. The bedroom and kitchen connect through the archive. The archive stairs lead to a basement with a dedicated light switch and ghost-room eligibility. The safe side workroom houses supplies, a two-channel monitor and the dispatch phone. Three selected items start in inventory. Three more are in the workroom, one in the bedroom and one in the basement.
 
-Static checks cover the preparation room, arrivals, station colliders and the phone clip. Unity compilation and Play Mode for this batch remain pending. See [mission preparation](Docs/MISSION_PREPARATION.md).
+The Archive-only route starts in the passenger seat with a masked driver gesture and hands control over by the curb. After entry the door seals until the phone call confirms the journal choice. The English reply is synthesized placeholder audio. The pickup car arrives after 60 game seconds. Boarding plays the departure before opening the existing result screen. The ghost NavMesh excludes the safe workroom and street. The monitor renders one 320×180 feed at up to five frames per second while open.
+
+Static checks cover the route and room graph, basement ramp, lighting, gear positions and voice format. Unity compilation, Play Mode, real NavMesh movement and FPS measurements remain pending. See [mission preparation](Docs/MISSION_PREPARATION.md).
 
 ## Implemented systems
 - Player movement/look/crouch/sprint, per-participant input action instances, interaction UI and a three-slot personal inventory with one selected item in hand.

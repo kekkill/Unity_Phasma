@@ -8,6 +8,7 @@ public class Room : MonoBehaviour
     [Header("Connections")]
     [SerializeField] private Room[] connectedRooms = new Room[0];
     [SerializeField] private bool canBeGhostRoom = true;
+    [SerializeField] private bool checkHeight;
     public Room[] ConnectedRooms => connectedRooms;
     public bool CanBeGhostRoom => canBeGhostRoom;
     public Vector3 FloorCenter => transform.TransformPoint(
@@ -82,8 +83,8 @@ public class Room : MonoBehaviour
     {
         Vector3 local = transform.InverseTransformPoint(worldPoint) - roomCollider.center;
         Vector3 half = roomCollider.size * 0.5f;
-        // Navigation is on the floor, so room membership is checked horizontally.
-        return Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.z) <= half.z;
+        return Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.z) <= half.z &&
+            (!checkHeight || Mathf.Abs(local.y) <= half.y + 0.12f);
     }
 
     public Vector3 GetRandomPoint()

@@ -1,7 +1,7 @@
 # Roadmap
 
-1. Current batch filters actor/equipment contacts and gives ghost-opened doors a brief hold. Verify both changes in ordinary Play Mode.
-2. Review and adjust the editable [Archive House floor plan](Docs/ARCHIVE_LAYOUT.drawio), then block out the loop and check clearances and navigation around fixed furniture.
+1. Current batch implements the Archive street, house loop, workroom and basement. Verify the passenger intro, navigation on both floors, phone call, 60-second pickup and departure in Play Mode.
+2. Profile the Archive PC build during exploration, hunt and monitor use. Use the same route on Android once a representative build and device are available. See the [mission route and profiling check](Docs/ARCHIVE_MISSION.md).
 3. SoundHidingValidation and its menu stay removed. Do not restore them or add an elaborate replacement without agreement. Explain changed gameplay checks in plain language, distinguish static checks from actual Unity execution. Distance-based sound-location uncertainty and visible-target chase zigzag remain deferred by the user.
 4. Phones need their own agreed batch: gameplay touch controls using the same Input System actions; migrate remaining OnGUI HUD/journal; mobile URP/build settings; actual device layouts/performance. Current scalable menu/results Canvas and safe-area support have not been verified on phones and do not establish mobile readiness.
 5. Later choose multiplayer transport and implement server authority, stable participant identities, ownership/replication, personal/shared journal policy, dead-player visibility/voice routing and connection handling. Current registries, sound events, hiding knowledge, inventory, mission requests and completion state remain local foundations.

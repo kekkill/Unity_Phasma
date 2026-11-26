@@ -24,9 +24,11 @@ public class MissionMapOption
     [SerializeField] private string sceneName;
     [SerializeField] private string displayName;
     [SerializeField] private string description;
+    [SerializeField, Min(0)] private int carriedSlots;
     public string SceneName => sceneName;
     public string DisplayName => displayName;
     public string Description => description;
+    public int CarriedSlots => carriedSlots;
 }
 
 [CreateAssetMenu(menuName = "Phasma/Mission Preparation Catalog")]

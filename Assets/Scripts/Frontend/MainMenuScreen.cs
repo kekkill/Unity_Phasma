@@ -16,6 +16,8 @@ public class MainMenuScreen : MonoBehaviour
     private RectTransform content;
     private Text status;
     private HubPhone phone;
+    private int CarriedSlots => map?.CarriedSlots ?? 0;
+    private bool LoadoutReady => CarriedSlots == 0 || equipment.Count == CarriedSlots;
     public bool IsOpen => page != null && page.activeSelf;
     private void Start()
     {
@@ -35,6 +37,7 @@ public class MainMenuScreen : MonoBehaviour
         difficulty = previous?.Difficulty ?? catalog.DefaultDifficulty;
         foreach (var option in catalog.Equipment)
             if (previous == null || previous.Includes(option.Id)) equipment.Add(option.Id);
+        LimitCarriedEquipment();
     }
 
     public void OpenStation(HubPhone source, HubStation.StationKind station)
@@ -108,7 +111,7 @@ public class MainMenuScreen : MonoBehaviour
         foreach (var option in catalog.Maps)
         {
             var button = MenuUi.Button(content, (map == option ? "✓ " : "") + option.DisplayName,
-                () => { map = option; ShowMapBoard(); });
+                () => { map = option; LimitCarriedEquipment(); ShowMapBoard(); });
             button.gameObject.AddComponent<MapLegendPreview>().Bind(legend, option.Description, selectedLegend);
             if (first == null || map == option) first = button;
         }
@@ -129,12 +132,21 @@ public class MainMenuScreen : MonoBehaviour
     {
         BeginPage("Стенд снаряжения");
         var close = MenuUi.Button(content, "Закрыть", CloseToHub);
-        MenuUi.Label(content, "Отмеченные предметы будут в безопасной зоне.", 20);
+        Text count = MenuUi.Label(content, LoadoutMessage(), 20);
         foreach (var option in catalog.Equipment)
         {
             EquipmentId id = option.Id;
-            MenuUi.Toggle(content, option.DisplayName, equipment.Contains(id), value =>
-            { if (value) equipment.Add(id); else equipment.Remove(id); });
+            Toggle toggle = null;
+            toggle = MenuUi.Toggle(content, option.DisplayName, equipment.Contains(id), value =>
+            {
+                if (value && CarriedSlots > 0 && equipment.Count >= CarriedSlots)
+                {
+                    toggle.SetIsOnWithoutNotify(false);
+                    return;
+                }
+                if (value) equipment.Add(id); else equipment.Remove(id);
+                count.text = LoadoutMessage();
+            });
         }
         MenuUi.Select(close);
     }
@@ -149,7 +161,8 @@ public class MainMenuScreen : MonoBehaviour
         MenuUi.Label(content, "Одиночная игра  ·  Кооператив позже", 20);
         status = MenuUi.Label(content, "");
         var launch = MenuUi.Button(content, "Начать расследование", Launch);
-        launch.interactable = map != null && difficulty != null;
+        launch.interactable = map != null && difficulty != null && LoadoutReady;
+        if (!LoadoutReady) status.text = $"Выберите {CarriedSlots} предмета на стенде.";
         MenuUi.Button(content, "Настройки", ShowSettings);
         MenuUi.Button(content, "В главное меню", () =>
         {
@@ -158,6 +171,19 @@ public class MainMenuScreen : MonoBehaviour
         });
         MenuUi.Select(launch.interactable ? launch : null);
     }
+    private string LoadoutMessage() => CarriedSlots == 0
+        ? "Отмеченные предметы будут в безопасной зоне."
+        : $"Взять с собой: {equipment.Count}/{CarriedSlots}. Остальные приборы ждут в доме.";
+
+    private void LimitCarriedEquipment()
+    {
+        if (CarriedSlots == 0 || equipment.Count <= CarriedSlots) return;
+        var carried = catalog.Equipment.Select(option => option.Id)
+            .Where(equipment.Contains).Take(CarriedSlots).ToArray();
+        equipment.Clear();
+        equipment.UnionWith(carried);
+    }
+
     private MissionLaunchRequest CreateRequest() => new MissionLaunchRequest(map?.SceneName, difficulty, equipment);
 
     private void Launch()

@@ -18,7 +18,8 @@ MonoBehaviour:
     description: Спальня и кухня по обе стороны коридора. Укрытие в спальне. Щиток у входа из безопасной пристройки.
   - sceneName: ArchiveInvestigation
     displayName: Архивный дом
-    description: За коридором находится архив со стеллажами, своей лампой и вторым шкафом. Призрак может обитать в архиве.
+    description: Дом с архивом, подвалом и отдельной рабочей комнатой. Машина возвращается через минуту после звонка.
+    carriedSlots: 3
   defaultDifficulty: {fileID: 11400000, guid: 1a8a5a74a16f4ec891d4ede43c2c6942, type: 2}
   difficulties:
   - {fileID: 11400000, guid: a100361a286f4dc79fc1af3b2e9e099d, type: 2}

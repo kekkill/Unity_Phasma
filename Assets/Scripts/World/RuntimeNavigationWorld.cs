@@ -8,6 +8,10 @@ public class RuntimeNavigationWorld : MonoBehaviour
 {
     [SerializeField] private Collider[] geometry;
     [SerializeField] private BoxCollider[] movingObstacles;
+    [SerializeField] private Collider[] additionalSaltFloors = new Collider[0];
+
+    public bool SupportsSaltOn(Collider surface) =>
+        surface != null && (surface.gameObject == gameObject || System.Array.IndexOf(additionalSaltFloors, surface) >= 0);
     private NavMeshData data;
     private NavMeshDataInstance instance;
     private readonly List<NavMeshObstacle> ownedObstacles = new();

@@ -194,32 +194,74 @@ archive = scene_objects(assets / 'Scenes/ArchiveInvestigation.unity')
 def archive_component(fid): return archive[fid]['MonoBehaviour']
 for fid in [50010002, 50010003, 50010004, 50010005, 50030063, 66000102]:
     assert archive_component(fid)['m_Enabled'] == 1
-assert archive_component(50010005) == setup
-terminal = next(obj['MonoBehaviour'] for obj in archive.values()
-                if obj.get('MonoBehaviour', {}).get('m_EditorClassIdentifier') == 'Assembly-CSharp::ExtractionTerminal')
-assert terminal['safeZone'] == archive_component(50010004)['safeZone'] == {'fileID': 50030063}
-assert terminal['session'] == archive_component(66000102)['session'] == {'fileID': 50010002}
-assert archive_component(66000102)['exitBarrier'] == {'fileID': 66000022}
-assert {'fileID': 71000101} in archive_component(513613254)['rooms']
-assert {'fileID': 71000101} in archive_component(50001003)['connectedRooms']
-assert archive_component(71000101)['connectedRooms'] == [{'fileID': 50001003}]
-assert archive_component(71000101)['canBeGhostRoom'] == 1
+archive_setup = archive_component(50010005)
+assert archive_setup['equipment'] == setup['equipment']
+assert archive_setup['carriedInventory'] == {'fileID': 1277915030}
+assert len(archive_setup['reservePositions']) >= len(catalog['equipment'])
+assert [option.get('carriedSlots', 0) for option in catalog['maps']] == [0, 3]
+
+route = archive_component(75500001)
+assert route['m_EditorClassIdentifier'] == 'Assembly-CSharp::ArchiveMissionRoute'
+assert route['workroom'] == {'fileID': 50030063}
+assert route['session'] == archive_component(66000102)['session'] == {'fileID': 50010002}
+assert archive_component(50010004)['archiveRoute'] == {'fileID': 75500001}
+assert archive_component(50010004)['safeZone'] == {'fileID': 75400003}
+assert archive_component(50030055)['route'] == {'fileID': 75500001}
+assert route['entrance'] == {'fileID': 66000002}
+assert route['entranceBarrier'] == {'fileID': 66000022}
+assert not archive_component(66000002)['initiallyOpen'] and not archive_component(66000002)['allowGhostInteraction']
+assert archive_component(66000102)['entrance'] == archive_component(66000102)['exitBarrier'] == {'fileID': 0}
+assert archive[route['entryThreshold']['fileID']]['BoxCollider']['m_IsTrigger']
+assert archive[1277915012]['Transform']['m_LocalPosition']['z'] < -3
+assert archive[route['curb']['fileID']]['Transform']['m_LocalPosition']['z'] < -3
+clip = Path(str(guids[route['dispatchReply']['guid']])[:-5])
+with wave.open(str(clip), 'rb') as stream:
+    assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (1, 2, 24000)
+    assert stream.getframerate() < stream.getnframes() < 5 * stream.getframerate()
+
+rooms = {ref['fileID'] for ref in archive_component(513613254)['rooms']}
+expected_ring = {
+    50001003: {1314804767, 1723003169},
+    1314804767: {50001003, 71000101},
+    1723003169: {50001003, 71000101},
+    71000101: {1314804767, 1723003169, 75200101},
+    75200101: {71000101},
+}
+assert rooms == set(expected_ring)
+for fid, connected in expected_ring.items():
+    room = archive_component(fid)
+    assert room['checkHeight']
+    assert {ref['fileID'] for ref in room['connectedRooms']} == connected
+
 nav = archive_component(1971981892)
 nav_geometry = {ref['fileID'] for ref in nav['geometry']}
-assert 50030012 not in nav_geometry, 'Safe annex floor must remain outside navigation.'
-assert {71000004 + 10*i for i in range(8)}.issubset(nav_geometry)
+assert {50030012, 75300034, 75300044}.isdisjoint(nav_geometry)
+assert {75000154, 75200004, 75000094}.issubset(nav_geometry)
 assert {'fileID': 72000114} in nav['movingObstacles']
 assert archive_component(72000003)['door'] == {'fileID': 72000102}
 assert {'fileID': 71010006} in archive_component(66000102)['roomLights']
 assert archive_component(71010006)['circuit'] == {'fileID': 68000005}
-# The adjoining floor surfaces meet at z=3 and the two wall segments leave a 3m opening.
-west = archive[2127530396]['Transform']
-east = archive[71000001]['Transform']
-floor = archive[71000011]['Transform']
-assert abs(east['m_LocalPosition']['x'] - east['m_LocalScale']['x'] / 2 - 1.5) < 1e-6
-assert abs(west['m_LocalPosition']['x'] + west['m_LocalScale']['x'] / 2 + 1.5) < 1e-6
-assert floor['m_LocalPosition']['z'] - floor['m_LocalScale']['z'] / 2 == 3
-print('InvestigationHub and both map choices enabled. Archive room, static geometry, hunt, power and extraction wiring passed.')
+basement_switch = archive_component(75200302)
+assert basement_switch['circuit'] == {'fileID': 68000005}
+assert archive[basement_switch['targetLight']['fileID']]['Light']['m_GameObject'] == {'fileID': 75200200}
+assert {'fileID': 75200302} in archive_component(66000102)['roomLights']
+assert {ref['fileID'] for ref in nav['additionalSaltFloors']} <= nav_geometry
+
+
+def extent_x(fid):
+    transform = archive[fid]['Transform']
+    center = transform['m_LocalPosition']['x']
+    half = transform['m_LocalScale']['x'] / 2
+    return center - half, center + half
+
+west, middle, east = map(extent_x, (2127530396, 75000071, 71000001))
+assert abs(middle[0] - west[1] - 2) < 1e-6
+assert abs(east[0] - middle[1] - 2) < 1e-6
+assert archive[75200001]['Transform']['m_LocalPosition']['y'] == -3.3
+ramp = archive[75000151]['Transform']
+assert 25 < -ramp['m_LocalEulerAnglesHint']['x'] < 40
+assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fileID': 75500111}]
+print('Archive floor ring, stair geometry, safe workroom, phone, outdoor pickup point and camera links passed.')
 
 
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
@@ -242,7 +284,7 @@ for field in ['playerStep', 'ghostStep', 'ghostLoop', 'huntStart', 'huntEnd', 'd
         pcm = stream.readframes(stream.getnframes())
     samples = struct.unpack('<' + 'h' * (len(pcm) // 2), pcm)
     assert 0 < max(abs(value) for value in samples) < 32767 and samples[0] == 0, f'Empty/clipped clip: {clip}'
-assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav')) < 640 * 1024
+assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav') if path.name != 'ArchiveDispatchReply.wav') < 640 * 1024
 sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
 print('Hunt entrance/lighting/audio links and nine bounded mono PCM clips passed.')

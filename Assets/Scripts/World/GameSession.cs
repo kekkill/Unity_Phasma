@@ -10,6 +10,7 @@ public class GameSession : MonoBehaviour
     private JournalCatalog missionCatalog;
     private JournalGhostEntry actualGhost;
     private SafeZone extractionZone;
+    private Dictionary<PlayerLifeState, string> confirmedChoices;
     public MissionPhase Phase { get; private set; }
     public bool HasEnded => Phase == MissionPhase.Ended;
     public MissionResult Result { get; private set; }
@@ -49,24 +50,57 @@ public class GameSession : MonoBehaviour
 
     public bool TryExtract(PlayerLifeState requester, out string reason)
     {
+        if (!CanExtract(requester, out reason)) return false;
+        foreach (PlayerLifeState player in participants)
+        {
+            if (player == null || !player.IsAlive) continue;
+            if (!extractionZone.Contains(player.transform.position))
+            {
+                reason = confirmedChoices == null ? "Все живые участники должны вернуться в безопасную зону." :
+                    "Все живые участники должны подойти к точке выезда.";
+                return false;
+            }
+            if (confirmedChoices == null && !TryReadChoice(player, out _))
+            { reason = "Каждый живой участник должен выбрать тип призрака в журнале (J)."; return false; }
+        }
+        EndMission(MissionEndReason.Extracted);
+        return true;
+    }
+
+    public bool TryConfirmExtraction(PlayerLifeState requester, out string reason)
+    {
+        if (!CanExtract(requester, out reason)) return false;
+        if (confirmedChoices != null) return true;
+        var choices = new Dictionary<PlayerLifeState, string>();
+        foreach (PlayerLifeState player in participants)
+        {
+            if (player == null || !player.IsAlive) continue;
+            if (!TryReadChoice(player, out string selectedId))
+            { reason = "Сначала выберите тип призрака в журнале (J)."; return false; }
+            choices.Add(player, selectedId);
+        }
+        confirmedChoices = choices;
+        return true;
+    }
+
+    private bool CanExtract(PlayerLifeState requester, out string reason)
+    {
         if (HasEnded) { reason = "Миссия уже завершена."; return false; }
         if (missionCatalog == null || actualGhost == null || extractionZone == null)
         { reason = "Миссия ещё не настроена."; return false; }
         if (!IsParticipantAlive(requester)) { reason = "Завершить расследование может только живой участник."; return false; }
         if (Phase != MissionPhase.Investigation) { reason = "Сначала войдите в дом и начните расследование."; return false; }
-        foreach (PlayerLifeState player in participants)
-        {
-            if (player == null || !player.IsAlive) continue;
-            if (!extractionZone.Contains(player.transform.position))
-            { reason = "Все живые участники должны вернуться в безопасную зону."; return false; }
-            JournalState notes = player.GetComponent<JournalState>();
-            if (notes == null || notes.Catalog != missionCatalog || missionCatalog.Find(notes.SelectedGhostId) == null)
-            { reason = "Каждый живой участник должен выбрать тип призрака в журнале (J)."; return false; }
-        }
         reason = null;
-        EndMission(MissionEndReason.Extracted);
         return true;
     }
+
+    private bool TryReadChoice(PlayerLifeState player, out string selectedId)
+    {
+        JournalState notes = player.GetComponent<JournalState>();
+        selectedId = notes != null ? notes.SelectedGhostId : null;
+        return notes != null && notes.Catalog == missionCatalog && missionCatalog.Find(selectedId) != null;
+    }
+
     public IEnumerable<GhostPerceptionTarget> LivingTargets()
     {
         if (participants == null || HasEnded) yield break;
@@ -99,6 +133,8 @@ public class GameSession : MonoBehaviour
             if (player == null) continue;
             JournalState notes = player.GetComponent<JournalState>();
             string selectedId = notes != null ? notes.SelectedGhostId : null;
+            if (confirmedChoices != null && confirmedChoices.TryGetValue(player, out string confirmedId))
+                selectedId = confirmedId;
             JournalGhostEntry selected = missionCatalog != null ? missionCatalog.Find(selectedId) : null;
             results.Add(new ParticipantMissionResult(player.name, player.IsAlive, selectedId,
                 selected != null ? selected.DisplayName : "Не выбран", actualGhost != null && selectedId == actualGhost.Id));

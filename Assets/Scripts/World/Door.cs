@@ -9,9 +9,11 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     [SerializeField] private float rotationSpeed = 180f;
 
     [SerializeField] private bool initiallyOpen;
+    [SerializeField] private bool allowGhostInteraction = true;
     [SerializeField] private Transform leafPivot;
     private Transform Pivot => leafPivot != null ? leafPivot : transform;
     [SerializeField] private string displayName = "дверь";
+    [SerializeField] private string lockedPrompt = "Вход заперт на время охоты";
     [Header("Player interaction noise")]
     [SerializeField, Range(0f, 1f)] private float interactionNoise = 0.85f;
     [SerializeField, Min(0.05f)] private float noiseDuration = 0.6f;
@@ -24,7 +26,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     public event Action<bool> OpenStateChanged;
 
     public string InteractionPrompt =>
-        IsLocked ? "Вход заперт на время охоты" :
+        IsLocked ? lockedPrompt :
         PlayerCloseBlocked ? "Дверь открыта призраком" :
         isOpen
             ? "[E] Закрыть " + displayName
@@ -84,7 +86,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     }
     public bool CanGhostInteract(GhostInteractionContext context)
     {
-        if (!isActiveAndEnabled || IsLocked || (context.IsHunting && isOpen)) return false;
+        if (!allowGhostInteraction || !isActiveAndEnabled || IsLocked || (context.IsHunting && isOpen)) return false;
         HidingZone zone = GetComponentInParent<HidingZone>();
         GhostHidingKnowledge knowledge = context.Controller != null ? context.Controller.GetComponent<GhostHidingKnowledge>() : null;
         return zone == null || (knowledge != null && (knowledge.CanEnter(zone) || zone.Contains(context.Controller.transform.position)));

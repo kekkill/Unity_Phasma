@@ -8,18 +8,20 @@ public class DefensiveItemSetup : MonoBehaviour
     [SerializeField] private Vector3 saltPosition = new Vector3(-5.2f, 0.05f, 1.6f);
     private void Awake()
     {
-        if (missionSetup == null || missionSetup.Includes(EquipmentId.Cross)) CreateCross();
-        if (missionSetup == null || missionSetup.Includes(EquipmentId.Salt)) CreateSalt();
+        if (missionSetup == null || missionSetup.UsesCarriedEquipment || missionSetup.Includes(EquipmentId.Cross)) CreateCross();
+        if (missionSetup == null || missionSetup.UsesCarriedEquipment || missionSetup.Includes(EquipmentId.Salt)) CreateSalt();
     }
     private void CreateCross()
     {
         GameObject cross = Item("Cross", crossPosition, new Vector3(0.55f, 0.84f, 0.12f), new Vector3(0f, 0.42f, 0f));
         cross.AddComponent<CrossItem>();
+        missionSetup?.RegisterCreatedEquipment(EquipmentId.Cross, cross);
     }
     private void CreateSalt()
     {
         GameObject salt = Item("Salt container", saltPosition, new Vector3(0.3f, 0.4f, 0.3f), new Vector3(0f, 0.2f, 0f));
         salt.AddComponent<SaltContainer>();
+        missionSetup?.RegisterCreatedEquipment(EquipmentId.Salt, salt);
         RuntimeVisuals.Primitive(PrimitiveType.Cylinder, salt.transform, new Vector3(0f, 0.2f, 0f),
             new Vector3(0.25f, 0.2f, 0.25f), Color.white);
     }
