@@ -162,6 +162,11 @@ assert reader['m_EditorClassIdentifier'] == 'Assembly-CSharp::PlayerInputReader'
 assert reader['inputActions']['guid'] in guids
 assert hub[330585546]['Transform']['m_Father'] == {'fileID': 1277915012}
 assert hub[1277915014]['MonoBehaviour']['headTransform'] == {'fileID': 330585546}
+hub_crouch = hub[1277915019]['MonoBehaviour']
+assert hub_crouch['m_EditorClassIdentifier'] == 'Assembly-CSharp::PlayerCrouch'
+assert hub_crouch['m_GameObject'] == {'fileID': 1277915010}
+assert hub_crouch['headTransform'] == hub[1277915014]['MonoBehaviour']['headTransform']
+assert hub_crouch['crouchingHeadY'] < hub_crouch['standingHeadY']
 assert phone['playerCamera'] == {'fileID': 330585545}
 assert all(hub[i]['BoxCollider']['m_Enabled'] for i in range(74000000, 74000010))
 assert phone['preparationArrival'] == {'fileID': 75003101}
@@ -258,6 +263,21 @@ west, middle, east = map(extent_x, (2127530396, 75000071, 71000001))
 assert abs(middle[0] - west[1] - 2) < 1e-6
 assert abs(east[0] - middle[1] - 2) < 1e-6
 assert archive[75200001]['Transform']['m_LocalPosition']['y'] == -3.3
+# The slab must close the storage side and both landings while leaving the stair shaft open.
+ceiling = [archive[fid]['Transform'] for fid in (75500201, 75500211, 75500221)]
+for fid in (75500204, 75500214, 75500224):
+    assert archive[fid]['BoxCollider']['m_Enabled'] and fid not in nav_geometry
+
+def ceiling_above(x, z):
+    return any(
+        abs(t['m_LocalPosition']['x'] - x) <= t['m_LocalScale']['x'] / 2
+        and abs(t['m_LocalPosition']['z'] - z) <= t['m_LocalScale']['z'] / 2
+        for t in ceiling
+    )
+
+assert all(ceiling_above(x, z) for x,z in [(1, 1.1), (5, 9.8), (7.8, 1.1), (7.8, 9.8)])
+assert not ceiling_above(6.8, 6.0)
+
 ramp = archive[75000151]['Transform']
 assert 25 < -ramp['m_LocalEulerAnglesHint']['x'] < 40
 assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fileID': 75500111}]

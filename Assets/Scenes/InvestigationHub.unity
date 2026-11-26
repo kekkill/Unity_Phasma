@@ -1619,6 +1619,7 @@ GameObject:
   - component: {fileID: 1277915013}
   - component: {fileID: 1277915014}
   - component: {fileID: 1277915016}
+  - component: {fileID: 1277915019}
   m_Layer: 0
   m_Name: Hub Player
   m_TagString: Untagged
@@ -5485,6 +5486,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1277915019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fb527032ff42f2439eae9794d5c5a06, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCrouch
+  headTransform: {fileID: 330585546}
+  standingHeight: 2
+  standingHeadY: 0.7
+  crouchingHeight: 1.2
+  crouchingHeadY: 0.1
+  crouchTransitionSpeed: 6
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -5,6 +5,11 @@ Updated: 2026-11-26.
 ## Scope and baseline
 Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile gameplay controls and device builds/performance are not implemented/verified yet. Main menu/results now use a scalable Canvas with safe-area handling; actual devices remain untested. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Build entry: Assets/Scenes/InvestigationHub.unity. MainMenu remains available from the launch terminal. Selectable missions: RoomSearchPrototype and ArchiveInvestigation. Mission preparation scene: InvestigationHub. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
 
+## Branch history
+
+- `feature/sound-and-hiding` ends at `d3dbfb0`. In addition to sound and hiding, it includes the hub and dispatch room, mission preparation, gear and door fixes, and the first playable Archive House route with a basement, arrival and pickup.
+- `feature/archive-mission` continues from that commit. It adds the existing crouch controller to the hub camera and solid basement ceiling pieces around the stair opening.
+
 ## Current batch
 
 Equipment ignores contact with actor colliders through per-collider filtering. Floor and wall collisions, item pickup and deliberate ghost throws remain available. Doors opened by a ghost block manual closing while the door swings, plus 0.9 seconds. The intended archive extension is documented as an editable [floor plan](Docs/ARCHIVE_LAYOUT.drawio). Copied projects use the same contact filtering with the Assets update alone. The user confirmed in local Play Mode that player and ghost movement no longer pushes equipment. The three equipment contact lookups now use the current Unity 6.6 API in response to CS0618 warnings. Static checks passed. Unity recompilation of the lookup change and door timing remain to be verified.
