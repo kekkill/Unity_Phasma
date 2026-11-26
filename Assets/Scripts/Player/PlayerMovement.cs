@@ -19,12 +19,12 @@ public class PlayerMovement : MonoBehaviour
     {
         characterController =
             GetComponent<CharacterController>();
-        if (EquipmentCollisionLayers.TryGet(out int actorLayer, out _))
-            characterController.gameObject.layer = actorLayer;
 
         inputReader =
             GetComponent<PlayerInputReader>();
     }
+
+    private void OnEnable() => EquipmentActorContacts.RefreshActor(characterController);
 
     private void Update()
     {

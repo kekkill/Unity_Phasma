@@ -29,17 +29,24 @@ public class PickupItem : MonoBehaviour, IInteractable
     {
         colliders = GetComponentsInChildren<Collider>(true);
         originalEnabled = new bool[colliders.Length];
-        bool useEquipmentLayer = EquipmentCollisionLayers.TryGet(out _, out int equipmentLayer);
-        for (int i = 0; i < colliders.Length; i++)
-        {
-            originalEnabled[i] = colliders[i].enabled;
-            if (useEquipmentLayer && !colliders[i].isTrigger) colliders[i].gameObject.layer = equipmentLayer;
-        }
+        for (int i = 0; i < colliders.Length; i++) originalEnabled[i] = colliders[i].enabled;
         itemRigidbody =
             GetComponent<Rigidbody>();
 
         itemCollider =
             GetComponent<Collider>();
+    }
+
+    private void OnEnable() => EquipmentActorContacts.RefreshEquipment(this);
+
+    internal void IgnoreActorContacts(Collider actor)
+    {
+        if (colliders == null || actor == null || !actor.enabled || actor.isTrigger ||
+            !actor.gameObject.activeInHierarchy || actor.GetComponentInParent<PickupItem>() != null) return;
+
+        foreach (Collider item in colliders)
+            if (item != null && item.enabled && !item.isTrigger && item.gameObject.activeInHierarchy)
+                Physics.IgnoreCollision(actor, item);
     }
 
     public void Interact(GameObject interactor)
@@ -128,6 +135,9 @@ public class PickupItem : MonoBehaviour, IInteractable
     {
         for (int i = 0; i < colliders.Length; i++)
             if (colliders[i] != null) colliders[i].enabled = active && originalEnabled[i];
+
+        // Unity forgets per-collider exclusions when a held item leaves the physics world.
+        if (active) EquipmentActorContacts.RefreshEquipment(this);
     }
     // Collider.bounds is empty while held (disabled). Use the local shape instead.
     private Bounds PlacementBounds

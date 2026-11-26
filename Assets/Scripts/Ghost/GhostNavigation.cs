@@ -68,11 +68,6 @@ public class GhostNavigation : MonoBehaviour
         hunt = GetComponent<GhostHuntController>();
         hiding = GetComponent<GhostHidingKnowledge>();
         candidatePath = new NavMeshPath();
-        if (EquipmentCollisionLayers.TryGet(out int actorLayer, out _))
-        {
-            foreach (Collider body in GetComponentsInChildren<Collider>(true))
-                if (!body.isTrigger) body.gameObject.layer = actorLayer;
-        }
         agent = GetComponent<NavMeshAgent>();
         if (agent == null) agent = gameObject.AddComponent<NavMeshAgent>();
         baseAreaMask = agent.areaMask;
@@ -83,6 +78,12 @@ public class GhostNavigation : MonoBehaviour
         agent.stoppingDistance = 0.1f;
         agent.acceleration = 12f;
         agent.angularSpeed = 360f;
+    }
+
+    private void OnEnable()
+    {
+        foreach (var body in GetComponentsInChildren<Collider>())
+            EquipmentActorContacts.RefreshActor(body);
     }
 
     public bool Initialize(Room room)

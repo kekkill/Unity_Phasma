@@ -1,30 +1,21 @@
 using UnityEngine;
 
-internal static class EquipmentCollisionLayers
+internal static class EquipmentActorContacts
 {
-    private static bool checkedSettings;
-    private static bool configured;
-    private static int actorLayer;
-    private static int equipmentLayer;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void Reset() => checkedSettings = false;
-
-    public static bool TryGet(out int actor, out int equipment)
+    public static void RefreshEquipment(PickupItem item)
     {
-        if (!checkedSettings)
-        {
-            actorLayer = LayerMask.NameToLayer("ActorBody");
-            equipmentLayer = LayerMask.NameToLayer("Equipment");
-            configured = actorLayer >= 0 && equipmentLayer >= 0 &&
-                Physics.GetIgnoreLayerCollision(actorLayer, equipmentLayer);
-            checkedSettings = true;
-            if (!configured)
-                Debug.LogWarning("Фильтр столкновений снаряжения отключён. Обновите ProjectSettings/TagManager.asset и ProjectSettings/DynamicsManager.asset из репозитория.");
-        }
+        foreach (var player in Object.FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None))
+            item.IgnoreActorContacts(player.GetComponent<CharacterController>());
 
-        actor = actorLayer;
-        equipment = equipmentLayer;
-        return configured;
+        foreach (var ghost in Object.FindObjectsByType<GhostNavigation>(FindObjectsSortMode.None))
+            foreach (var body in ghost.GetComponentsInChildren<Collider>())
+                item.IgnoreActorContacts(body);
+    }
+
+    public static void RefreshActor(Collider body)
+    {
+        if (body == null || !body.enabled || body.isTrigger) return;
+        foreach (var item in Object.FindObjectsByType<PickupItem>(FindObjectsSortMode.None))
+            item.IgnoreActorContacts(body);
     }
 }
