@@ -23,6 +23,12 @@ public class PlayerLook : MonoBehaviour
         Cursor.visible = false;
     }
 
+    public void ResetPitch()
+    {
+        pitch = 0f;
+        headTransform.localRotation = Quaternion.identity;
+    }
+
     private void Update()
     {
         Vector2 lookInput =

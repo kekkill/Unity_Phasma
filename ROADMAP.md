@@ -1,7 +1,7 @@
 # Roadmap
 
-1. Current batch starts in a walkable InvestigationHub. The desk phone rings before the dispatch menu opens. The user confirmed the previous hub-to-mission batch in ordinary Play Mode.
-2. Check the new hub in Unity, including room collisions, the call, menu close and mission return. Add optional props and interactions after the phone flow is confirmed. See [mission preparation](Docs/MISSION_PREPARATION.md).
+1. Current batch adds a separate preparation room reached from the hub phone. It has a map board, equipment rack, launch terminal and return door.
+2. Check the phone transfer, all stations, their shared selection and mission return in ordinary Play Mode. See [mission preparation](Docs/MISSION_PREPARATION.md).
 3. SoundHidingValidation and its menu stay removed. Do not restore them or add an elaborate replacement without agreement. Explain changed gameplay checks in plain language, distinguish static checks from actual Unity execution. Distance-based sound-location uncertainty and visible-target chase zigzag remain deferred by the user.
 4. Phones need their own agreed batch: gameplay touch controls using the same Input System actions; migrate remaining OnGUI HUD/journal; mobile URP/build settings; actual device layouts/performance. Current scalable menu/results Canvas and safe-area support have not been verified on phones and do not establish mobile readiness.
 5. Later choose multiplayer transport and implement server authority, stable participant identities, ownership/replication, personal/shared journal policy, dead-player visibility/voice routing and connection handling. Current registries, sound events, hiding knowledge, inventory, mission requests and completion state remain local foundations.

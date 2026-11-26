@@ -37,7 +37,7 @@ public class MainMenuScreen : MonoBehaviour
             if (previous == null || previous.Includes(option.Id)) equipment.Add(option.Id);
     }
 
-    public void OpenFromPhone(HubPhone source)
+    public void OpenStation(HubPhone source, HubStation.StationKind station)
     {
         phone = source;
         Cursor.lockState = CursorLockMode.None;
@@ -47,7 +47,15 @@ public class MainMenuScreen : MonoBehaviour
             BeginPage("Не назначены настройки подготовки");
             MenuUi.Select(MenuUi.Button(content, "Закрыть", CloseToHub));
         }
-        else ShowPreparation();
+        else
+        {
+            switch (station)
+            {
+                case HubStation.StationKind.MapBoard: ShowMapBoard(); break;
+                case HubStation.StationKind.EquipmentRack: ShowEquipmentRack(); break;
+                case HubStation.StationKind.LaunchTerminal: ShowLaunchTerminal(); break;
+            }
+        }
 
         StartCoroutine(Reveal(controls));
     }
@@ -90,49 +98,65 @@ public class MainMenuScreen : MonoBehaviour
         MenuUi.Button(content, "Настройки", ShowSettings);
         if (!Application.isMobilePlatform) MenuUi.Button(content, "Выйти", Quit);
     }
-    private void ShowPreparation(bool focusDifficulty = false)
+    private void ShowMapBoard(bool focusDifficulty = false)
     {
-        BeginPage("Диспетчерская");
-        MenuUi.Button(content, "Положить трубку", CloseToHub);
-        MenuUi.Label(content, "Режим", 26);
-        MenuUi.Label(content, "✓ Одиночная игра");
-        MenuUi.Button(content, "Кооператив — позже", () => { }).interactable = false;
-        MenuUi.Label(content, "Карта", 26);
+        BeginPage("Доска карт");
+        MenuUi.Button(content, "Закрыть", CloseToHub);
+        string selectedLegend = map != null ? map.Description : "Выберите карту.";
+        Text legend = MenuUi.Label(content, selectedLegend, 20);
         Button first = null;
         foreach (var option in catalog.Maps)
         {
             var button = MenuUi.Button(content, (map == option ? "✓ " : "") + option.DisplayName,
-                () => { map = option; ShowPreparation(); });
+                () => { map = option; ShowMapBoard(); });
+            button.gameObject.AddComponent<MapLegendPreview>().Bind(legend, option.Description, selectedLegend);
             if (first == null || map == option) first = button;
         }
-        if (map != null) MenuUi.Label(content, map.Description, 20);
         MenuUi.Label(content, "Сложность", 26);
         foreach (var option in catalog.Difficulties)
         {
             if (option == null) continue;
             var chosen = option;
             var button = MenuUi.Button(content, (difficulty == option ? "✓ " : "") + option.DisplayName,
-                () => { difficulty = chosen; ShowPreparation(true); });
+                () => { difficulty = chosen; ShowMapBoard(true); });
             if (focusDifficulty && difficulty == option) first = button;
         }
         if (difficulty != null) MenuUi.Label(content, difficulty.Description, 20);
-        MenuUi.Label(content, "Снаряжение в безопасной зоне", 26);
-        MenuUi.Label(content, "Это стартовый комплект. В инвентаре по-прежнему три слота; покупать предметы пока не нужно.", 20);
+        MenuUi.Select(first);
+    }
+
+    private void ShowEquipmentRack()
+    {
+        BeginPage("Стенд снаряжения");
+        var close = MenuUi.Button(content, "Закрыть", CloseToHub);
+        MenuUi.Label(content, "Отмеченные предметы будут в безопасной зоне.", 20);
         foreach (var option in catalog.Equipment)
         {
             EquipmentId id = option.Id;
             MenuUi.Toggle(content, option.DisplayName, equipment.Contains(id), value =>
             { if (value) equipment.Add(id); else equipment.Remove(id); });
         }
+        MenuUi.Select(close);
+    }
+
+    private void ShowLaunchTerminal()
+    {
+        BeginPage("Терминал выезда");
+        MenuUi.Button(content, "Закрыть", CloseToHub);
+        MenuUi.Label(content, $"Карта: {map?.DisplayName ?? "—"}");
+        MenuUi.Label(content, $"Сложность: {difficulty?.DisplayName ?? "—"}");
+        MenuUi.Label(content, $"Предметов к выезду: {equipment.Count}");
+        MenuUi.Label(content, "Одиночная игра  ·  Кооператив позже", 20);
         status = MenuUi.Label(content, "");
-        MenuUi.Button(content, "Начать расследование", Launch).interactable = map != null;
+        var launch = MenuUi.Button(content, "Начать расследование", Launch);
+        launch.interactable = map != null && difficulty != null;
         MenuUi.Button(content, "Настройки", ShowSettings);
         MenuUi.Button(content, "В главное меню", () =>
         {
             MissionFlow.PreparationDraft = CreateRequest();
             ReportLoad(MissionFlow.TryReturnToMenu(out string reason), reason);
         });
-        MenuUi.Select(first);
+        MenuUi.Select(launch.interactable ? launch : null);
     }
     private MissionLaunchRequest CreateRequest() => new MissionLaunchRequest(map?.SceneName, difficulty, equipment);
 
@@ -161,7 +185,7 @@ public class MainMenuScreen : MonoBehaviour
         { GamePreferences.SetSensitivity(value); sensitivity.text = "Чувствительность обзора: " + value.ToString("0.00") + "×"; });
         MenuUi.Label(content, "Настройки сохраняются на этом устройстве.", 20);
         MenuUi.Button(content, "Назад", () =>
-        { GamePreferences.Save(); if (isHub) ShowPreparation(); else ShowHome(); });
+        { GamePreferences.Save(); if (isHub) ShowLaunchTerminal(); else ShowHome(); });
         MenuUi.Select(first);
     }
     private void OnDisable() => GamePreferences.Save();

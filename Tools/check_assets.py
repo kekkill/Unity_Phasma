@@ -164,6 +164,19 @@ assert hub[330585546]['Transform']['m_Father'] == {'fileID': 1277915012}
 assert hub[1277915014]['MonoBehaviour']['headTransform'] == {'fileID': 330585546}
 assert phone['playerCamera'] == {'fileID': 330585545}
 assert all(hub[i]['BoxCollider']['m_Enabled'] for i in range(74000000, 74000010))
+assert phone['preparationArrival'] == {'fileID': 75003101}
+assert phone['hubArrival'] == {'fileID': 75003111}
+arrival = hub[75003101]['Transform']['m_LocalPosition']
+assert 18.5 < arrival['x'] < 29.5 and -4.5 < arrival['z'] < 4.5 and arrival['y'] > 1
+assert all(hub[75000004 + 10*i]['BoxCollider']['m_Enabled'] for i in range(6))
+for kind in range(4):
+    base = 75001000 + 10*kind
+    station = hub[base+5]['MonoBehaviour']
+    assert station['kind'] == kind and station['prompt']
+    assert station['m_GameObject'] == {'fileID': base}
+    assert hub[base+4]['BoxCollider']['m_GameObject'] == station['m_GameObject']
+    assert hub[base+4]['BoxCollider']['m_Enabled'] and not hub[base+4]['BoxCollider']['m_IsTrigger']
+
 ring_path = Path(str(guids[phone['ring']['guid']])[:-5])
 with wave.open(str(ring_path), 'rb') as stream:
     rate = stream.getframerate()
@@ -173,7 +186,7 @@ with wave.open(str(ring_path), 'rb') as stream:
     assert not any(ring[rate // 2:rate * 9 // 10])
     assert max(map(abs, ring[rate:rate * 14 // 10])) > 1000
     assert not any(ring[rate * 15 // 10:])
-print('Hub player, room colliders, dispatch phone references and two ring bursts passed.')
+print('Hub player, arrival points, four preparation stations, colliders and two ring bursts passed.')
 
 
 archive = scene_objects(assets / 'Scenes/ArchiveInvestigation.unity')

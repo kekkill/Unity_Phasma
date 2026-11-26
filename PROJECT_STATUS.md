@@ -1,17 +1,17 @@
 # Project state
 
-Updated: 2026-11-24.
+Updated: 2026-11-26.
 
 ## Scope and baseline
-Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile gameplay controls and device builds/performance are not implemented/verified yet. Main menu/results now use a scalable Canvas with safe-area handling; actual devices remain untested. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Build entry: Assets/Scenes/InvestigationHub.unity. MainMenu remains available from the dispatch menu. Selectable missions: RoomSearchPrototype and ArchiveInvestigation. Mission preparation scene: InvestigationHub. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
+Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile gameplay controls and device builds/performance are not implemented/verified yet. Main menu/results now use a scalable Canvas with safe-area handling; actual devices remain untested. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Build entry: Assets/Scenes/InvestigationHub.unity. MainMenu remains available from the launch terminal. Selectable missions: RoomSearchPrototype and ArchiveInvestigation. Mission preparation scene: InvestigationHub. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
 
 ## Current batch
 
-The user reported the previous hub and archive mission working in local Play Mode. The current batch starts the game in a walkable InvestigationHub. The player approaches the desk phone and interacts through the existing Input System. HubPhone owns the two-second call, temporary input block and return to exploration. MainMenuScreen fades in dispatch with the existing map, difficulty and equipment selection. The room stays visible at the sides on wide layouts. Esc and the hang-up button return to the same spot. Mission results return to the hub and the phone reopens the saved selection.
+The user reported the earlier hub and archive mission working in local Play Mode. The hub phone now plays two rings and fades to black before moving the player into a separate preparation room. The map board previews each map's description on hover and selects map and difficulty. The wall rack owns equipment selection, the terminal summarizes the mission and launches it, and the return door takes the player back to the phone room. These stations share the same launch request. The fade and player control belong to HubPhone, and station pages belong to MainMenuScreen.
 
 ArchiveInvestigation extends the original layout with a connected ghost room, shelves, a worktable, a powered light and a second hiding cabinet. It uses the existing safe annex, hunt seal, evidence, extraction and result systems.
 
-Static checks cover scene wiring and the phone clip's two bursts. Unity compilation and a Play Mode run of the phone flow remain pending. See [mission preparation](Docs/MISSION_PREPARATION.md).
+Static checks cover the preparation room, arrivals, station colliders and the phone clip. Unity compilation and Play Mode for this batch remain pending. See [mission preparation](Docs/MISSION_PREPARATION.md).
 
 ## Implemented systems
 - Player movement/look/crouch/sprint, per-participant input action instances, interaction UI and a three-slot personal inventory with one selected item in hand.
