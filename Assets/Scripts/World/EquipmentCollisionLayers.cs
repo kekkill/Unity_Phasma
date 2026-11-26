@@ -4,10 +4,10 @@ internal static class EquipmentActorContacts
 {
     public static void RefreshEquipment(PickupItem item)
     {
-        foreach (var player in Object.FindObjectsByType<PlayerMovement>(FindObjectsSortMode.None))
+        foreach (var player in Object.FindObjectsByType<PlayerMovement>())
             item.IgnoreActorContacts(player.GetComponent<CharacterController>());
 
-        foreach (var ghost in Object.FindObjectsByType<GhostNavigation>(FindObjectsSortMode.None))
+        foreach (var ghost in Object.FindObjectsByType<GhostNavigation>())
             foreach (var body in ghost.GetComponentsInChildren<Collider>())
                 item.IgnoreActorContacts(body);
     }
@@ -15,7 +15,7 @@ internal static class EquipmentActorContacts
     public static void RefreshActor(Collider body)
     {
         if (body == null || !body.enabled || body.isTrigger) return;
-        foreach (var item in Object.FindObjectsByType<PickupItem>(FindObjectsSortMode.None))
+        foreach (var item in Object.FindObjectsByType<PickupItem>())
             item.IgnoreActorContacts(body);
     }
 }
