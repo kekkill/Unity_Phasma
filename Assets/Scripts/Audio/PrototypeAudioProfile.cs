@@ -4,7 +4,8 @@ public enum SoundCue
 {
     PlayerStep, GhostStep, GhostLoop, HuntStart, HuntEnd, DoorOpen, DoorClose, Throw, Impact,
     HeavyImpact, CabinetClose, FlashlightToggle, MechanicalSwitch, WritingScratch, MapPageClick,
-    InventoryClick, CameraTune, MonitorShutdown, MonitorFan, CarPass, ExtractionConfirm, GhostAttack
+    InventoryClick, CameraTune, MonitorShutdown, MonitorFan, CarPass, ExtractionConfirm, GhostAttack,
+    ArchiveOutdoorAmbience, ArchiveIndoorAmbience, ArchiveBasementAmbience
 }
 
 [CreateAssetMenu(menuName = "Phasma/Audio Profile", fileName = "PrototypeAudio")]
@@ -14,6 +15,8 @@ public class PrototypeAudioProfile : ScriptableObject
     [SerializeField] private AudioClip heavyImpact, cabinetClose, flashlightToggle, mechanicalSwitch, writingScratch;
     [SerializeField] private AudioClip mapPageClick, inventoryClick, cameraTune, monitorShutdown, monitorFan, carPass;
     [SerializeField] private AudioClip extractionConfirm, ghostAttack;
+    [SerializeField] private AudioClip archiveOutdoorAmbience, archiveIndoorAmbience, archiveBasementAmbience;
+    [SerializeField] private Vector3 archiveAmbienceLevels = new Vector3(0.24f, 0.18f, 0.18f);
     [SerializeField, Range(0f, 1f)] private float masterVolume = 0.7f;
     [SerializeField, Range(0f, 1f)] private float ghostVoiceVolume = 0.45f;
     [SerializeField, Min(0.3f)] private float playerStride = 1.4f;
@@ -28,6 +31,7 @@ public class PrototypeAudioProfile : ScriptableObject
     public int MaxOneShotVoices => Mathf.Clamp(maxOneShotVoices, 1, 24);
     public float MinimumDistance => Mathf.Max(0.1f, minimumDistance);
     public float MaximumDistance => Mathf.Max(MinimumDistance + 0.1f, maximumDistance);
+    public Vector3 ArchiveAmbienceLevels => archiveAmbienceLevels;
     public AudioClip Clip(SoundCue cue) => cue switch
     {
         SoundCue.PlayerStep => playerStep, SoundCue.GhostStep => ghostStep, SoundCue.GhostLoop => ghostLoop,
@@ -47,6 +51,9 @@ public class PrototypeAudioProfile : ScriptableObject
         SoundCue.CarPass => carPass,
         SoundCue.ExtractionConfirm => extractionConfirm,
         SoundCue.GhostAttack => ghostAttack,
+        SoundCue.ArchiveOutdoorAmbience => archiveOutdoorAmbience,
+        SoundCue.ArchiveIndoorAmbience => archiveIndoorAmbience,
+        SoundCue.ArchiveBasementAmbience => archiveBasementAmbience,
         _ => null
     };
 }

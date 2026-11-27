@@ -16,8 +16,7 @@ public class MainMenuScreen : MonoBehaviour
     private RectTransform content;
     private Text status;
     private HubPhone phone;
-    private int CarriedSlots => map?.CarriedSlots ?? 0;
-    private bool LoadoutReady => CarriedSlots == 0 || equipment.Count == CarriedSlots;
+    private int CarriedSlots => map?.CarriedSlots ?? PlayerInventory.SlotCount;
     public bool IsOpen => page != null && page.activeSelf;
     private void Start()
     {
@@ -37,7 +36,7 @@ public class MainMenuScreen : MonoBehaviour
         difficulty = previous?.Difficulty ?? catalog.DefaultDifficulty;
         var options = catalog.Equipment;
         var selected = previous == null
-            ? options.Take(PlayerInventory.SlotCount)
+            ? options.Take(CarriedSlots)
             : options.Where(option => previous.Includes(option.Id));
         equipment.UnionWith(selected.Select(option => option.Id));
         LimitCarriedEquipment();
@@ -133,24 +132,33 @@ public class MainMenuScreen : MonoBehaviour
 
     private void ShowEquipmentRack()
     {
-        BeginPage("Стенд снаряжения");
+        BeginPage("Снаряжение с собой");
         var close = MenuUi.Button(content, "Закрыть", CloseToHub);
         Text count = MenuUi.Label(content, LoadoutMessage(), 20);
+        var toggles = new List<Toggle>();
+        void RefreshLoadout()
+        {
+            count.text = LoadoutMessage();
+            foreach (var row in toggles) row.interactable = row.isOn || equipment.Count < CarriedSlots;
+        }
+
         foreach (var option in catalog.Equipment)
         {
             EquipmentId id = option.Id;
             Toggle toggle = null;
             toggle = MenuUi.Toggle(content, option.DisplayName, equipment.Contains(id), value =>
             {
-                if (value && CarriedSlots > 0 && equipment.Count >= CarriedSlots)
+                if (value && equipment.Count >= CarriedSlots)
                 {
                     toggle.SetIsOnWithoutNotify(false);
                     return;
                 }
                 if (value) equipment.Add(id); else equipment.Remove(id);
-                count.text = LoadoutMessage();
+                RefreshLoadout();
             });
+            toggles.Add(toggle);
         }
+        RefreshLoadout();
         MenuUi.Select(close);
     }
 
@@ -160,12 +168,13 @@ public class MainMenuScreen : MonoBehaviour
         MenuUi.Button(content, "Закрыть", CloseToHub);
         MenuUi.Label(content, $"Карта: {map?.DisplayName ?? "—"}");
         MenuUi.Label(content, $"Сложность: {difficulty?.DisplayName ?? "—"}");
-        MenuUi.Label(content, $"Предметов к выезду: {equipment.Count}");
+        string carried = string.Join(", ", catalog.Equipment.Where(option => equipment.Contains(option.Id))
+            .Select(option => option.DisplayName));
+        MenuUi.Label(content, $"С собой ({equipment.Count}/{CarriedSlots}): {(carried.Length > 0 ? carried : "—")}");
         MenuUi.Label(content, "Одиночная игра  ·  Кооператив позже", 20);
         status = MenuUi.Label(content, "");
         var launch = MenuUi.Button(content, "Начать расследование", Launch);
-        launch.interactable = map != null && difficulty != null && LoadoutReady;
-        if (!LoadoutReady) status.text = $"Выберите {CarriedSlots} предмета на стенде.";
+        launch.interactable = map != null && difficulty != null;
         MenuUi.Button(content, "Настройки", ShowSettings);
         MenuUi.Button(content, "В главное меню", () =>
         {
@@ -174,13 +183,12 @@ public class MainMenuScreen : MonoBehaviour
         });
         MenuUi.Select(launch.interactable ? launch : null);
     }
-    private string LoadoutMessage() => CarriedSlots == 0
-        ? "Отмеченные предметы будут в безопасной зоне."
-        : $"Взять с собой: {equipment.Count}/{CarriedSlots}. Остальные приборы ждут в доме.";
+    private string LoadoutMessage() =>
+        $"С собой: {equipment.Count}/{CarriedSlots}. Отмеченные предметы будут в инвентаре в начале миссии.";
 
     private void LimitCarriedEquipment()
     {
-        if (CarriedSlots == 0 || equipment.Count <= CarriedSlots) return;
+        if (equipment.Count <= CarriedSlots) return;
         var carried = catalog.Equipment.Select(option => option.Id)
             .Where(equipment.Contains).Take(CarriedSlots).ToArray();
         equipment.Clear();

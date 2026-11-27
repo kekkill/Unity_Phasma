@@ -6,6 +6,7 @@ import json
 import re
 import struct
 import wave
+from array import array
 import yaml
 from tree_sitter import Language, Parser
 import tree_sitter_c_sharp
@@ -106,6 +107,8 @@ assert menu[330585546]['Transform']['m_Father']['fileID'] == 0
 main = scene_objects(assets / 'Scenes/RoomSearchPrototype.unity')
 setup = main[50010005]['MonoBehaviour']
 assert setup['catalog']['guid'] == catalog_guid
+assert setup['carriedInventory'] == {'fileID': 1277915030}
+assert not setup['equipOnDirectPlay'], 'Direct Play should keep the small-house test items in the scene.'
 spawns = setup['equipment']
 assert {row['id'] for row in spawns} == set(range(6)) and len(spawns) == 6
 expected_items = ['FlashLight', 'Thermometer', 'EMFReader', 'UVFlashlight', 'GhostWritingBook', 'MotionSensor']
@@ -205,8 +208,9 @@ for fid in [50010002, 50010003, 50010004, 50010005, 50030063, 66000102]:
 archive_setup = archive_component(50010005)
 assert archive_setup['equipment'] == setup['equipment']
 assert archive_setup['carriedInventory'] == {'fileID': 1277915030}
+assert archive_setup['equipOnDirectPlay']
 assert len(archive_setup['reservePositions']) >= len(catalog['equipment'])
-assert [option.get('carriedSlots', 0) for option in catalog['maps']] == [0, 3]
+assert [option.get('carriedSlots', 0) for option in catalog['maps']] == [3, 3]
 
 route = archive_component(75500001)
 assert route['m_EditorClassIdentifier'] == 'Assembly-CSharp::ArchiveMissionRoute'
@@ -402,7 +406,7 @@ for path in (assets / 'Editor').glob('*.cs'):
 assert not (assets / 'Editor/SoundHidingValidation.cs').exists(), 'Removed fixture must stay removed.'
 audio_profile = yaml.safe_load((assets / 'Settings/PrototypeAudio.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 library_bindings = {
-    'ghostLoop': 'HuntWail', 'doorOpen': 'WoodenDoorCreak', 'itemThrow': 'ItemThrowSweep',
+    'ghostLoop': 'HuntWail', 'doorOpen': 'WoodenDoorCreak', 'doorClose': 'DoorLatchImpact', 'itemThrow': 'ItemThrowSweep',
     'impact': 'ItemContact', 'heavyImpact': 'ItemHeavyContact', 'cabinetClose': 'CabinetLatch',
     'flashlightToggle': 'FlashlightToggle', 'mechanicalSwitch': 'MechanicalSwitch',
     'writingScratch': 'WritingScratch', 'mapPageClick': 'MapPageClick',
@@ -411,7 +415,7 @@ library_bindings = {
     'extractionConfirm': 'ExtractionConfirm', 'ghostAttack': 'GhostAttackGrowl',
 }
 loops = {'ghostLoop', 'monitorFan'}
-for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', 'doorClose', *library_bindings]:
+for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', *library_bindings]:
     reference = audio_profile[field]
     assert reference['fileID'] == 8300000 and reference['guid'] in guids, f'Missing clip: {field}'
     clip = Path(str(guids[reference['guid']])[:-5])
@@ -429,8 +433,35 @@ for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', 'doorClose', *l
 assert len(list((assets / 'Audio/ArchiveSoundLibrary').glob('*.wav'))) == len(library_bindings)
 assert sum(path.stat().st_size for path in (assets / 'Audio/ArchiveSoundLibrary').glob('*.wav')) < 2 * 1024 * 1024
 assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav') if path.name != 'ArchiveDispatchReply.wav') < 640 * 1024
+
+ambience = archive_component(66000203)
+assert ambience['m_GameObject'] == archive_component(66000202)['m_GameObject']
+assert guids[ambience['m_Script']['guid']] == assets / 'Scripts/Audio/ArchiveAmbience.cs.meta'
+assert ambience['player'] == {'fileID': 1277915012} and ambience['session'] == route['session']
+volume_ids = [ref['fileID'] for ref in ambience['indoorVolumes']]
+assert volume_ids == [1314804768, 50001002, 1723003170, 71000102, 50030062]
+assert ambience['basementVolume'] == {'fileID': 75200102}
+for fid in (*volume_ids, ambience['basementVolume']['fileID']):
+    collider = archive[fid]['BoxCollider']
+    assert collider['m_Enabled'] and collider['m_IsTrigger']
+
+ambience_dir = assets / 'Audio/ArchiveAmbience'
+for field, name, channels in [
+    ('archiveOutdoorAmbience', 'Wind', 2), ('archiveIndoorAmbience', 'HouseRoomTone', 2),
+    ('archiveBasementAmbience', 'Underground', 1),
+]:
+    path = ambience_dir / f'{name}.wav'
+    reference = audio_profile[field]
+    assert reference['fileID'] == 8300000 and guids[reference['guid']] == path.with_suffix('.wav.meta')
+    with wave.open(str(path), 'rb') as stream:
+        assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (channels, 2, 24000)
+        assert 10 * 24000 <= stream.getnframes() <= 45 * 24000
+        samples = array('h', stream.readframes(stream.getnframes()))
+    assert 0 < max(map(abs, samples)) < 32767
+    assert all(abs(samples[i] - samples[i - channels]) < 512 for i in range(channels)), f'Loop seam: {path}'
+
 sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
-print('Shared audio and 17 library cues passed PCM, reference, fades and loop-seam checks.')
+print('Shared audio, 18 library cues and three Archive ambience zones passed reference and loop checks.')
 print(f'{len(sources)} C# files parsed; {len(guids)} unique GUIDs; input, area IDs and validation asset paths passed.')
 print('Static checks only. Unity compilation, Editor validations, physics, NavMesh and gameplay are NOT run by this script.')

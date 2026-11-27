@@ -8148,6 +8148,7 @@ GameObject:
   m_Component:
   - component: {fileID: 66000201}
   - component: {fileID: 66000202}
+  - component: {fileID: 66000203}
   m_Layer: 0
   m_Name: WorldAudio
   m_TagString: Untagged
@@ -8183,6 +8184,27 @@ MonoBehaviour:
   m_Name: ''
   m_EditorClassIdentifier: Assembly-CSharp::WorldAudio
   profile: {fileID: 11400000, guid: e997d800213d47a5b9592a3cb36d9881, type: 2}
+--- !u!114 &66000203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66000200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0216b9aeeb6d4be4a63b3a3efa7068c6, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ArchiveAmbience
+  player: {fileID: 1277915012}
+  session: {fileID: 50010002}
+  indoorVolumes:
+  - {fileID: 1314804768}
+  - {fileID: 50001002}
+  - {fileID: 1723003170}
+  - {fileID: 71000102}
+  - {fileID: 50030062}
+  basementVolume: {fileID: 75200102}
 --- !u!114 &513613274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8612,6 +8634,7 @@ MonoBehaviour:
   - id: 5
     item: {fileID: 2107965709}
   carriedInventory: {fileID: 1277915030}
+  equipOnDirectPlay: 1
   reservePositions:
   - {x: 9.1, y: 0.65, z: 0.45}
   - {x: 10.2, y: 0.65, z: 0.45}

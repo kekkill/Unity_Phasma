@@ -28,7 +28,7 @@ public class MissionMapOption
     public string SceneName => sceneName;
     public string DisplayName => displayName;
     public string Description => description;
-    public int CarriedSlots => carriedSlots;
+    public int CarriedSlots => carriedSlots > 0 ? Mathf.Min(carriedSlots, PlayerInventory.SlotCount) : PlayerInventory.SlotCount;
 }
 
 [CreateAssetMenu(menuName = "Phasma/Mission Preparation Catalog")]

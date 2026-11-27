@@ -14,17 +14,20 @@ public class MissionSceneSetup : MonoBehaviour
     [SerializeField] private MissionPreparationCatalog catalog;
     [SerializeField] private EquipmentSpawn[] equipment = new EquipmentSpawn[0];
     [SerializeField] private PlayerInventory carriedInventory;
+    [SerializeField] private bool equipOnDirectPlay = true;
     [SerializeField] private Vector3[] reservePositions = Array.Empty<Vector3>();
     private readonly List<EquipmentSpawn> createdEquipment = new();
     private MissionLaunchRequest request;
     private EquipmentSpawn[] reserveEquipment;
+    private bool hasLaunchRequest;
     public bool UsesCarriedEquipment => carriedInventory != null;
     public MissionDifficultyProfile Difficulty => request != null ? request.Difficulty : null;
     public bool Includes(EquipmentId id) => request == null || request.Includes(id);
     private void Awake()
     {
         MissionLaunchRequest selected = MissionFlow.CurrentRequest;
-        request = selected != null && selected.SceneName == gameObject.scene.name ? selected : catalog != null ? catalog.DefaultRequest(gameObject.scene.name) : null;
+        hasLaunchRequest = selected != null && selected.SceneName == gameObject.scene.name;
+        request = hasLaunchRequest ? selected : catalog != null ? catalog.DefaultRequest(gameObject.scene.name) : null;
         if (UsesCarriedEquipment) return;
         foreach (var spawn in equipment)
             if (spawn.item != null) spawn.item.SetActive(Includes(spawn.id));
@@ -36,7 +39,7 @@ public class MissionSceneSetup : MonoBehaviour
 
     private void Start()
     {
-        if (!UsesCarriedEquipment) return;
+        if (!UsesCarriedEquipment || (!hasLaunchRequest && !equipOnDirectPlay)) return;
 
         reserveEquipment = new EquipmentSpawn[reservePositions.Length];
         int reserveIndex = 0;

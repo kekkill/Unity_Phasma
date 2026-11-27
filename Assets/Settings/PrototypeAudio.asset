@@ -18,7 +18,7 @@ MonoBehaviour:
   huntStart: {fileID: 8300000, guid: d2ce769491964e09abded3b86b836ff9, type: 3}
   huntEnd: {fileID: 8300000, guid: db3047a6b2f54b5dab829ca166249be5, type: 3}
   doorOpen: {fileID: 8300000, guid: 66aad51247bd58ccaf86d1a5427e678b, type: 3}
-  doorClose: {fileID: 8300000, guid: 3ff14cc6588f4b76a10de5c57688c4a8, type: 3}
+  doorClose: {fileID: 8300000, guid: 538a9082204d459d8d2091237ede7f48, type: 3}
   itemThrow: {fileID: 8300000, guid: 161cb11f54345a90b5c8cb6492700df0, type: 3}
   impact: {fileID: 8300000, guid: 613281c7cb9a5551a6f254f313f629ab, type: 3}
   heavyImpact: {fileID: 8300000, guid: 70c80fcb5f1858eb8da630459b0611f6, type: 3}
@@ -34,6 +34,10 @@ MonoBehaviour:
   carPass: {fileID: 8300000, guid: 099e1becb8b55ff89f59e011681199a0, type: 3}
   extractionConfirm: {fileID: 8300000, guid: 5235a0b157cd56e7bb84ce2ee9bcaa84, type: 3}
   ghostAttack: {fileID: 8300000, guid: 414c011a049c5eb8813a4b76d8acd18b, type: 3}
+  archiveOutdoorAmbience: {fileID: 8300000, guid: f038f6d15ce3434c99821d8e3178c75a, type: 3}
+  archiveIndoorAmbience: {fileID: 8300000, guid: 75988220945d42c79e7b1b6d5a95604d, type: 3}
+  archiveBasementAmbience: {fileID: 8300000, guid: b7bf7643487540359d9aaf3cccb7b384, type: 3}
+  archiveAmbienceLevels: {x: 0.24, y: 0.18, z: 0.19}
   masterVolume: 0.7
   ghostVoiceVolume: 0.45
   playerStride: 1.4

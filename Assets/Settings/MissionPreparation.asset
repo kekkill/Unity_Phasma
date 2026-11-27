@@ -16,6 +16,7 @@ MonoBehaviour:
   - sceneName: RoomSearchPrototype
     displayName: Небольшой дом
     description: Спальня и кухня по обе стороны коридора. Укрытие в спальне. Щиток у входа из безопасной пристройки.
+    carriedSlots: 3
   - sceneName: ArchiveInvestigation
     displayName: Архивный дом
     description: Дом с архивом, подвалом и отдельной рабочей комнатой. Машина возвращается через минуту после звонка.

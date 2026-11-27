@@ -8607,3 +8607,5 @@ MonoBehaviour:
     item: {fileID: 1944482476}
   - id: 5
     item: {fileID: 2107965709}
+  carriedInventory: {fileID: 1277915030}
+  equipOnDirectPlay: 0

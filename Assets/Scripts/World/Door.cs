@@ -80,6 +80,7 @@ public class Door : MonoBehaviour, IInteractable, IGhostInteractionTarget
     public float OpenFraction => 1f - Mathf.Clamp01(Quaternion.Angle(Pivot.localRotation, openRotation) /
         Mathf.Max(0.01f, Quaternion.Angle(closedRotation, openRotation)));
     public bool IsFullyOpen => isOpen && Quaternion.Angle(Pivot.localRotation, openRotation) < 2f;
+    public bool IsFullyClosed => !isOpen && Quaternion.Angle(Pivot.localRotation, closedRotation) <= 0.1f;
     public Vector3 NoisePosition
     {
         get { Collider panel = GetComponentInChildren<Collider>(); return panel != null ? panel.bounds.center : transform.position + Vector3.up; }
