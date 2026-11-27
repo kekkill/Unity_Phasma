@@ -12,6 +12,8 @@ Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phone
 
 ## Current batch
 
+The proposed Archive House expansion has an [editable two-floor plan](Docs/ARCHIVE_LAYOUT_V2.drawio) and [blockout checks](Docs/ARCHIVE_MISSION.md#эскиз-расширения). It adds two archive wings and two stair routes at the design stage. ArchiveInvestigation still uses the original layout. The plan's connectivity was checked statically. Traversal time, NavMesh and hunt behavior in the expanded house need a playable blockout.
+
 Seventeen sounds from assets/intake b01b56f support existing item, switch, door, map, inventory, monitor, car, writing, hunt and extraction actions. One-shots reuse the bounded WorldAudio pool. The Archive monitor has one short-range fan loop and the moving car has one spatial source. Sound presentation leaves the ghost's noise observations intact. The file-by-file record is in [ARCHIVE_SOUND_LIBRARY.md](Docs/ARCHIVE_SOUND_LIBRARY.md). Static audio validation passed. Unity playback and mix balance still need a Play Mode check.
 
 ArchiveInvestigation uses the supplied skinned Phasma model. Blender verified a 1.817 m model, 102,174 triangles, five skinned meshes, matching 64-bone hierarchies and five action clips. The Archive ghost blends the idle and in-place gait clips according to NavMesh speed and hunt state. The two moving-root clips remain available for a later movement test. Source credits are recorded in [PHASMA_GHOST_CREDITS.md](Docs/PHASMA_GHOST_CREDITS.md). Static scene checks passed. The Unity importer and Play Mode integration require a local run.
