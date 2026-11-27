@@ -17335,6 +17335,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eee8521cb345a5da30b46c449165338, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::GhostModelVisual
+  appearance: 2
+  izlomAppearance: {fileID: 11400000, guid: 27d512ab6851478da7b277cfb91023b4, type: 2}
   skin: {fileID: 2100000, guid: f4d3ea2cb38753b3b26a3ba13d1229eb, type: 2}
   clothes: {fileID: 2100000, guid: 3d1138ea4357544a8213adf6008f11cf, type: 2}
   shoes: {fileID: 2100000, guid: 3c35461732de56be8db9da4065a68537, type: 2}

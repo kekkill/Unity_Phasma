@@ -317,6 +317,40 @@ for path in ghost_fbx:
     assert path.with_suffix('.fbx.meta').exists()
 print('Archive ghost attachment, five imported materials and six FBX assets passed.')
 
+assert ghost_visual['appearance'] == 2, 'Archive should select an appearance per run.'
+izlom_assets = assets / 'Izlom'
+appearance_ref = ghost_visual['izlomAppearance']
+appearance_path = izlom_assets / 'IzlomAppearance.asset'
+assert appearance_ref['fileID'] == 11400000
+assert guids[appearance_ref['guid']] == appearance_path.with_suffix('.asset.meta')
+appearance = yaml.safe_load(appearance_path.read_text().split('\n', 3)[3])['MonoBehaviour']
+assert guids[appearance['m_Script']['guid']] == assets / 'Scripts/Ghost/GhostAppearance.cs.meta'
+assert appearance['modelResource'] == 'Izlom/Izlom' and appearance['walkSpeed'] == 0.6
+model = izlom_assets / 'Resources' / f"{appearance['modelResource']}.fbx"
+with model.open('rb') as stream:
+    assert stream.read(18) == b'Kaydara FBX Binary', model
+assert model.with_suffix('.fbx.meta').is_file()
+material = izlom_assets / 'IzlomSurface.mat'
+assert appearance['material']['fileID'] == 2100000
+assert guids[appearance['material']['guid']] == material.with_suffix('.mat.meta')
+material_text = material.read_text().split('--- !u!21 &2100000\n', 1)[1]
+izlom_maps = yaml.safe_load(material_text)['Material']['m_SavedProperties']['m_TexEnvs']
+for slot, suffix in map_slots.items():
+    ref = next(mapping[slot]['m_Texture'] for mapping in izlom_maps if slot in mapping)
+    texture_name = 'URP_Mask' if suffix == 'Mask' else suffix
+    texture = izlom_assets / 'Textures' / f'Izlom_{texture_name}.png'
+    metadata = texture.with_suffix('.png.meta')
+    assert ref['fileID'] == 2800000 and guids[ref['guid']] == metadata
+    assert struct.unpack('>II', texture.read_bytes()[16:24]) == (2048, 2048)
+    importer = yaml.safe_load(metadata.read_text())['TextureImporter']
+    assert importer['textureType'] == (1 if suffix == 'Normal' else 0)
+    assert importer['mipmaps']['sRGBTexture'] == (1 if suffix == 'BaseColor' else 0)
+    if suffix == 'Mask':
+        assert importer['alphaUsage'] == 1
+    android = next(platform for platform in importer['platformSettings'] if platform['buildTarget'] == 'Android')
+    assert android['overridden'] and android['maxTextureSize'] == 1024
+print('Archive appearance selection, Izlom FBX and URP atlas references passed.')
+
 
 board = archive_component(75500505)
 assert board['m_GameObject'] == {'fileID': 75500500}
