@@ -285,6 +285,39 @@ ramp = archive[75000151]['Transform']
 assert 25 < -ramp['m_LocalEulerAnglesHint']['x'] < 40
 assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fileID': 75500111}]
 
+ghost_visual = archive_component(75500520)
+assert ghost_visual['m_EditorClassIdentifier'] == 'Assembly-CSharp::GhostModelVisual'
+assert ghost_visual['m_GameObject'] == {'fileID': 513613253}
+assert archive_component(513613265)['visible'], 'Keep the debug silhouette available as fallback.'
+ghost_assets = assets / 'PhasmaGhost'
+map_slots = {'_BaseMap': 'BaseColor', '_BumpMap': 'Normal', '_MetallicGlossMap': 'Mask', '_OcclusionMap': 'Mask'}
+for name in ('Skin', 'Clothes', 'Shoes', 'Eyes', 'Hair'):
+    mat_ref = ghost_visual[name.lower()]
+    path = ghost_assets / 'Materials' / f'{name}.mat'
+    assert mat_ref['fileID'] == 2100000 and guids[mat_ref['guid']] == path.with_suffix('.mat.meta')
+    material_text = path.read_text().split('--- !u!21 &2100000\n', 1)[1]
+    maps = yaml.safe_load(material_text)['Material']['m_SavedProperties']['m_TexEnvs']
+    for slot, suffix in map_slots.items():
+        ref = next(mapping[slot]['m_Texture'] for mapping in maps if slot in mapping)
+        assert ref['fileID'] == 2800000
+        assert guids[ref['guid']] == ghost_assets / 'Textures' / f'{name}_{suffix}.png.meta'
+    for suffix in ('BaseColor', 'Normal', 'Mask'):
+        texture_importer = yaml.safe_load((ghost_assets / 'Textures' / f'{name}_{suffix}.png.meta').read_text())['TextureImporter']
+        assert texture_importer['textureType'] == (1 if suffix == 'Normal' else 0)
+        assert texture_importer['mipmaps']['sRGBTexture'] == (1 if suffix == 'BaseColor' else 0)
+        android = next(platform for platform in texture_importer['platformSettings'] if platform['buildTarget'] == 'Android')
+        assert android['overridden'] and android['maxTextureSize'] == 1024
+runtime_ghost = ghost_assets / 'Resources/PhasmaGhost'
+ghost_fbx = [runtime_ghost / 'PhasmaGhost.fbx']
+ghost_fbx += [runtime_ghost / 'Animations' / f'PhasmaGhost@{clip}.fbx' for clip in ('Idle', 'Walk_InPlace', 'Chase_InPlace')]
+ghost_fbx += [ghost_assets / 'RootMotion' / f'PhasmaGhost@{clip}.fbx' for clip in ('Walk_RootMotion', 'Chase_RootMotion')]
+for path in ghost_fbx:
+    with path.open('rb') as stream:
+        assert stream.read(18) == b'Kaydara FBX Binary', path
+    assert path.with_suffix('.fbx.meta').exists()
+print('Archive ghost attachment, five imported materials and six FBX assets passed.')
+
+
 board = archive_component(75500505)
 assert board['m_GameObject'] == {'fileID': 75500500}
 assert board['mission'] == {'fileID': 50010005} and board['breaker'] == {'fileID': 68000001}

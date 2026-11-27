@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-11-26.
+Updated: 2026-11-27.
 
 ## Scope and baseline
 Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile gameplay controls and device builds/performance are not implemented/verified yet. Main menu/results now use a scalable Canvas with safe-area handling; actual devices remain untested. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Build entry: Assets/Scenes/InvestigationHub.unity. MainMenu remains available from the launch terminal. Selectable missions: RoomSearchPrototype and ArchiveInvestigation. Mission preparation scene: InvestigationHub. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
@@ -11,6 +11,8 @@ Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phone
 - `feature/archive-mission` continues from that commit. It adds the existing crouch controller to the hub camera and solid basement ceiling pieces around the stair opening.
 
 ## Current batch
+
+ArchiveInvestigation uses the supplied skinned Phasma model. Blender verified a 1.817 m model, 102,174 triangles, five skinned meshes, matching 64-bone hierarchies and five action clips. The Archive ghost blends the idle and in-place gait clips according to NavMesh speed and hunt state. The two moving-root clips remain available for a later movement test. Source credits are recorded in [PHASMA_GHOST_CREDITS.md](Docs/PHASMA_GHOST_CREDITS.md). Static scene checks passed. The Unity importer and Play Mode integration require a local run.
 
 The first visit to the hub defaults to a flashlight, thermometer and EMF reader. Returning to the hub restores the player's chosen loadout. Static checks passed. The initial hub selection remains to be checked in Play Mode.
 
