@@ -9,6 +9,7 @@ public class RuntimeNavigationWorld : MonoBehaviour
     [SerializeField] private Collider[] geometry;
     [SerializeField] private BoxCollider[] movingObstacles;
     [SerializeField] private Collider[] additionalSaltFloors = new Collider[0];
+    [SerializeField] private Collider[] nonWalkableGeometry = new Collider[0];
 
     public bool SupportsSaltOn(Collider surface) =>
         surface != null && (surface.gameObject == gameObject || System.Array.IndexOf(additionalSaltFloors, surface) >= 0);
@@ -65,12 +66,13 @@ public class RuntimeNavigationWorld : MonoBehaviour
     private void Awake()
     {
         var sources = new List<NavMeshBuildSource>();
+        var nonWalkable = new HashSet<Collider>(nonWalkableGeometry ?? System.Array.Empty<Collider>());
         Bounds bounds = default;
         bool hasBounds = false;
         foreach (Collider collider in geometry ?? new Collider[0])
         {
             if (collider == null || !collider.enabled || collider.isTrigger) continue;
-            NavMeshBuildSource source = new NavMeshBuildSource { area = 0 };
+            NavMeshBuildSource source = new NavMeshBuildSource { area = nonWalkable.Contains(collider) ? 1 : 0 };
             if (collider is BoxCollider box)
             {
                 source.shape = NavMeshBuildSourceShape.Box;

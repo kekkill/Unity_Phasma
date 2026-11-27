@@ -231,62 +231,74 @@ with wave.open(str(clip), 'rb') as stream:
     assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (1, 2, 24000)
     assert stream.getframerate() < stream.getnframes() < 5 * stream.getframerate()
 
-rooms = {ref['fileID'] for ref in archive_component(513613254)['rooms']}
-expected_ring = {
-    50001003: {1314804767, 1723003169},
-    1314804767: {50001003, 71000101},
-    1723003169: {50001003, 71000101},
-    71000101: {1314804767, 1723003169, 75200101},
-    75200101: {71000101},
+rooms = {ref['fileID']: archive_component(ref['fileID']) for ref in archive_component(513613254)['rooms']}
+neighbors = {fid: {ref['fileID'] for ref in room['connectedRooms']} for fid, room in rooms.items()}
+for fid, room in rooms.items():
+    assert room['checkHeight'] and neighbors[fid]
+    assert all(fid in neighbors[target] for target in neighbors[fid]), room['roomName']
+assert {'Санузел', 'Душевая', 'Фотолаборатория', 'Мастерская'} <= {room['roomName'] for room in rooms.values()}
+assert not any(room['roomName'] == 'Рабочая комната' for room in rooms.values())
+
+
+def archive_transform(component_id):
+    component = next(iter(archive[component_id].values()))
+    owner = archive[component['m_GameObject']['fileID']]['GameObject']
+    return archive[owner['m_Component'][0]['component']['fileID']]['Transform']
+
+
+room_heights = {fid: archive_transform(fid)['m_LocalPosition']['y'] for fid in rooms}
+stair_links = [(fid, other) for fid in rooms for other in neighbors[fid]
+               if room_heights[fid] == 0 and room_heights[other] < 0]
+assert {(rooms[upper]['roomName'], rooms[lower]['roomName']) for upper, lower in stair_links} == {
+    ('Архивные фонды', 'Кладовая'), ('Погрузочная', 'Техотсек'),
 }
-assert rooms == set(expected_ring)
-for fid, connected in expected_ring.items():
-    room = archive_component(fid)
-    assert room['checkHeight']
-    assert {ref['fileID'] for ref in room['connectedRooms']} == connected
+for disabled in stair_links:
+    reached = set()
+    pending = [50001003]
+    while pending:
+        current = pending.pop()
+        if current in reached:
+            continue
+        reached.add(current)
+        pending.extend(target for target in neighbors[current] if {current, target} != set(disabled))
+    assert reached == rooms.keys(), f'Alternate stair route disconnected: {disabled}'
 
 nav = archive_component(1971981892)
 nav_geometry = {ref['fileID'] for ref in nav['geometry']}
-assert {50030012, 75300034, 75300044}.isdisjoint(nav_geometry)
-assert {75000154, 75200004, 75000094}.issubset(nav_geometry)
-assert {'fileID': 72000114} in nav['movingObstacles']
+nav_floors = {ref['fileID'] for ref in nav['additionalSaltFloors']}
+nav_obstructions = {ref['fileID'] for ref in nav['nonWalkableGeometry']}
+assert nav_floors | nav_obstructions == nav_geometry and nav_floors.isdisjoint(nav_obstructions)
+assert {75300034, 75300044, 66000014}.isdisjoint(nav_geometry)
+assert {65000114, 72000114}.issubset({ref['fileID'] for ref in nav['movingObstacles']})
 assert archive_component(72000003)['door'] == {'fileID': 72000102}
-assert {'fileID': 71010006} in archive_component(66000102)['roomLights']
-assert archive_component(71010006)['circuit'] == {'fileID': 68000005}
-basement_switch = archive_component(75200302)
-assert basement_switch['circuit'] == {'fileID': 68000005}
-assert archive[basement_switch['targetLight']['fileID']]['Light']['m_GameObject'] == {'fileID': 75200200}
-assert {'fileID': 75200302} in archive_component(66000102)['roomLights']
-assert {ref['fileID'] for ref in nav['additionalSaltFloors']} <= nav_geometry
 
-
-def extent_x(fid):
-    transform = archive[fid]['Transform']
-    center = transform['m_LocalPosition']['x']
-    half = transform['m_LocalScale']['x'] / 2
-    return center - half, center + half
-
-west, middle, east = map(extent_x, (2127530396, 75000071, 71000001))
-assert abs(middle[0] - west[1] - 2) < 1e-6
-assert abs(east[0] - middle[1] - 2) < 1e-6
-assert archive[75200001]['Transform']['m_LocalPosition']['y'] == -3.3
-# The slab must close the storage side and both landings while leaving the stair shaft open.
-ceiling = [archive[fid]['Transform'] for fid in (75500201, 75500211, 75500221)]
-for fid in (75500204, 75500214, 75500224):
-    assert archive[fid]['BoxCollider']['m_Enabled'] and fid not in nav_geometry
-
-def ceiling_above(x, z):
-    return any(
-        abs(t['m_LocalPosition']['x'] - x) <= t['m_LocalScale']['x'] / 2
-        and abs(t['m_LocalPosition']['z'] - z) <= t['m_LocalScale']['z'] / 2
-        for t in ceiling
-    )
-
-assert all(ceiling_above(x, z) for x,z in [(1, 1.1), (5, 9.8), (7.8, 1.1), (7.8, 9.8)])
-assert not ceiling_above(6.8, 6.0)
-
-ramp = archive[75000151]['Transform']
-assert 25 < -ramp['m_LocalEulerAnglesHint']['x'] < 40
+ramps = []
+clear_span = []
+for data in archive.values():
+    if 'GameObject' not in data:
+        continue
+    game_object = data['GameObject']
+    name = game_object['m_Name']
+    if name not in {'Stair A - walkable ramp', 'Stair B - walkable ramp'} and not name.endswith(': lintel'):
+        continue
+    ids = [part['component']['fileID'] for part in game_object['m_Component']]
+    transform = archive[ids[0]]['Transform']
+    collider, = [component for component in ids if 'BoxCollider' in archive[component]]
+    dimensions = transform['m_LocalScale']
+    if name.endswith(': lintel'):
+        assert collider not in nav_geometry
+        clear_span.append(max(dimensions['x'], dimensions['z']))
+    else:
+        assert collider in nav_floors and dimensions['x'] >= 2.1
+        assert 31 < transform['m_LocalEulerAnglesHint']['x'] < 36
+        ramps.append(name)
+assert len(clear_span) == 23 and min(clear_span) >= 1.95
+assert len(ramps) == 2
+for light_ref in archive_component(66000102)['roomLights']:
+    switch = archive_component(light_ref['fileID'])
+    assert switch['circuit'] == {'fileID': 68000005}
+    assert 'Light' in archive[switch['targetLight']['fileID']]
+assert len(archive_component(66000102)['roomLights']) == 11
 assert archive_component(75500120)['viewpoints'] == [{'fileID': 75500101}, {'fileID': 75500111}]
 
 ghost_visual = archive_component(75500520)
@@ -391,7 +403,7 @@ assert archive[75200202]['Light']['m_Type'] == 0
 assert archive_component(75200201)['m_AdditionalLightsShadowResolutionTier'] == 0
 print('Workroom map floors, reserve locations, difficulty limits, PNG assets, breath and basement spotlight passed.')
 
-print('Archive floor ring, stair geometry, safe workroom, phone, outdoor pickup point and camera links passed.')
+print('Archive door widths, dual stair graph, safe workroom, pickup point and camera links passed.')
 
 
 areas = yaml.safe_load((root / 'ProjectSettings/NavMeshAreas.asset').read_text().split('\n', 3)[3])['NavMeshProjectSettings']['areas']
@@ -454,8 +466,11 @@ assert ambience['m_GameObject'] == archive_component(66000202)['m_GameObject']
 assert guids[ambience['m_Script']['guid']] == assets / 'Scripts/Audio/ArchiveAmbience.cs.meta'
 assert ambience['player'] == {'fileID': 1277915012} and ambience['session'] == route['session']
 volume_ids = [ref['fileID'] for ref in ambience['indoorVolumes']]
-assert volume_ids == [1314804768, 50001002, 1723003170, 71000102, 50030062]
-assert ambience['basementVolume'] == {'fileID': 75200102}
+assert {1314804768, 50001002, 1723003170, 71000102, 50030062}.issubset(volume_ids)
+assert all(archive_transform(fid)['m_LocalPosition']['y'] == 0 for fid in volume_ids)
+basement_audio = ambience['basementVolume']['fileID']
+assert archive_transform(basement_audio)['m_LocalPosition']['y'] == -3.1
+assert archive[basement_audio]['BoxCollider']['m_Size']['x'] == 31.2
 for fid in (*volume_ids, ambience['basementVolume']['fileID']):
     collider = archive[fid]['BoxCollider']
     assert collider['m_Enabled'] and collider['m_IsTrigger']

@@ -26,6 +26,7 @@ public class GhostPerception : MonoBehaviour
     public bool HasDetectedTarget => canSeeTarget || canHearTarget;
     public bool HasKnownTargetPosition => hasKnownTargetPosition;
     public Vector3 LastKnownPosition => lastKnownPosition;
+    public Vector3 LastKnownNavigationPosition { get; private set; }
     public Vector3 LastHeardPosition => lastHeardPosition;
     public GhostPerceptionTarget Target => target;
     private void Awake()
@@ -50,6 +51,7 @@ public class GhostPerception : MonoBehaviour
         float nearestVisible = float.PositiveInfinity, bestSound = -1f;
         Vector3 heardPosition = default;
         HidingZone heardZone = null;
+        bool heardWorldEvent = false;
         if (session != null)
         {
             foreach (var candidate in session.LivingTargets())
@@ -62,6 +64,7 @@ public class GhostPerception : MonoBehaviour
             if (!Eligible(sound.Source) || !hearing.TryHear(HearingPosition, sound.Position, sound.Source, sound.Loudness,
                 ghostController.Profile.HearingRange, out float strength) || strength <= bestSound) continue;
             audible = sound.Source; bestSound = strength; heardPosition = sound.Position; heardZone = sound.OriginHidingZone;
+            heardWorldEvent = true;
         }
         GhostPerceptionTarget selected = visible != null ? visible : audible != null ? audible : Eligible(target) ? target : null;
         if (selected != target) ClearMemory();
@@ -71,10 +74,10 @@ public class GhostPerception : MonoBehaviour
         if (canHearTarget) lastHeardPosition = heardPosition;
         if (target == null) { ClearMemory(); return; }
         if (canSeeTarget)
-            Remember(target.transform.position, HidingZone.FindAt(target.transform.position));
+            Remember(target.transform.position, HidingZone.FindAt(target.transform.position), target.GroundPosition);
         else if (canHearTarget)
         {
-            Remember(heardPosition, heardZone);
+            Remember(heardPosition, heardZone, heardWorldEvent ? null : target.GroundPosition);
         }
         else
         {
@@ -95,9 +98,12 @@ public class GhostPerception : MonoBehaviour
             out float strength) && strength > bestSound)
         { audible = candidate; bestSound = strength; position = candidate.transform.position; zone = HidingZone.FindAt(position); }
     }
-    private void Remember(Vector3 position, HidingZone zone)
+    private void Remember(Vector3 position, HidingZone zone, Vector3? navigationPosition)
     {
         lastKnownPosition = position; LastKnownRoom = ghostController.FindRoomAt(position); LastKnownHidingZone = zone;
+        LastKnownNavigationPosition = navigationPosition ?? position;
+        if (!navigationPosition.HasValue && LastKnownRoom != null)
+            LastKnownNavigationPosition = new Vector3(position.x, LastKnownRoom.FloorCenter.y, position.z);
         lastDetectionTime = Time.time; timeSinceLastDetection = 0f; hasKnownTargetPosition = true;
         hiding.Observe(zone, ghostController.Profile.TargetMemoryDuration);
     }
@@ -105,7 +111,7 @@ public class GhostPerception : MonoBehaviour
     {
         canSeeTarget = false; canHearTarget = false; hasKnownTargetPosition = false;
         LastKnownRoom = null; LastKnownHidingZone = null;
-        lastDetectionTime = float.NegativeInfinity; lastKnownPosition = default;
+        lastDetectionTime = float.NegativeInfinity; lastKnownPosition = default; LastKnownNavigationPosition = default;
         previousCanSeeTarget = false; previousCanHearTarget = false;
     }
     private bool CheckVision(GhostPerceptionTarget candidate)

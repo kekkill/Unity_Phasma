@@ -166,7 +166,8 @@ public class GhostHuntController : MonoBehaviour
         else
         {
             EnterSearch(
-                ghostPerception.LastKnownPosition
+                ghostPerception.HasKnownTargetPosition ? ghostPerception.LastKnownNavigationPosition :
+                    transform.position - Vector3.up * navigation.StandingOffset
             );
         }
 
@@ -226,14 +227,14 @@ public class GhostHuntController : MonoBehaviour
         if (approachingHidingPlace)
         {
             approachingHidingPlace = false;
-            EnterSearch(hidingPlace != null ? hidingPlace.InvestigationPosition : ghostPerception.LastKnownPosition);
+            EnterSearch(hidingPlace != null ? hidingPlace.InvestigationPosition : ghostPerception.LastKnownNavigationPosition);
         }
 
         // Видит игрока:
         // можно преследовать его точную текущую позицию.
         if (ghostPerception.CanSeeTarget)
         {
-            Vector3 observedPosition = ghostPerception.Target.transform.position;
+            Vector3 observedPosition = ghostPerception.Target.GroundPosition;
             if (navigation.TryReachablePoint(observedPosition, out _))
             {
                 if (currentMode != HuntMode.Chase) EnterChase();
@@ -259,7 +260,7 @@ public class GhostHuntController : MonoBehaviour
         if (currentMode == HuntMode.Chase || wasHearingTarget)
         {
             EnterSearch(
-                ghostPerception.LastKnownPosition
+                ghostPerception.LastKnownNavigationPosition
             );
         }
 
@@ -298,20 +299,13 @@ public class GhostHuntController : MonoBehaviour
         if (ghostPerception.Target == null)
         {
             EnterSearch(
-                ghostPerception.LastKnownPosition
+                ghostPerception.LastKnownNavigationPosition
             );
 
             return;
         }
 
-        Vector3 chasePosition =
-            ghostPerception.Target
-                .transform.position;
-
-        chasePosition.y =
-            transform.position.y;
-
-        navigation.MoveTo(chasePosition, ghostController.HuntMoveSpeed);
+        navigation.MoveTo(ghostPerception.Target.GroundPosition, ghostController.HuntMoveSpeed);
     }
 
     private void UpdateHeardTarget()
@@ -329,10 +323,7 @@ public class GhostHuntController : MonoBehaviour
 
         searchCenter =
             ghostPerception.LastKnownHidingZone != null ? ghostPerception.LastKnownHidingZone.InvestigationPosition :
-            ghostPerception.LastKnownPosition;
-
-        searchCenter.y =
-            transform.position.y;
+            ghostPerception.LastKnownNavigationPosition;
 
         searchTargetPosition =
             searchCenter;
@@ -373,9 +364,6 @@ public class GhostHuntController : MonoBehaviour
 
         searchCenter =
             lostPosition;
-
-        searchCenter.y =
-            transform.position.y;
 
         searchTargetPosition =
             searchCenter;

@@ -19,7 +19,7 @@ MonoBehaviour:
     carriedSlots: 3
   - sceneName: ArchiveInvestigation
     displayName: Архивный дом
-    description: Дом с архивом, подвалом и отдельной рабочей комнатой. Машина возвращается через минуту после звонка.
+    description: Архив с выставочным залом, служебным крылом и двумя спусками в подвал. Машина возвращается через минуту после звонка.
     carriedSlots: 3
   defaultDifficulty: {fileID: 11400000, guid: 1a8a5a74a16f4ec891d4ede43c2c6942, type: 2}
   difficulties:

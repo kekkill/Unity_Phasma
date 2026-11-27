@@ -38,6 +38,7 @@ public class GhostNavigation : MonoBehaviour
             // remainingDistance may still be zero immediately after SetPath.
             // Arrival requires the ghost to physically reach the requested point.
             Vector3 delta = transform.position - requestedDestination;
+            if (Mathf.Abs(delta.y) > agent.baseOffset + 0.5f) return false;
             delta.y = 0f;
             float tolerance = agent.stoppingDistance + 0.05f;
             return delta.sqrMagnitude <= tolerance * tolerance;
