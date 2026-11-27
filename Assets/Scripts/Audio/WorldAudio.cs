@@ -9,6 +9,7 @@ public class WorldAudio : MonoBehaviour
     public PrototypeAudioProfile Profile => profile;
     private AudioSource[] voices;
     private int nextVoice;
+    private int nextPlayerStep;
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Reset() { Instance = null; }
     private void Awake()
@@ -36,7 +37,7 @@ public class WorldAudio : MonoBehaviour
     {
         var world = Instance;
         if (world == null || !world.isActiveAndEnabled || world.profile == null || world.voices == null) return;
-        AudioClip clip = world.profile.Clip(cue); if (clip == null) return;
+        AudioClip clip = world.ResolveClip(cue); if (clip == null) return;
         AudioSource voice = null;
         foreach (var candidate in world.voices) if (!candidate.isPlaying) { voice = candidate; break; }
         // Reuse one bounded voice under load; no unbounded PlayClipAtPoint objects/PlayOneShot mixing.
@@ -45,5 +46,17 @@ public class WorldAudio : MonoBehaviour
         voice.loop = false; voice.spatialBlend = spatial ? 1f : 0f;
         voice.pitch = Mathf.Clamp(pitch, 0.5f, 1.5f);
         voice.volume = world.profile.MasterVolume * Mathf.Clamp01(volume); voice.Play();
+    }
+
+    private AudioClip ResolveClip(SoundCue cue)
+    {
+        var steps = profile.PlayerStepVariations;
+        if (cue == SoundCue.PlayerStep && steps != null && steps.Count > 0)
+        {
+            nextPlayerStep %= steps.Count;
+            AudioClip clip = steps[nextPlayerStep++];
+            if (clip != null) return clip;
+        }
+        return profile.Clip(cue);
     }
 }

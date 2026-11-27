@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: PrototypeAudio
   m_EditorClassIdentifier: Assembly-CSharp::PrototypeAudioProfile
   playerStep: {fileID: 8300000, guid: 3a510c3a84bf4808868b69b0fb880e9e, type: 3}
+  playerStepVariations:
+  - {fileID: 8300000, guid: 993f0333c9b6479c8ef3755efad44ef8, type: 3}
+  - {fileID: 8300000, guid: 33139c493f5c4343857bcb63e6c8541d, type: 3}
+  - {fileID: 8300000, guid: ab78d7a355484d569a4de6be6d5de38d, type: 3}
+  - {fileID: 8300000, guid: d06f674308de41e8aeef3798fa91010c, type: 3}
   ghostStep: {fileID: 8300000, guid: 26dc46ffbeb04dd49bdbdde6d6f73582, type: 3}
   ghostLoop: {fileID: 8300000, guid: 7247612983dd5341ab45c9bef3c1917b, type: 3}
   huntStart: {fileID: 8300000, guid: d2ce769491964e09abded3b86b836ff9, type: 3}

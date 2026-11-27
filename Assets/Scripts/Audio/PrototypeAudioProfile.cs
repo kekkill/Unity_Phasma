@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum SoundCue
@@ -12,6 +14,7 @@ public enum SoundCue
 public class PrototypeAudioProfile : ScriptableObject
 {
     [SerializeField] private AudioClip playerStep, ghostStep, ghostLoop, huntStart, huntEnd, doorOpen, doorClose, itemThrow, impact;
+    [SerializeField] private AudioClip[] playerStepVariations = Array.Empty<AudioClip>();
     [SerializeField] private AudioClip heavyImpact, cabinetClose, flashlightToggle, mechanicalSwitch, writingScratch;
     [SerializeField] private AudioClip mapPageClick, inventoryClick, cameraTune, monitorShutdown, monitorFan, carPass;
     [SerializeField] private AudioClip extractionConfirm, ghostAttack;
@@ -27,6 +30,7 @@ public class PrototypeAudioProfile : ScriptableObject
     public float MasterVolume => Mathf.Clamp01(masterVolume);
     public float GhostVoiceVolume => Mathf.Clamp01(ghostVoiceVolume);
     public float PlayerStride => Mathf.Max(0.3f, playerStride);
+    internal IReadOnlyList<AudioClip> PlayerStepVariations => playerStepVariations;
     public float GhostStride => Mathf.Max(0.3f, ghostStride);
     public int MaxOneShotVoices => Mathf.Clamp(maxOneShotVoices, 1, 24);
     public float MinimumDistance => Mathf.Max(0.1f, minimumDistance);

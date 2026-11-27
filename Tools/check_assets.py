@@ -415,23 +415,38 @@ library_bindings = {
     'extractionConfirm': 'ExtractionConfirm', 'ghostAttack': 'GhostAttackGrowl',
 }
 loops = {'ghostLoop', 'monitorFan'}
-for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', *library_bindings]:
-    reference = audio_profile[field]
-    assert reference['fileID'] == 8300000 and reference['guid'] in guids, f'Missing clip: {field}'
-    clip = Path(str(guids[reference['guid']])[:-5])
-    if field in library_bindings:
-        assert clip == assets / 'Audio/ArchiveSoundLibrary' / f'{library_bindings[field]}.wav'
+sound_library = assets / 'Audio/ArchiveSoundLibrary'
+
+
+def check_short_clip(clip, loop=False, fade_out=False):
     with wave.open(str(clip), 'rb') as stream:
         assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (1, 2, 24000)
         pcm = stream.readframes(stream.getnframes())
     samples = struct.unpack('<' + 'h' * (len(pcm) // 2), pcm)
     assert 0 < max(abs(value) for value in samples) < 32767, f'Empty/clipped clip: {clip}'
-    if field in loops:
+    if loop:
         assert abs(samples[0] - samples[-1]) < 1311, f'Loop seam jump: {clip}'
     else:
-        assert samples[0] == 0 and (field not in library_bindings or samples[-1] == 0), f'One-shot fade missing: {clip}'
-assert len(list((assets / 'Audio/ArchiveSoundLibrary').glob('*.wav'))) == len(library_bindings)
-assert sum(path.stat().st_size for path in (assets / 'Audio/ArchiveSoundLibrary').glob('*.wav')) < 2 * 1024 * 1024
+        assert samples[0] == 0 and (not fade_out or samples[-1] == 0), f'One-shot fade missing: {clip}'
+    return len(samples) / 24000
+
+
+for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', *library_bindings]:
+    reference = audio_profile[field]
+    assert reference['fileID'] == 8300000 and reference['guid'] in guids, f'Missing clip: {field}'
+    clip = Path(str(guids[reference['guid']])[:-5])
+    if field in library_bindings:
+        assert clip == sound_library / f'{library_bindings[field]}.wav'
+    check_short_clip(clip, loop=field in loops, fade_out=field in library_bindings)
+
+steps = audio_profile['playerStepVariations']
+assert len(steps) == 4
+for index, reference in enumerate(steps, 1):
+    clip = sound_library / f'ConcreteFootstep{index}.wav'
+    assert reference['fileID'] == 8300000 and guids[reference['guid']] == clip.with_suffix('.wav.meta')
+    assert 0.18 < check_short_clip(clip, fade_out=True) < 0.30
+assert len(list(sound_library.glob('*.wav'))) == len(library_bindings) + len(steps)
+assert sum(path.stat().st_size for path in sound_library.glob('*.wav')) < 2 * 1024 * 1024
 assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav') if path.name != 'ArchiveDispatchReply.wav') < 640 * 1024
 
 ambience = archive_component(66000203)
@@ -462,6 +477,6 @@ for field, name, channels in [
 
 sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
-print('Shared audio, 18 library cues and three Archive ambience zones passed reference and loop checks.')
+print('Shared audio, 18 library cues, four player steps and three Archive ambience zones passed audio checks.')
 print(f'{len(sources)} C# files parsed; {len(guids)} unique GUIDs; input, area IDs and validation asset paths passed.')
 print('Static checks only. Unity compilation, Editor validations, physics, NavMesh and gameplay are NOT run by this script.')
