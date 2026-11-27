@@ -7,10 +7,32 @@ public sealed class ArchiveMonitor : MonoBehaviour, IInteractable
     private PlayerInputReader viewer;
     private Camera feed;
     private RenderTexture picture;
+    private AudioSource fan;
     private int channel;
     private float nextFrame;
 
     public string InteractionPrompt => "[E] Посмотреть камеры";
+
+    private void Start()
+    {
+        var world = WorldAudio.Instance;
+        if (world == null || world.Profile == null) return;
+        AudioClip clip = world.Profile.Clip(SoundCue.MonitorFan);
+        if (clip == null) return;
+
+        fan = world.CreateSource(transform, "Workroom monitor fan");
+        fan.clip = clip;
+        fan.loop = true;
+        fan.minDistance = 0.65f;
+        fan.maxDistance = 5.5f;
+        fan.volume = world.Profile.MasterVolume * 0.23f;
+        fan.Play();
+    }
+
+    private void OnEnable()
+    {
+        if (fan != null) fan.Play();
+    }
 
     public void Interact(GameObject interactor)
     {
@@ -52,7 +74,7 @@ public sealed class ArchiveMonitor : MonoBehaviour, IInteractable
         if (viewer == null) return;
         if (viewer.CloseJournalPressedThisFrame)
         {
-            Close();
+            Close(playSound: true);
             return;
         }
 
@@ -61,21 +83,27 @@ public sealed class ArchiveMonitor : MonoBehaviour, IInteractable
         nextFrame = Time.unscaledTime + 0.2f;
     }
 
-    private void Close()
+    private void Close(bool playSound)
     {
         if (feed != null) feed.enabled = false;
         if (viewer == null) return;
+        if (playSound) WorldAudio.Play(SoundCue.MonitorShutdown, transform.position, 0.28f);
         viewer.SetGameplayBlocked(this, false);
         viewer = null;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    private void OnDisable() => Close();
+    private void OnDisable()
+    {
+        Close(playSound: false);
+        if (fan != null) fan.Stop();
+    }
 
     private void OnDestroy()
     {
         if (picture != null) Destroy(picture);
+        if (fan != null) Destroy(fan.gameObject);
     }
 
     private void OnGUI()
@@ -87,9 +115,13 @@ public sealed class ArchiveMonitor : MonoBehaviour, IInteractable
         float top = (Screen.height - height) * 0.5f;
         GUI.Box(new Rect(left - 8f, top - 34f, width + 16f, height + 78f), $"Камера {channel + 1}/{viewpoints.Length}");
         GUI.DrawTexture(new Rect(left, top, width, height), picture);
-        if (GUI.Button(new Rect(left, top + height + 8f, width * 0.48f, 27f), "Следующая камера"))
+        if (viewpoints.Length > 1 &&
+            GUI.Button(new Rect(left, top + height + 8f, width * 0.48f, 27f), "Следующая камера"))
+        {
             SetChannel((channel + 1) % viewpoints.Length);
+            WorldAudio.Play(SoundCue.CameraTune, transform.position, 0.42f, spatial: false);
+        }
         if (GUI.Button(new Rect(left + width * 0.52f, top + height + 8f, width * 0.48f, 27f), "Закрыть"))
-            Close();
+            Close(playSound: true);
     }
 }

@@ -367,18 +367,36 @@ for path in (assets / 'Editor').glob('*.cs'):
         assert (root / reference).exists(), f'Missing validation asset: {reference}'
 assert not (assets / 'Editor/SoundHidingValidation.cs').exists(), 'Removed fixture must stay removed.'
 audio_profile = yaml.safe_load((assets / 'Settings/PrototypeAudio.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
-for field in ['playerStep', 'ghostStep', 'ghostLoop', 'huntStart', 'huntEnd', 'doorOpen', 'doorClose', 'itemThrow', 'impact']:
+library_bindings = {
+    'ghostLoop': 'HuntWail', 'doorOpen': 'WoodenDoorCreak', 'itemThrow': 'ItemThrowSweep',
+    'impact': 'ItemContact', 'heavyImpact': 'ItemHeavyContact', 'cabinetClose': 'CabinetLatch',
+    'flashlightToggle': 'FlashlightToggle', 'mechanicalSwitch': 'MechanicalSwitch',
+    'writingScratch': 'WritingScratch', 'mapPageClick': 'MapPageClick',
+    'inventoryClick': 'InventoryClick', 'cameraTune': 'CameraTune',
+    'monitorShutdown': 'MonitorShutdown', 'monitorFan': 'MonitorFan', 'carPass': 'CompanyCarPass',
+    'extractionConfirm': 'ExtractionConfirm', 'ghostAttack': 'GhostAttackGrowl',
+}
+loops = {'ghostLoop', 'monitorFan'}
+for field in ['playerStep', 'ghostStep', 'huntStart', 'huntEnd', 'doorClose', *library_bindings]:
     reference = audio_profile[field]
     assert reference['fileID'] == 8300000 and reference['guid'] in guids, f'Missing clip: {field}'
     clip = Path(str(guids[reference['guid']])[:-5])
+    if field in library_bindings:
+        assert clip == assets / 'Audio/ArchiveSoundLibrary' / f'{library_bindings[field]}.wav'
     with wave.open(str(clip), 'rb') as stream:
         assert (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) == (1, 2, 24000)
         pcm = stream.readframes(stream.getnframes())
     samples = struct.unpack('<' + 'h' * (len(pcm) // 2), pcm)
-    assert 0 < max(abs(value) for value in samples) < 32767 and samples[0] == 0, f'Empty/clipped clip: {clip}'
+    assert 0 < max(abs(value) for value in samples) < 32767, f'Empty/clipped clip: {clip}'
+    if field in loops:
+        assert abs(samples[0] - samples[-1]) < 1311, f'Loop seam jump: {clip}'
+    else:
+        assert samples[0] == 0 and (field not in library_bindings or samples[-1] == 0), f'One-shot fade missing: {clip}'
+assert len(list((assets / 'Audio/ArchiveSoundLibrary').glob('*.wav'))) == len(library_bindings)
+assert sum(path.stat().st_size for path in (assets / 'Audio/ArchiveSoundLibrary').glob('*.wav')) < 2 * 1024 * 1024
 assert sum(path.stat().st_size for path in (assets / 'Audio').glob('*.wav') if path.name != 'ArchiveDispatchReply.wav') < 640 * 1024
 sequence = yaml.safe_load((assets / 'Settings/HuntSequence.asset').read_text().split('\n', 3)[3])['MonoBehaviour']
 assert sequence['warningDuration'] >= 0 and sequence['flickerInterval'] >= 0.1
-print('Hunt entrance/lighting/audio links and nine bounded mono PCM clips passed.')
+print('Shared audio and 17 library cues passed PCM, reference, fades and loop-seam checks.')
 print(f'{len(sources)} C# files parsed; {len(guids)} unique GUIDs; input, area IDs and validation asset paths passed.')
 print('Static checks only. Unity compilation, Editor validations, physics, NavMesh and gameplay are NOT run by this script.')

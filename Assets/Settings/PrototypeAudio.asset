@@ -14,13 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrototypeAudioProfile
   playerStep: {fileID: 8300000, guid: 3a510c3a84bf4808868b69b0fb880e9e, type: 3}
   ghostStep: {fileID: 8300000, guid: 26dc46ffbeb04dd49bdbdde6d6f73582, type: 3}
-  ghostLoop: {fileID: 8300000, guid: b53fdde4f18d48d2afe8b0ce2f3e02b4, type: 3}
+  ghostLoop: {fileID: 8300000, guid: 7247612983dd5341ab45c9bef3c1917b, type: 3}
   huntStart: {fileID: 8300000, guid: d2ce769491964e09abded3b86b836ff9, type: 3}
   huntEnd: {fileID: 8300000, guid: db3047a6b2f54b5dab829ca166249be5, type: 3}
-  doorOpen: {fileID: 8300000, guid: 02cc80cdd4e24ded8a53f2c485263a61, type: 3}
+  doorOpen: {fileID: 8300000, guid: 66aad51247bd58ccaf86d1a5427e678b, type: 3}
   doorClose: {fileID: 8300000, guid: 3ff14cc6588f4b76a10de5c57688c4a8, type: 3}
-  itemThrow: {fileID: 8300000, guid: bd8d8f89da944e50ab09bf7e21936971, type: 3}
-  impact: {fileID: 8300000, guid: 5a76dd9cf0ae45aa8e48ac944d742c1f, type: 3}
+  itemThrow: {fileID: 8300000, guid: 161cb11f54345a90b5c8cb6492700df0, type: 3}
+  impact: {fileID: 8300000, guid: 613281c7cb9a5551a6f254f313f629ab, type: 3}
+  heavyImpact: {fileID: 8300000, guid: 70c80fcb5f1858eb8da630459b0611f6, type: 3}
+  cabinetClose: {fileID: 8300000, guid: 649aae4b153b518eb544d733453b3d6b, type: 3}
+  flashlightToggle: {fileID: 8300000, guid: 632d29ed5e555e2799604758c6c20a08, type: 3}
+  mechanicalSwitch: {fileID: 8300000, guid: c2c735e2bedf5a709df7de76202f0624, type: 3}
+  writingScratch: {fileID: 8300000, guid: eb35b356e3a254f8b1df809696e29c9d, type: 3}
+  mapPageClick: {fileID: 8300000, guid: 07f48fef36435693bc2d871d275963e5, type: 3}
+  inventoryClick: {fileID: 8300000, guid: afd3c6258b32529f818bef9808fdb6fe, type: 3}
+  cameraTune: {fileID: 8300000, guid: 2a45a89fff2356fb94367087ebc78175, type: 3}
+  monitorShutdown: {fileID: 8300000, guid: eb981a8513e4520996c98a6e41f64d3b, type: 3}
+  monitorFan: {fileID: 8300000, guid: 515ed8b1e3855be5aa5fc27ee60d2455, type: 3}
+  carPass: {fileID: 8300000, guid: 099e1becb8b55ff89f59e011681199a0, type: 3}
+  extractionConfirm: {fileID: 8300000, guid: 5235a0b157cd56e7bb84ce2ee9bcaa84, type: 3}
+  ghostAttack: {fileID: 8300000, guid: 414c011a049c5eb8813a4b76d8acd18b, type: 3}
   masterVolume: 0.7
   ghostVoiceVolume: 0.45
   playerStride: 1.4

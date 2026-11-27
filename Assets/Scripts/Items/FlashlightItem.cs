@@ -21,6 +21,7 @@ public class FlashlightItem : MonoBehaviour, IUsableItem
         if (flashlightLight != null)
         {
             flashlightLight.enabled = isOn;
+            WorldAudio.Play(SoundCue.FlashlightToggle, transform.position, 0.52f, pitch: isOn ? 1f : 0.93f);
         }
     }
 }

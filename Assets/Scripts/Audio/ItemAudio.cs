@@ -21,7 +21,8 @@ public class ItemAudio : MonoBehaviour
         if (speed < 0.8f || collision.collider.GetComponentInParent<PlayerLifeState>() != null) return;
         nextImpact = Time.time + 0.2f;
         Vector3 point = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;
-        WorldAudio.Play(SoundCue.Impact, point, Mathf.Clamp01(speed / 6f));
+        SoundCue cue = speed >= 3.5f ? SoundCue.HeavyImpact : SoundCue.Impact;
+        WorldAudio.Play(cue, point, Mathf.Clamp01(speed / 6f));
     }
     private void OnDisable()
     {

@@ -1,11 +1,19 @@
 using UnityEngine;
 
-public enum SoundCue { PlayerStep, GhostStep, GhostLoop, HuntStart, HuntEnd, DoorOpen, DoorClose, Throw, Impact }
+public enum SoundCue
+{
+    PlayerStep, GhostStep, GhostLoop, HuntStart, HuntEnd, DoorOpen, DoorClose, Throw, Impact,
+    HeavyImpact, CabinetClose, FlashlightToggle, MechanicalSwitch, WritingScratch, MapPageClick,
+    InventoryClick, CameraTune, MonitorShutdown, MonitorFan, CarPass, ExtractionConfirm, GhostAttack
+}
 
 [CreateAssetMenu(menuName = "Phasma/Audio Profile", fileName = "PrototypeAudio")]
 public class PrototypeAudioProfile : ScriptableObject
 {
     [SerializeField] private AudioClip playerStep, ghostStep, ghostLoop, huntStart, huntEnd, doorOpen, doorClose, itemThrow, impact;
+    [SerializeField] private AudioClip heavyImpact, cabinetClose, flashlightToggle, mechanicalSwitch, writingScratch;
+    [SerializeField] private AudioClip mapPageClick, inventoryClick, cameraTune, monitorShutdown, monitorFan, carPass;
+    [SerializeField] private AudioClip extractionConfirm, ghostAttack;
     [SerializeField, Range(0f, 1f)] private float masterVolume = 0.7f;
     [SerializeField, Range(0f, 1f)] private float ghostVoiceVolume = 0.45f;
     [SerializeField, Min(0.3f)] private float playerStride = 1.4f;
@@ -25,6 +33,20 @@ public class PrototypeAudioProfile : ScriptableObject
         SoundCue.PlayerStep => playerStep, SoundCue.GhostStep => ghostStep, SoundCue.GhostLoop => ghostLoop,
         SoundCue.HuntStart => huntStart, SoundCue.HuntEnd => huntEnd,
         SoundCue.DoorOpen => doorOpen, SoundCue.DoorClose => doorClose, SoundCue.Throw => itemThrow,
-        _ => impact
+        SoundCue.Impact => impact,
+        SoundCue.HeavyImpact => heavyImpact != null ? heavyImpact : impact,
+        SoundCue.CabinetClose => cabinetClose != null ? cabinetClose : doorClose,
+        SoundCue.FlashlightToggle => flashlightToggle,
+        SoundCue.MechanicalSwitch => mechanicalSwitch,
+        SoundCue.WritingScratch => writingScratch,
+        SoundCue.MapPageClick => mapPageClick,
+        SoundCue.InventoryClick => inventoryClick,
+        SoundCue.CameraTune => cameraTune,
+        SoundCue.MonitorShutdown => monitorShutdown,
+        SoundCue.MonitorFan => monitorFan,
+        SoundCue.CarPass => carPass,
+        SoundCue.ExtractionConfirm => extractionConfirm,
+        SoundCue.GhostAttack => ghostAttack,
+        _ => null
     };
 }

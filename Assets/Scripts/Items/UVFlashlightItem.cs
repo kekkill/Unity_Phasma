@@ -43,6 +43,8 @@ public class UVFlashlightItem : MonoBehaviour, IUsableItem
             !isOn;
 
         UpdateLightState();
+        if (ultravioletLight != null)
+            WorldAudio.Play(SoundCue.FlashlightToggle, transform.position, 0.50f, pitch: isOn ? 1.08f : 1f);
     }
 
     private void UpdateLightState()

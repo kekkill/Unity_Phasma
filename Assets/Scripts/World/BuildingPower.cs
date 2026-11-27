@@ -17,7 +17,11 @@ public class BuildingPower : MonoBehaviour, IInteractable
         indicatorProperties = new MaterialPropertyBlock();
         SetPowered(initiallyPowered);
     }
-    public void Interact(GameObject interactor) => SetPowered(!IsPowered);
+    public void Interact(GameObject interactor)
+    {
+        SetPowered(!IsPowered);
+        WorldAudio.Play(SoundCue.MechanicalSwitch, transform.position, 0.65f, pitch: 0.8f);
+    }
     public void SetPowered(bool value)
     {
         bool changed = IsPowered != value;

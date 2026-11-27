@@ -37,7 +37,9 @@ public class GhostAttack : MonoBehaviour
                 WasRepelled = true;
                 return false;
             }
-            return target.LifeState.TryDie();
+            if (!target.LifeState.TryDie()) return false;
+            WorldAudio.Play(SoundCue.GhostAttack, origin, 0.43f);
+            return true;
         }
         return false;
     }

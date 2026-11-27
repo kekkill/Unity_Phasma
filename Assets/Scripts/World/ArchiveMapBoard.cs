@@ -103,6 +103,7 @@ public sealed class ArchiveMapBoard : MonoBehaviour, IInteractable
         GUI.enabled = selectedFloor != floor;
         bool clicked = GUI.Button(at, label);
         GUI.enabled = enabled;
+        if (clicked) WorldAudio.Play(SoundCue.MapPageClick, transform.position, 0.24f, spatial: false);
         return clicked;
     }
 

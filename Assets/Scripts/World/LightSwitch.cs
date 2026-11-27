@@ -77,6 +77,7 @@ public class LightSwitch : MonoBehaviour, IInteractable, IGhostInteractionTarget
         ApplyLight();
 
         UpdateVisual();
+        WorldAudio.Play(SoundCue.MechanicalSwitch, transform.position, 0.50f, pitch: isOn ? 1f : 0.92f);
     }
 
     private void UpdateVisual()

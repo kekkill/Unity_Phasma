@@ -3,15 +3,24 @@ using UnityEngine;
 public class DoorAudio : MonoBehaviour
 {
     private Door door;
+    private bool isCabinetDoor;
     private void OnEnable() { Bind(); }
     private void Start() { Bind(); } // Required components on newly created objects may awaken before Door exists.
     private void Bind()
     {
         if (door != null) return;
         door = GetComponent<Door>();
-        if (door != null) door.OpenStateChanged += OnChanged;
+        if (door == null) return;
+        var hidingPlace = GetComponentInParent<HidingZone>();
+        isCabinetDoor = hidingPlace != null && hidingPlace.Door == door;
+        door.OpenStateChanged += OnChanged;
     }
-    private void OnChanged(bool open) => WorldAudio.Play(open ? SoundCue.DoorOpen : SoundCue.DoorClose, door.NoisePosition, 0.55f);
+
+    private void OnChanged(bool open)
+    {
+        SoundCue closeCue = isCabinetDoor ? SoundCue.CabinetClose : SoundCue.DoorClose;
+        WorldAudio.Play(open ? SoundCue.DoorOpen : closeCue, door.NoisePosition, 0.55f);
+    }
     private void OnDisable()
     {
         if (door != null) door.OpenStateChanged -= OnChanged;

@@ -25,6 +25,8 @@ public class RoundEndScreen : MonoBehaviour
         Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
         screen = MenuUi.Create(transform, "Миссия завершена", out RectTransform content, out controls);
         MissionResult result = session.Result;
+        if (result.Reason == MissionEndReason.Extracted)
+            WorldAudio.Play(SoundCue.ExtractionConfirm, transform.position, 0.31f, spatial: false);
         MenuUi.Label(content, result.Reason == MissionEndReason.AllPlayersDead ? "Все игроки погибли." :
             result.TeamSuccess ? "Вы вернулись и верно определили призрака." : "Вы вернулись, но версия оказалась неверной.");
         MenuUi.Label(content, "Настоящий тип: " + result.ActualGhostName);

@@ -20,6 +20,7 @@ public sealed class ArchiveMissionRoute : MonoBehaviour
     private Transform driverArm;
     private Camera introCamera;
     private BoxCollider carBody;
+    private AudioSource carAudio;
     private bool introPlaying;
     private bool entranceSealed;
     private bool called;
@@ -48,9 +49,13 @@ public sealed class ArchiveMissionRoute : MonoBehaviour
         }
 
         if (!called || carReady || Time.time < pickupAt - ApproachTime) return;
-        if (!car.gameObject.activeSelf) car.gameObject.SetActive(true);
         float remaining = Mathf.Max(0f, pickupAt - Time.time);
         car.position = curb.position - curb.forward * (remaining * 4f);
+        if (!car.gameObject.activeSelf)
+        {
+            car.gameObject.SetActive(true);
+            PlayCarPass();
+        }
         if (remaining > 0f) return;
 
         carBody.enabled = true;
@@ -148,6 +153,8 @@ public sealed class ArchiveMissionRoute : MonoBehaviour
 
     private IEnumerator MoveCar(Vector3 from, Vector3 to, float duration)
     {
+        car.position = from;
+        PlayCarPass();
         for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
         {
             car.position = Vector3.Lerp(from, to, Mathf.SmoothStep(0f, 1f, elapsed / duration));
@@ -201,6 +208,26 @@ public sealed class ArchiveMissionRoute : MonoBehaviour
         car.gameObject.AddComponent<ArchiveRouteInteraction>().BindCar(this);
     }
 
+    private void PlayCarPass()
+    {
+        var world = WorldAudio.Instance;
+        if (world == null || world.Profile == null) return;
+        AudioClip clip = world.Profile.Clip(SoundCue.CarPass);
+        if (clip == null) return;
+
+        if (carAudio == null)
+        {
+            carAudio = world.CreateSource(car, "Company car movement");
+            carAudio.minDistance = 2f;
+            carAudio.maxDistance = 26f;
+            carAudio.clip = clip;
+        }
+        carAudio.spatialBlend = introPlaying ? 0f : 1f;
+        carAudio.volume = world.Profile.MasterVolume * (introPlaying ? 0.32f : 0.62f);
+        carAudio.Stop();
+        carAudio.Play();
+    }
+
     private static void AddBox(string name, Transform root, Vector3 at, Vector3 size, Color color)
     {
         RuntimeVisuals.Primitive(PrimitiveType.Cube, root, at, size, color).name = name;
@@ -215,6 +242,7 @@ public sealed class ArchiveMissionRoute : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
+        if (carAudio != null) carAudio.Stop();
         if (player != null) player.SetGameplayBlocked(this, false);
         if (introCamera != null) introCamera.enabled = false;
         if (introPlaying && playerCamera != null) playerCamera.enabled = true;

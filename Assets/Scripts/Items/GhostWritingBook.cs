@@ -36,6 +36,7 @@ public class GhostWritingBook : MonoBehaviour, IGhostInteractionTarget
         if (!CanGhostInteract(context) || Random.value > writingChance) return false;
         hasWriting = true;
         if (writingVisual != null) writingVisual.SetActive(true);
+        WorldAudio.Play(SoundCue.WritingScratch, transform.position, 0.47f);
         Debug.Log("Ghost wrote in the book.");
         return true;
     }
