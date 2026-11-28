@@ -13,7 +13,7 @@ public sealed class PlayerBodyVisual : MonoBehaviour
     private const string ModelResource = "PhasmaInvestigator/Phasma_Investigator";
     private const float EyeClearance = 0.025f;
 
-    private enum Grip { Round, Controls, Flat }
+    private enum Grip { Flashlight, Round, Controls, Flat }
 
     private readonly struct Limb
     {
@@ -41,6 +41,7 @@ public sealed class PlayerBodyVisual : MonoBehaviour
     private Transform eyePoint, hips, deviceSocket;
     private Limb leftArm, rightArm, leftLeg, rightLeg;
     private Quaternion? leftPalmBasis, rightPalmBasis;
+    private Quaternion leftWristRest, rightWristRest;
     private Vector3 gaitVelocity;
     private float gaitPhase;
     private PickupItem displayedItem;
@@ -99,6 +100,8 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         rightLeg = new Limb(FindBone("RightUpLeg"), FindBone("RightLeg"), FindBone("RightFoot"));
         leftPalmBasis = ReadPalmBasis(leftArm, "Left", FindBone);
         rightPalmBasis = ReadPalmBasis(rightArm, "Right", FindBone);
+        if (leftPalmBasis.HasValue) leftWristRest = leftArm.End.localRotation;
+        if (rightPalmBasis.HasValue) rightWristRest = rightArm.End.localRotation;
         foreach (var bone in bones)
         {
             if (bone == rightArm.End || !bone.name.StartsWith("RightHand", StringComparison.Ordinal)) continue;
@@ -158,7 +161,7 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         graph.Evaluate(0);
         PositionBody();
         Vector3 armSwing = AnimateGait(posture, out Vector3 gripSway);
-        RelaxArm(leftArm, leftPalmBasis, posture, armSwing);
+        RelaxArm(leftArm, leftPalmBasis, leftWristRest, posture, armSwing);
         if (item != null && holdPoint != null && deviceSocket != null && rightPalmBasis.HasValue)
         {
             float upwardPitch = Mathf.Max(0f, Vector3.Dot(viewCamera.transform.forward, transform.up));
@@ -169,7 +172,7 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         }
         else
         {
-            RelaxArm(rightArm, rightPalmBasis, posture, -armSwing);
+            RelaxArm(rightArm, rightPalmBasis, rightWristRest, posture, -armSwing);
             foreach (var (bone, rest, _) in fingers)
                 bone.localRotation = Quaternion.Slerp(rest, bone.localRotation, 0.1f);
         }
@@ -228,19 +231,23 @@ public sealed class PlayerBodyVisual : MonoBehaviour
 
         if (hips != null && leftLeg.IsValid && rightLeg.IsValid)
         {
-            Vector3 leftAnkle = leftLeg.End.position;
-            Vector3 rightAnkle = rightLeg.End.position;
-            float lowerHips = Mathf.Lerp(0.06f, 0.018f, posture) + dip * 0.012f;
-            hips.position -= transform.up * (lowerHips * strength);
-
             // Side steps stay within the stance width so the feet do not cross.
-            float forwardReach = Mathf.Lerp(0.29f, 0.18f, posture) + 0.045f * running;
+            float forwardReach = 0.18f + 0.09f * running;
             Vector3 localReach = new(0.105f * direction.x, 0f, forwardReach * direction.z);
             Vector3 reach = transform.TransformDirection(localReach) * strength;
-            float lift = (Mathf.Lerp(0.09f, 0.05f, posture) + 0.035f * running) * strength;
+            float lift = (Mathf.Lerp(0.045f, 0.037f, posture) + 0.045f * running) * strength;
             float toeRoll = Mathf.Lerp(12f, 7f, posture) * direction.z * strength;
-            StepLeg(leftLeg, leftAnkle, gaitPhase, reach, lift, toeRoll);
-            StepLeg(rightLeg, rightAnkle, Mathf.Repeat(gaitPhase + 0.5f, 1f), reach, lift, toeRoll);
+            float upright = (1f - posture) * strength;
+            Vector3 leftAnkle = NeutralAnkle(leftLeg, upright) + StepOffset(gaitPhase, reach, lift, out float leftRoll);
+            Vector3 rightAnkle = NeutralAnkle(rightLeg, upright) + StepOffset(Mathf.Repeat(gaitPhase + 0.5f, 1f), reach, lift, out float rightRoll);
+
+            // Lower the hips only as far as needed to keep the step reachable.
+            hips.position += transform.up * (0.012f * upright);
+            float reachDrop = Mathf.Max(RequiredHipDrop(leftLeg, leftAnkle), RequiredHipDrop(rightLeg, rightAnkle));
+            float crouchDip = posture * (0.018f + dip * 0.012f) * strength;
+            hips.position -= transform.up * Mathf.Max(reachDrop, crouchDip);
+            StepLeg(leftLeg, leftAnkle, toeRoll * leftRoll);
+            StepLeg(rightLeg, rightAnkle, toeRoll * rightRoll);
         }
 
         float armReach = Mathf.Lerp(0.075f, 0.033f, posture) * strength;
@@ -249,7 +256,14 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         return transform.TransformDirection(swingDirection) * (armReach * swing);
     }
 
-    private void StepLeg(Limb leg, Vector3 ankle, float phase, Vector3 reach, float lift, float toeRoll)
+    private Vector3 NeutralAnkle(Limb leg, float upright)
+    {
+        Vector3 ankle = leg.End.position;
+        float aheadOfHip = Vector3.Dot(ankle - leg.Upper.position, transform.forward);
+        return ankle - transform.forward * (0.6f * upright * aheadOfHip);
+    }
+
+    private Vector3 StepOffset(float phase, Vector3 reach, float lift, out float roll)
     {
         // Match both halves at zero endpoint speed, with most of the counter-travel during support.
         float contact = Mathf.Min(1f, phase * 2f);
@@ -259,9 +273,25 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         float travel = phase < 0.5f ? 1f - 2f * step : -recoveryCosine;
         float elevation = Mathf.Sin(recovery * Mathf.PI);
         float lifted = elevation * elevation;
-        Quaternion soleRotation = Quaternion.AngleAxis(toeRoll * lifted * recoveryCosine, transform.right) * leg.End.rotation;
+        roll = lifted * recoveryCosine;
+        return reach * travel + transform.up * (lifted * lift);
+    }
+
+    private float RequiredHipDrop(Limb leg, Vector3 ankle)
+    {
+        Vector3 fromHip = ankle - leg.Upper.position;
+        float down = -Vector3.Dot(fromHip, transform.up);
+        float horizontal = Mathf.Max(0f, fromHip.sqrMagnitude - down * down);
+        float reach = (Vector3.Distance(leg.Upper.position, leg.Lower.position) +
+            Vector3.Distance(leg.Lower.position, leg.End.position)) * 0.995f;
+        return Mathf.Max(0f, down - Mathf.Sqrt(Mathf.Max(0f, reach * reach - horizontal)));
+    }
+
+    private void StepLeg(Limb leg, Vector3 ankle, float toeRoll)
+    {
+        Quaternion soleRotation = Quaternion.AngleAxis(toeRoll, transform.right) * leg.End.rotation;
         Vector3 kneeDirection = transform.forward + Outward(leg) * 0.18f;
-        MoveLimb(leg, ankle + reach * travel + transform.up * (lifted * lift), kneeDirection, 0.995f);
+        MoveLimb(leg, ankle, kneeDirection, 0.995f);
         leg.End.rotation = soleRotation;
     }
 
@@ -273,8 +303,8 @@ public sealed class PlayerBodyVisual : MonoBehaviour
 
     private static Grip ResolveGrip(PickupItem item)
     {
-        if (item.TryGetComponent<FlashlightItem>(out _) || item.TryGetComponent<UVFlashlightItem>(out _) ||
-            item.TryGetComponent<SaltContainer>(out _) || item.TryGetComponent<CrossItem>(out _)) return Grip.Round;
+        if (item.TryGetComponent<FlashlightItem>(out _) || item.TryGetComponent<UVFlashlightItem>(out _)) return Grip.Flashlight;
+        if (item.TryGetComponent<SaltContainer>(out _) || item.TryGetComponent<CrossItem>(out _)) return Grip.Round;
         if (item.TryGetComponent<GhostWritingBook>(out _) || item.TryGetComponent<MotionSensorItem>(out _)) return Grip.Flat;
         return Grip.Controls;
     }
@@ -285,13 +315,12 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         Vector3 socketOffset = Quaternion.Inverse(hand.rotation) * (deviceSocket.position - hand.position);
         float tilt = pose == Grip.Flat ? 0.26f : 0.55f;
         Vector3 knuckles = (holdPoint.forward - tilt * holdPoint.up).normalized;
-        Vector3 backOfHand = holdPoint.up + holdPoint.right * (pose == Grip.Round ? 0.3f : 0.14f);
+        Vector3 backOfHand = holdPoint.up + holdPoint.right * (pose is Grip.Round or Grip.Flashlight ? 0.3f : 0.14f);
         Quaternion wristRotation = Quaternion.LookRotation(knuckles, backOfHand) * Quaternion.Inverse(palmBasis);
-        Vector3 itemOffset = holdPoint.forward * 0.055f + holdPoint.up * (pose == Grip.Flat ? 0.022f : 0.032f);
+        float liftFromPalm = pose switch { Grip.Flashlight => 0.008f, Grip.Flat => 0.022f, _ => 0.032f };
+        Vector3 itemOffset = holdPoint.forward * 0.055f + holdPoint.up * liftFromPalm;
         MoveLimb(rightArm, holdPoint.position - wristRotation * socketOffset - itemOffset, ElbowDirection(rightArm));
-        Vector3 forearm = (hand.position - rightArm.Lower.position).normalized;
-        knuckles = Vector3.RotateTowards(forearm, knuckles, 28f * Mathf.Deg2Rad, 0f);
-        hand.rotation = Quaternion.LookRotation(knuckles, backOfHand) * Quaternion.Inverse(palmBasis);
+        SetWrist(rightArm, palmBasis, rightWristRest, knuckles, backOfHand);
         holdPoint.position = deviceSocket.position + itemOffset;
 
         foreach (var (bone, rest, isIndex) in fingers)
@@ -301,15 +330,29 @@ public sealed class PlayerBodyVisual : MonoBehaviour
         }
     }
 
-    private void RelaxArm(Limb arm, Quaternion? palmBasis, float posture, Vector3 swing)
+    private void RelaxArm(Limb arm, Quaternion? palmBasis, Quaternion wristRest, float posture, Vector3 swing)
     {
         if (!palmBasis.HasValue) return;
         Vector3 outside = Outward(arm);
         Vector3 wristOffset = outside * 0.06f - transform.up * Mathf.Lerp(0.47f, 0.33f, posture)
-            + transform.forward * Mathf.Lerp(0.14f, 0.33f, posture);
+            + transform.forward * Mathf.Lerp(0.10f, 0.33f, posture);
         MoveLimb(arm, arm.Upper.position + wristOffset + swing, ElbowDirection(arm));
         Vector3 knuckles = arm.End.position - arm.Lower.position;
-        arm.End.rotation = Quaternion.LookRotation(knuckles, outside + transform.up * 0.18f) * Quaternion.Inverse(palmBasis.Value);
+        SetWrist(arm, palmBasis.Value, wristRest, knuckles, outside + transform.up * 0.18f);
+    }
+
+    private static void SetWrist(Limb arm, Quaternion palmBasis, Quaternion wristRest, Vector3 knuckles, Vector3 backOfHand)
+    {
+        Vector3 forearm = (arm.End.position - arm.Lower.position).normalized;
+        Vector3 direction = Vector3.RotateTowards(forearm, knuckles.normalized, 22f * Mathf.Deg2Rad, 0f);
+        Quaternion wrist = Quaternion.LookRotation(direction, backOfHand) * Quaternion.Inverse(palmBasis);
+
+        // Carry the palm's roll along the forearm while keeping both elbow and wrist positions fixed.
+        Vector3 localForearm = Quaternion.Inverse(arm.Lower.rotation) * forearm;
+        Quaternion neutralWristForearm = wrist * Quaternion.Inverse(wristRest);
+        Quaternion alignment = Quaternion.FromToRotation(neutralWristForearm * localForearm, forearm);
+        arm.Lower.rotation = alignment * neutralWristForearm;
+        arm.End.rotation = wrist;
     }
 
     private Vector3 Outward(Limb limb) => transform.right * Mathf.Sign(Vector3.Dot(limb.Upper.position - transform.position, transform.right));

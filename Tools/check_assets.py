@@ -407,7 +407,10 @@ for scene in (main, archive):
     assert uv_visual['m_LocalScale'] == {'x': 1, 'y': 1, 'z': 1}
     assert scene[1731972680]['MeshRenderer']['m_Enabled'] == 1
     assert scene[1964078700]['BoxCollider']['m_Enabled'] == 1 and scene[1731972679]['BoxCollider']['m_Enabled'] == 0
-print('UV flashlight visual alignment and pickup collider passed in both missions.')
+    lamp_scale = scene[1988192543]['Transform']['m_LocalScale']
+    assert max(lamp_scale['x'], lamp_scale['y']) < 0.08 and 0.15 < lamp_scale['z'] < 0.3, 'Flashlight must fit a one-handed grip.'
+    assert scene[1988192540]['BoxCollider']['m_Size'] == {'x': 1, 'y': 1, 'z': 1}
+print('Flashlight size, UV visual alignment and their pickup colliders passed in both missions.')
 
 
 board = archive_component(75500505)
