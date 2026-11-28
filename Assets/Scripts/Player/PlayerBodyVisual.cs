@@ -15,7 +15,7 @@ public sealed class PlayerBodyVisual : MonoBehaviour
 
     private enum Grip { Round, Controls, Flat }
 
-    private readonly List<(Transform Bone, Quaternion Rest, bool IsIndex)> fingers = new();
+    private readonly List<(Transform Bone, Quaternion RestRotation, bool IsIndex)> fingers = new();
     private CharacterController capsule;
     private PlayerCrouch crouch;
     private PlayerLifeState life;
