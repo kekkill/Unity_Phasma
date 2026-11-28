@@ -398,6 +398,17 @@ for row in remaps:
         assert ref['fileID'] == 2800000 and guids[ref['guid']] == worker / 'Textures' / f'{name}_{suffix}.png.meta'
 print('Investigator body, pose takes, material remaps and all three camera references passed.')
 
+for scene in (main, archive):
+    uv_root = scene[1964078701]['Transform']
+    uv_visual = scene[1731972678]['Transform']
+    assert uv_visual['m_Father'] == {'fileID': 1964078701}
+    assert {'fileID': 1731972678} in uv_root['m_Children']
+    assert uv_visual['m_LocalPosition'] == {'x': 0, 'y': 0, 'z': 0}, 'UV mesh must follow the pickup pivot.'
+    assert uv_visual['m_LocalScale'] == {'x': 1, 'y': 1, 'z': 1}
+    assert scene[1731972680]['MeshRenderer']['m_Enabled'] == 1
+    assert scene[1964078700]['BoxCollider']['m_Enabled'] == 1 and scene[1731972679]['BoxCollider']['m_Enabled'] == 0
+print('UV flashlight visual alignment and pickup collider passed in both missions.')
+
 
 board = archive_component(75500505)
 assert board['m_GameObject'] == {'fileID': 75500500}
