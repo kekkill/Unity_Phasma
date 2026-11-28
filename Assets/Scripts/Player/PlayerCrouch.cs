@@ -23,6 +23,10 @@ public class PlayerCrouch : MonoBehaviour
     public bool IsCrouched => characterController != null &&
         characterController.height < (standingHeight + crouchingHeight) * 0.5f;
 
+    public float VisualAmount => characterController != null
+        ? Mathf.InverseLerp(standingHeight, crouchingHeight, characterController.height)
+        : 0f;
+
     private float standingCenterY;
     private float crouchingCenterY;
 

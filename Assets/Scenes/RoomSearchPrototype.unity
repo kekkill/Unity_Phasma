@@ -1606,6 +1606,7 @@ GameObject:
   - component: {fileID: 1277915031}
   - component: {fileID: 1277915032}
   - component: {fileID: 1277915033}
+  - component: {fileID: 1277915039}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -6184,6 +6185,19 @@ MonoBehaviour:
   stepsPerContact: 6
   stepDistance: 0.35
   lifetime: 30
+--- !u!114 &1277915039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277915010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a22cbbb7a26476e87601db042503bba, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBodyVisual
+  viewCamera: {fileID: 330585545}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -341,10 +341,11 @@ assert appearance_ref['fileID'] == 11400000
 assert guids[appearance_ref['guid']] == appearance_path.with_suffix('.asset.meta')
 appearance = yaml.safe_load(appearance_path.read_text().split('\n', 3)[3])['MonoBehaviour']
 assert guids[appearance['m_Script']['guid']] == assets / 'Scripts/Ghost/GhostAppearance.cs.meta'
-assert appearance['modelResource'] == 'Izlom/Izlom' and appearance['walkSpeed'] == 0.6
+assert appearance['modelResource'] == 'Izlom/Izlom' and appearance['walkSpeed'] == 0.6 and appearance['chaseSpeed'] == 1.6
 model = izlom_assets / 'Resources' / f"{appearance['modelResource']}.fbx"
-with model.open('rb') as stream:
-    assert stream.read(18) == b'Kaydara FBX Binary', model
+izlom_fbx = model.read_bytes()
+assert izlom_fbx.startswith(b'Kaydara FBX Binary'), model
+assert all(take in izlom_fbx for take in (b'|Idle', b'|Walk_InPlace', b'|Chase_InPlace'))
 assert model.with_suffix('.fbx.meta').is_file()
 material = izlom_assets / 'IzlomSurface.mat'
 assert appearance['material']['fileID'] == 2100000
@@ -357,15 +358,45 @@ for slot, suffix in map_slots.items():
     texture = izlom_assets / 'Textures' / f'Izlom_{texture_name}.png'
     metadata = texture.with_suffix('.png.meta')
     assert ref['fileID'] == 2800000 and guids[ref['guid']] == metadata
-    assert struct.unpack('>II', texture.read_bytes()[16:24]) == (2048, 2048)
+    with texture.open('rb') as stream:
+        assert struct.unpack('>II', stream.read(24)[16:24]) == (4096, 4096)
     importer = yaml.safe_load(metadata.read_text())['TextureImporter']
     assert importer['textureType'] == (1 if suffix == 'Normal' else 0)
     assert importer['mipmaps']['sRGBTexture'] == (1 if suffix == 'BaseColor' else 0)
+    assert importer['maxTextureSize'] == 2048
     if suffix == 'Mask':
         assert importer['alphaUsage'] == 1
     android = next(platform for platform in importer['platformSettings'] if platform['buildTarget'] == 'Android')
     assert android['overridden'] and android['maxTextureSize'] == 1024
-print('Archive appearance selection, Izlom FBX and URP atlas references passed.')
+print('Archive appearance selection, revised Izlom FBX takes and URP atlas references passed.')
+
+for scene in (hub, main, archive):
+    player_body = scene[1277915039]['MonoBehaviour']
+    assert player_body['m_GameObject'] == {'fileID': 1277915010}
+    assert player_body['viewCamera'] == {'fileID': 330585545}
+    assert guids[player_body['m_Script']['guid']] == assets / 'Scripts/Player/PlayerBodyVisual.cs.meta'
+layers = yaml.safe_load((root / 'ProjectSettings/TagManager.asset').read_text().split('\n', 3)[3])['TagManager']['layers']
+assert layers[8] == 'PlayerHead'
+worker = assets / 'PhasmaInvestigator'
+worker_model = worker / 'Resources/PhasmaInvestigator/Phasma_Investigator.fbx'
+worker_fbx = worker_model.read_bytes()
+assert worker_fbx.startswith(b'Kaydara FBX Binary')
+assert all(name in worker_fbx for name in (b'|Stand_LookDown', b'|Crouch_LookDown', b'Socket_Device_R', b'WatchScreen'))
+remaps = yaml.safe_load(worker_model.with_suffix('.fbx.meta').read_text())['ModelImporter']['externalObjects']
+assert {row['first']['name'] for row in remaps} == {
+    'Clothes', 'Skin', 'Shoes', 'Hair', 'Eyes', 'WatchCase', 'WatchStrap', 'WatchHardware', 'WatchScreen',
+}
+for row in remaps:
+    name = row['first']['name']
+    path = worker / 'Materials' / f'{name}.mat'
+    assert row['second']['fileID'] == 2100000 and guids[row['second']['guid']] == path.with_suffix('.mat.meta')
+    if name.startswith('Watch'):
+        continue
+    material = yaml.safe_load(path.read_text().split('--- !u!21 &2100000\n', 1)[1])['Material']
+    for slot, suffix in map_slots.items():
+        ref = next(mapping[slot]['m_Texture'] for mapping in material['m_SavedProperties']['m_TexEnvs'] if slot in mapping)
+        assert ref['fileID'] == 2800000 and guids[ref['guid']] == worker / 'Textures' / f'{name}_{suffix}.png.meta'
+print('Investigator body, pose takes, material remaps and all three camera references passed.')
 
 
 board = archive_component(75500505)

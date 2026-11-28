@@ -13,6 +13,7 @@ public class PlayerItemHolder : MonoBehaviour
     public PlayerInventory Inventory => inventory;
     public PickupItem CurrentItem => inventory != null ? inventory.SelectedItem : null;
     public bool HasItem => CurrentItem != null;
+    internal Transform HoldPoint => holdPoint;
     private bool CanManageItems => inventory != null && inventory.CanModify && isActiveAndEnabled &&
         (input == null || !input.GameplayBlocked);
 

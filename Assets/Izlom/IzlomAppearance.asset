@@ -15,3 +15,4 @@ MonoBehaviour:
   modelResource: Izlom/Izlom
   material: {fileID: 2100000, guid: a8761ad7c80f4bddabbfd8b042ccd6ff, type: 2}
   walkSpeed: 0.6
+  chaseSpeed: 1.6

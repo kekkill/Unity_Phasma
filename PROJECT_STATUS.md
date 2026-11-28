@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-11-27.
+Updated: 2026-11-28.
 
 ## Scope and baseline
 Unity 6000.6.3f1, URP. Single-player now; multiplayer later. PC and future phones are intended targets; keep gameplay input action-based so touch controls can share the same gameplay logic. Mobile gameplay controls and device builds/performance are not implemented/verified yet. Main menu/results now use a scalable Canvas with safe-area handling; actual devices remain untested. Keep gameplay state, decisions, navigation and presentation separate. Original baseline commit: 9bbd013. Build entry: Assets/Scenes/InvestigationHub.unity. MainMenu remains available from the launch terminal. Selectable missions: RoomSearchPrototype and ArchiveInvestigation. Mission preparation scene: InvestigationHub. Earlier Prototype.unity remains available. Work is on feature branches; main/baseline is not automatically merged.
@@ -20,7 +20,9 @@ Archive House crossfades outdoor wind, interior room tone and basement ambience 
 
 The two playable maps cycle through four recorded player footfalls cut from the supplied Concrete Footsteps 1 (6265). Playback uses the existing WorldAudio pool and retains the quieter crouch gain and distinct ghost footsteps. Clip format, fades and audio-profile references passed static checks. The Unity mix needs a Play Mode check. [Source and checks](Docs/ARCHIVE_SOUND_LIBRARY.md#шаги-игрока)
 
-ArchiveInvestigation selects Skrutka or Izlom as a visual per run, independently of the ghost profile. `GhostModelVisual` exposes forced choices for Play Mode checks. Skrutka uses its original five materials and hunt locomotion. Izlom uses a shared URP atlas material and its supplied idle and in-place walk. The walk is sped up during hunts until there is a dedicated chase clip. NavMesh owns travel. Blender verified Izlom's four skinned meshes, 46 bones, 148,269 triangles and three action clips. Static scene, reference and importer-setting checks passed. Unity compilation, local Play Mode and performance remain unverified. See [model setup and checks](Docs/GHOST_MODEL.md).
+ArchiveInvestigation selects Skrutka or Izlom as a visual per run, independently of the ghost profile. `GhostModelVisual` exposes forced choices for Play Mode checks. The revised Izlom from `16d978e` has 47,275 triangles and 46 bones. It uses a new atlas and its own idle, in-place walk and in-place chase clips, verified in Blender. NavMesh owns travel. See [model setup and checks](Docs/GHOST_MODEL.md).
+
+The investigator from `80c8787` is visible in the hub and both playable missions. `PlayerBodyVisual` mixes the supplied standing and crouching poses and aligns the right hand with the held equipment while keeping camera control separate. The player's camera excludes the head. The asset has 29,339 triangles and three static poses, verified in Blender. Static assets and scene checks passed. Unity import, compilation and Play Mode need verification. A working watch display and player locomotion clips remain separate tasks.
 
 The hub rack selects up to three carried items for both playable maps and shows the exact selection at the launch terminal. The initial visit defaults to a flashlight, thermometer and EMF reader. Returning to the hub restores the chosen items, including a partial or empty loadout. Items not selected stay available in the mission. Direct Play of the small house keeps its equipment in the scene for existing checks. Scene wiring and catalog checks passed. Play Mode verification remains pending.
 

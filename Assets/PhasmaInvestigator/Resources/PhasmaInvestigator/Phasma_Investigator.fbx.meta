@@ -1,0 +1,51 @@
+fileFormatVersion: 2
+guid: 5a3a764f3c424a73b1cbd74c9a4be0b5
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Clothes
+    second: {fileID: 2100000, guid: 48b24bf1ec714a74b63df929022bb906, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Eyes
+    second: {fileID: 2100000, guid: d0bf244e54e04a8ca9de703ab7e865b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hair
+    second: {fileID: 2100000, guid: 62e6790830ed4a21979ff7dfadd233d0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Shoes
+    second: {fileID: 2100000, guid: 8d542fe365ed4ddab456b7d7c0045390, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Skin
+    second: {fileID: 2100000, guid: 41488d62dc3441ec82368f2357bca184, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WatchCase
+    second: {fileID: 2100000, guid: 117ce8d2692c40a18a3382e0c766cb8c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WatchStrap
+    second: {fileID: 2100000, guid: 6a1bf81fe9cd4072bff8d6b98dd96689, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WatchHardware
+    second: {fileID: 2100000, guid: 07377004b2fd4ec8b48fa0f6be292eb8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WatchScreen
+    second: {fileID: 2100000, guid: 2de81fd361174ac0a70d424baf28fdc3, type: 2}

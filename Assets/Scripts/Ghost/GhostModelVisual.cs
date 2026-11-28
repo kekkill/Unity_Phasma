@@ -22,7 +22,7 @@ public sealed class GhostModelVisual : MonoBehaviour
     private const string ModelPath = "PhasmaGhost/PhasmaGhost";
     private const string ClipPath = "PhasmaGhost/Animations/PhasmaGhost@";
     private const float SkrutkaWalkClipSpeed = 0.99f / 1.55f;
-    private const float ChaseClipSpeed = 1.56f / 0.90f;
+    private const float SkrutkaChaseClipSpeed = 1.56f / 0.90f;
     private static readonly System.Random AppearanceRandom = new System.Random();
 
     private GameObject instance;
@@ -35,6 +35,7 @@ public sealed class GhostModelVisual : MonoBehaviour
     private AnimationClipPlayable walk;
     private AnimationClipPlayable chase;
     private float walkClipSpeed;
+    private float chaseClipSpeed;
     private float walkRate = 1f;
     private float chaseRate = 1f;
 
@@ -63,7 +64,7 @@ public sealed class GhostModelVisual : MonoBehaviour
             return;
         }
 
-        ShowAppearance(model, "Phasma Ghost", idleClip, walkClip, SkrutkaWalkClipSpeed, chaseClip);
+        ShowAppearance(model, "Phasma Ghost", idleClip, walkClip, SkrutkaWalkClipSpeed, chaseClip, SkrutkaChaseClipSpeed);
     }
 
     private bool TryShowIzlom()
@@ -77,27 +78,31 @@ public sealed class GhostModelVisual : MonoBehaviour
 
         AnimationClip idleClip = null;
         AnimationClip walkClip = null;
+        AnimationClip chaseClip = null;
         foreach (var clip in Resources.LoadAll<AnimationClip>(path))
         {
             if (clip.name.StartsWith("__preview__", StringComparison.Ordinal)) continue;
             if (clip.name.EndsWith("Idle", StringComparison.Ordinal)) idleClip = clip;
             if (clip.name.EndsWith("Walk_InPlace", StringComparison.Ordinal)) walkClip = clip;
+            if (clip.name.EndsWith("Chase_InPlace", StringComparison.Ordinal)) chaseClip = clip;
         }
 
         if (idleClip == null || walkClip == null) return false;
         ShowAppearance(model, "Izlom", idleClip, walkClip, izlomAppearance.WalkSpeed,
-            sharedMaterial: izlomAppearance.Material);
+            chaseClip, izlomAppearance.ChaseSpeed, izlomAppearance.Material);
         return true;
     }
 
     private void ShowAppearance(GameObject model, string instanceName, AnimationClip idleClip,
-        AnimationClip walkClip, float authoredWalkSpeed, AnimationClip chaseClip = null, Material sharedMaterial = null)
+        AnimationClip walkClip, float authoredWalkSpeed, AnimationClip chaseClip, float authoredChaseSpeed,
+        Material sharedMaterial = null)
     {
         instance = Instantiate(model, transform, false);
         instance.name = instanceName;
         instance.transform.localPosition = Vector3.down * GetComponent<GhostNavigation>().StandingOffset;
         ApplyMaterials(sharedMaterial);
         walkClipSpeed = Mathf.Max(0.01f, authoredWalkSpeed);
+        chaseClipSpeed = Mathf.Max(0.01f, authoredChaseSpeed);
 
         if (!instance.TryGetComponent(out Animator animator))
             animator = instance.AddComponent<Animator>();
@@ -150,7 +155,7 @@ public sealed class GhostModelVisual : MonoBehaviour
         walk.SetSpeed(walkRate);
         if (hasChase)
         {
-            chaseRate = Mathf.Lerp(chaseRate, Mathf.Clamp(speed / ChaseClipSpeed, 0.2f, 3.2f), blend);
+            chaseRate = Mathf.Lerp(chaseRate, Mathf.Clamp(speed / chaseClipSpeed, 0.2f, 3.2f), blend);
             chase.SetSpeed(chaseRate);
         }
     }
